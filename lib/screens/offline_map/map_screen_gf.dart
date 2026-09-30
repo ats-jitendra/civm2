@@ -621,13 +621,11 @@ class _MapScreenGFState extends State<MapScreenGF> {
                             children: [
                               TileLayer(
                                 urlTemplate: mapStyle == "street"
-                                    ? "https://tile.openstreetmap.de/{z}/{x}/{y}.png"
+                                    ? "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                    //"https://tile.openstreetmap.de/{z}/{x}/{y}.png"
                                     : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-                                // urlTemplate:
-                                //     //"https://tile.openstreetmap.de/{z}/{x}/{y}.png",
-                                //     "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-                                userAgentPackageName:
-                                    "com.example.flutter_offline",
+
+                                userAgentPackageName: "com.ariespro.civm2",
                               ),
                               if (showSubstationLayer)
                                 PolygonLayer(
@@ -761,7 +759,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                               //         })
                               //         .toList(),
                               //   ),
-       if (showOverHeadLayer)
+                              if (showOverHeadLayer)
                                 PolylineLayer(
                                   polylines: overHeadPolylines.asMap().entries.expand((
                                     entry,
@@ -900,14 +898,13 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                     return lines;
                                   }).toList(),
                                 ), //////////////////////////////////added20-8-2026
-                           
                               //-------------------------
                               if (showUnderGroundLayer)
                                 PolylineLayer(polylines: underGroundPolylines),
-                            
+
                               if (showConsumerLayer)
                                 MarkerLayer(markers: consumerMarkers),
-                                 if (showPoleLayer)
+                              if (showPoleLayer)
                                 MarkerLayer(markers: poleMarkers),
                               MarkerLayer(markers: _markers),
                               MarkerLayer(markers: completedMarkers),
@@ -1794,7 +1791,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
         // final Color lineColor = maintType.isNotEmpty
         //     ? lightenColor(polylineColor)
         //     : polylineColor;
-         //////////// //////////////////////////////////added20-8-2026
+        //////////// //////////////////////////////////added20-8-2026
         // Always keep the actual original feeder color.
         // final Color lineColor = polylineColor;
         // service = 1 -> Black
@@ -1906,7 +1903,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
           Polyline(
             points: parseLineString(wkt),
             strokeWidth: 8,
-            color: row["service"] == "1" ? Colors.black :undergroundColor,
+            color: row["service"] == "1" ? Colors.black : undergroundColor,
             pattern: StrokePattern.dashed(segments: [5, 10]),
           ),
         );
@@ -5096,9 +5093,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
     if (!connectivity.contains(ConnectivityResult.none)) {
       try {
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/createMap",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/createMap"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
@@ -5203,9 +5198,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
     if (!connectivity.contains(ConnectivityResult.none)) {
       try {
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/updateJobStatus",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/updateJobStatus"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
@@ -5537,7 +5530,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
     switch (color.toUpperCase().trim()) {
       case "JARRAFF":
         return Colors.purple;
-        // return const Color.fromARGB(255, 96, 0, 113);
+      // return const Color.fromARGB(255, 96, 0, 113);
       case "MINI JARRAFF":
         return const Color.fromARGB(255, 247, 19, 2);
       case "NO SPRAY":
@@ -6247,8 +6240,8 @@ class _MapScreenGFState extends State<MapScreenGF> {
                       //     .where((type) => selectedWorkTypes[type] == true)
                       //     .map((type) {
                       ...completedMaintTypes
-    .where((type) => selectedWorkTypes[type] == true)
-    .map((type) {
+                          .where((type) => selectedWorkTypes[type] == true)
+                          .map((type) {
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 12),
                               child: Row(
@@ -8272,9 +8265,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
         print(jsonEncode(body));
 
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/createChangeOrder",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/createChangeOrder"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
@@ -8750,7 +8741,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
     double latitude,
     double longitude,
   ) async {
-     String baseUrl =
+    String baseUrl =
         '${AppUrl.baseUrl}supervisorLoginPanel/getDataByLatitudeLongitude';
     final Uri url = Uri.parse(
       '$baseUrl?latitude=$latitude&longitude=$longitude',
@@ -8840,8 +8831,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
   Future<dynamic> getDataByNameAndAccountNumber(String accOrName) async {
     //102114900
     print('inside getDataByNameAndAccountNumber');
-     String endpoint =
-        "${AppUrl.baseUrl}supervisorLoginPanel/suggestions";
+    String endpoint = "${AppUrl.baseUrl}supervisorLoginPanel/suggestions";
     final Uri url = Uri.parse(
       "$endpoint?searchTerm=$accOrName&substation=$selectedSubstation",
     );
@@ -9138,9 +9128,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
     if (!connectivity.contains(ConnectivityResult.none)) {
       try {
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/addComment",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/addComment"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",

@@ -243,7 +243,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
     WakelockPlus.enable();
     getUserType();
     /////
-     cameraInit();
+    cameraInit();
     _startListeningToCompass();
   }
 
@@ -635,13 +635,11 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                             children: [
                               TileLayer(
                                 urlTemplate: mapStyle == "street"
-                                    ? "https://tile.openstreetmap.de/{z}/{x}/{y}.png"
+                                    ? "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                    //"https://tile.openstreetmap.de/{z}/{x}/{y}.png"
                                     : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-                                // urlTemplate:
-                                //     //"https://tile.openstreetmap.de/{z}/{x}/{y}.png",
-                                //     "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-                                userAgentPackageName:
-                                    "com.example.flutter_offline",
+
+                                userAgentPackageName: "com.ariespro.civm2",
                               ),
                               if (showSubstationLayer)
                                 PolygonLayer(
@@ -4798,9 +4796,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
     if (!connectivity.contains(ConnectivityResult.none)) {
       try {
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/createMap",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/createMap"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
@@ -4905,9 +4901,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
     if (!connectivity.contains(ConnectivityResult.none)) {
       try {
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/updateJobStatus",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/updateJobStatus"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
@@ -5239,7 +5233,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
     switch (color.toUpperCase().trim()) {
       case "JARRAFF":
         return Colors.purple;
-        //return const Color.fromARGB(255, 96, 0, 113);
+      //return const Color.fromARGB(255, 96, 0, 113);
       case "MINI JARRAFF":
         return const Color.fromARGB(255, 247, 19, 2);
       case "NO SPRAY":
@@ -6469,9 +6463,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
         print(jsonEncode(body));
 
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/createChangeOrder",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/createChangeOrder"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
@@ -6947,7 +6939,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
     double latitude,
     double longitude,
   ) async {
-     String baseUrl =
+    String baseUrl =
         '${AppUrl.baseUrl}supervisorLoginPanel/getDataByLatitudeLongitude';
     final Uri url = Uri.parse(
       '$baseUrl?latitude=$latitude&longitude=$longitude',
@@ -7037,8 +7029,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
   Future<dynamic> getDataByNameAndAccountNumber(String accOrName) async {
     //102114900
     print('inside getDataByNameAndAccountNumber');
-     String endpoint =
-        "${AppUrl.baseUrl}supervisorLoginPanel/suggestions";
+    String endpoint = "${AppUrl.baseUrl}supervisorLoginPanel/suggestions";
     final Uri url = Uri.parse(
       "$endpoint?searchTerm=$accOrName&substation=$selectedSubstation",
     );
@@ -7922,9 +7913,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
     if (!connectivity.contains(ConnectivityResult.none)) {
       try {
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/addComment",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/addComment"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",

@@ -527,12 +527,11 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                         children: [
                           TileLayer(
                             urlTemplate: mapStyle == "street"
-                                ? "https://tile.openstreetmap.de/{z}/{x}/{y}.png"
+                                ? "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                //"https://tile.openstreetmap.de/{z}/{x}/{y}.png"
                                 : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-                            // urlTemplate:
-                            //     //"https://tile.openstreetmap.de/{z}/{x}/{y}.png",
-                            //     "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-                            userAgentPackageName: "com.example.flutter_offline",
+                            
+                            userAgentPackageName: "com.ariespro.civm2",
                           ),
                           if (showSubstationLayer)
                             PolygonLayer(polygons: substationBoundaryPolygons),

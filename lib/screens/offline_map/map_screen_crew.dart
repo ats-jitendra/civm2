@@ -199,7 +199,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     _initializeMap();
     WakelockPlus.enable();
     /////
-    ensureCameraInitialized();
+     ensureCameraInitialized();
     _startListeningToCompass();
     // cameraInit();
   }
@@ -549,12 +549,10 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                         children: [
                           TileLayer(
                             urlTemplate: mapStyle == "street"
-                                ? "https://tile.openstreetmap.de/{z}/{x}/{y}.png"
+                                ? "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                //"https://tile.openstreetmap.de/{z}/{x}/{y}.png"
                                 : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-                            // urlTemplate:
-                            //     //"https://tile.openstreetmap.de/{z}/{x}/{y}.png",
-                            //     "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-                            userAgentPackageName: "com.example.flutter_offline",
+                            userAgentPackageName: "com.ariespro.civm2",
                           ),
                           if (showSubstationLayer)
                             PolygonLayer(polygons: substationBoundaryPolygons),
@@ -7734,7 +7732,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     double latitude,
     double longitude,
   ) async {
-     String baseUrl =
+    String baseUrl =
         '${AppUrl.baseUrl}supervisorLoginPanel/getDataByLatitudeLongitude';
     final Uri url = Uri.parse(
       '$baseUrl?latitude=$latitude&longitude=$longitude',
@@ -7824,7 +7822,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
   Future<dynamic> getDataByNameAndAccountNumber(String accOrName) async {
     //102114900
     print('inside getDataByNameAndAccountNumber');
-     String endpoint = "${AppUrl.baseUrl}supervisorLoginPanel/suggestions";
+    String endpoint = "${AppUrl.baseUrl}supervisorLoginPanel/suggestions";
     final Uri url = Uri.parse(
       "$endpoint?searchTerm=$accOrName&substation=$selectedSubstation",
     );
