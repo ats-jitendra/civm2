@@ -2,34 +2,48 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+
 	<key>CFBundleDisplayName</key>
 	<string>Civm2</string>
+
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
+
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+
 	<key>CFBundleName</key>
 	<string>civm2</string>
+
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+
 	<key>CFBundleShortVersionString</key>
 	<string>$(FLUTTER_BUILD_NAME)</string>
+
 	<key>CFBundleSignature</key>
 	<string>????</string>
+
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
 		<false/>
+
 		<key>UISceneConfigurations</key>
 		<dict>
 			<key>UIWindowSceneSessionRoleApplication</key>
@@ -37,28 +51,124 @@
 				<dict>
 					<key>UISceneClassName</key>
 					<string>UIWindowScene</string>
+
 					<key>UISceneConfigurationName</key>
 					<string>flutter</string>
+
 					<key>UISceneDelegateClassName</key>
 					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+
 					<key>UISceneStoryboardFile</key>
 					<string>Main</string>
 				</dict>
 			</array>
 		</dict>
 	</dict>
+
+
+	<key>NSCameraUsageDescription</key>
+	<string>We use your camera so you can capture photos and attach them to inspection reports or forms.</string>
+
+
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>We use your photo library so you can select and upload existing images for tasks, inspections, and reports.</string>
+
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>We need access to your photo library to save the photos you capture within the app.</string>
+
+
+	<key>NSMicrophoneUsageDescription</key>
+	<string>We use your microphone so you can record audio notes and attach them to your reports or tasks.</string>
+
+
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your location is used while the app is open to tag service requests, inspections, and tasks with accurate site information.</string>
+
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Your location is used in the background to ensure accurate tracking of inspections and service activities, even when the app is not active.</string>
+
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Your location is used both in the background and while using the app to provide continuous tracking of field activities.</string>
+
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>YourPurposeKey</key>
+		<string>We temporarily use precise location to ensure accurate geotagging of inspection activities.</string>
+	</dict>
+
+
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>We use speech recognition so you can dictate notes or comments directly into your inspection forms.</string>
+
+
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>We use local network for video recording, video playing for tracking the work progress, and Leaflet maps for live location navigation in our app.</string>
+
+
+	<key>WKWebViewAllowsInlineMediaPlayback</key>
+	<true/>
+
+	<key>WebKitAllowsInlineMediaPlayback</key>
+	<true/>
+
+
+	<key>FirebaseAppDelegateProxyEnabled</key>
+	<true/>
+
+
+	<key>UIFileSharingEnabled</key>
+	<true/>
+
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
+
+
+	<key>UIDeviceFamily</key>
+	<array>
+		<integer>1</integer>
+		<integer>2</integer>
+	</array>
+
+
+	<key>UIBackgroundModes</key>
+	<array>
+		<key>fetch</key>
+		<string>fetch</string>
+		<string>remote-notification</string>
+		<string>processing</string>
+	</array>
+
+
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>be.tramckrijte.workmanager.background</string>
+	</array>
+
+
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>sms</string>
+		<string>tel</string>
+	</array>
+
+
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
+
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+
+
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -66,5 +176,6 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
 </dict>
 </plist>

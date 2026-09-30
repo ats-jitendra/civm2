@@ -236,9 +236,10 @@ class AppUrl {
       '${baseUrl}changeOrderLcpCreateOrder/GetChangeOrderByStatus_VisibilityFlag';
 
   ////////
-  static var crewList = 'https://lcpmapapi.ariespro.com/main/crew_list';
+  static var crewList = 'https://civm2.ariespro.com/civm2/login_user/crew_list';
+  // 'https://lcpmapapi.ariespro.com/main/crew_list';
   static var addCrewMemberInsertEndPoint =
-      'https://lcpmapapi.ariespro.com/main/create_crew';
+      'https://civm2.ariespro.com/civm2/login_user/create_crew';
   //////////
   static var getAllDataEndPoint =
       '${baseUrl}changeOrderLcpCreateOrder/getAllData';
