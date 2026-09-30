@@ -2549,7 +2549,7 @@ class _IVMMaintenanceProgressDashboardState
 
     final uri =
         Uri.parse(
-          "https://civmapi.ariespro.com/civmapi/row_maintenance_progress/row_maintenance_data_progress_dashboard",
+          "https://civm2.ariespro.com/civm2/row_maintenance_progress/row_maintenance_data_progress_dashboard",
         ).replace(
           queryParameters: {
             "year": year ?? "",

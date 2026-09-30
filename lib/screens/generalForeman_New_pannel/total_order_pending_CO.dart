@@ -3517,7 +3517,7 @@ class _TotalOrderPendingCOState extends State<TotalOrderPendingCO> {
 
   Future<void> updateFlagValue(String token, int flag) async {
     const String url =
-        'https://civmapi.ariespro.com/civmapi/vma_row_custom_main_plan/updateFlagValue';
+        'https://civm2.ariespro.com/civm2/vma_row_custom_main_plan/updateFlagValue';
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
     try {
@@ -4247,7 +4247,7 @@ class _TotalOrderPendingCOState extends State<TotalOrderPendingCO> {
     // String contractorId = data.user!.id.toString();
 
     String url = AppUrl.crewList;
-    // "https://civmapi.ariespro.com/civmapi/login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
+    // "https://civm2.ariespro.com/civm2/login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
     print('urlCrewList gf pannel:: $url');
     try {
       final response = await http.get(

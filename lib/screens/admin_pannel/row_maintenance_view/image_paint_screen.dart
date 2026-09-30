@@ -134,7 +134,7 @@ class _ImagePaintScreenState extends State<ImagePaintScreen> {
     try {
       print('submit image 333333333333333333333');
       var uri = Uri.parse(
-          "https://civmapi.ariespro.com/civmapi/contractorPanel/updateImageVEGETATION_CREW_FORMs");
+          "https://civm2.ariespro.com/civm2/contractorPanel/updateImageVEGETATION_CREW_FORMs");
       var request = http.MultipartRequest("POST", uri);
       final userPreferences = Provider.of<UserPref>(context, listen: false);
       UserModel data = await userPreferences.getUser();

@@ -1578,7 +1578,7 @@ class _ContractorDispatchDashboardState
 
   Future<void> fetchChartData(String year) async {
     final String apiUrl =
-        "https://civmapi.ariespro.com/civmapi/contractorDashboard/contractorDisPacherPageData?contractorId=$contractorId&year=$year";
+        "https://civm2.ariespro.com/civm2/contractorDashboard/contractorDisPacherPageData?contractorId=$contractorId&year=$year";
     try {
       final userPreferences = Provider.of<UserPref>(context, listen: false);
       UserModel data = await userPreferences.getUser();

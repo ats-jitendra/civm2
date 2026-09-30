@@ -4931,7 +4931,7 @@ class _CrewTempRowMaintenanceProgressContractorNewState
 
     try {
       var uri = Uri.parse(
-          "https://civmapi.ariespro.com/civmapi/contractorPanel/updateImageVEGETATION_CREW_FORMs");
+          "https://civm2.ariespro.com/civm2/contractorPanel/updateImageVEGETATION_CREW_FORMs");
       var request = http.MultipartRequest("POST", uri);
 
       // Get the user token
@@ -5195,7 +5195,7 @@ class _CrewTempRowMaintenanceProgressContractorNewState
       final userPreferences = Provider.of<UserPref>(context, listen: false);
       UserModel data = await userPreferences.getUser();
       final String apiUrl =
-          "https://civmapi.ariespro.com/civmapi/contractorPanel/updateStatusByIds/$id";
+          "https://civm2.ariespro.com/civm2/contractorPanel/updateStatusByIds/$id";
       print(apiUrl);
       Map<String, dynamic> updatedData = {
         "status": "new_status",
@@ -5540,7 +5540,7 @@ class _CrewTempRowMaintenanceProgressContractorNewState
 
   //   try {
   //     var uri = Uri.parse(
-  //         "https://civmapi.ariespro.com/civmapi/contractorPanel/uploadFiles");
+  //         "https://civm2.ariespro.com/civm2/contractorPanel/uploadFiles");
   //     var request = http.MultipartRequest("POST", uri);
 
   //     final userPreferences = Provider.of<UserPref>(context, listen: false);
@@ -5600,7 +5600,7 @@ class _CrewTempRowMaintenanceProgressContractorNewState
         },
       );
       var uri = Uri.parse(
-          "https://civmapi.ariespro.com/civmapi/contractorPanel/uploadFiles");
+          "https://civm2.ariespro.com/civm2/contractorPanel/uploadFiles");
       var request = http.MultipartRequest("POST", uri);
 
       final userPreferences = Provider.of<UserPref>(context, listen: false);
@@ -5767,7 +5767,7 @@ class _CrewTempRowMaintenanceProgressContractorNewState
         },
       );
       var uri = Uri.parse(
-          "https://civmapi.ariespro.com/civmapi/contractorPanel/uploadFiles");
+          "https://civm2.ariespro.com/civm2/contractorPanel/uploadFiles");
       var request = http.MultipartRequest("POST", uri);
 
       final userPreferences = Provider.of<UserPref>(context, listen: false);
@@ -5966,7 +5966,7 @@ class _CrewTempRowMaintenanceProgressContractorNewState
   Future<void> updateVegetationCrewForm(
       Map mapDataEditOldRecord, int id) async {
     const String url =
-        "https://civmapi.ariespro.com/civmapi/contractorPanel/updateVegetationCrewForm";
+        "https://civm2.ariespro.com/civm2/contractorPanel/updateVegetationCrewForm";
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
     try {

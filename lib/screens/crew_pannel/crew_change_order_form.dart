@@ -1342,7 +1342,7 @@ class _CrewChangeOrderFormState extends State<CrewChangeOrderForm> {
 
     try {
       var uri = Uri.parse(
-        "https://civmapi.ariespro.com/civmapi/contractorPanel/updateImageVEGETATION_CREW_FORMs",
+        "https://civm2.ariespro.com/civm2/contractorPanel/updateImageVEGETATION_CREW_FORMs",
       );
       var request = http.MultipartRequest("POST", uri);
 
@@ -1557,7 +1557,7 @@ class _CrewChangeOrderFormState extends State<CrewChangeOrderForm> {
       final userPreferences = Provider.of<UserPref>(context, listen: false);
       UserModel data = await userPreferences.getUser();
       final String apiUrl =
-          "https://civmapi.ariespro.com/civmapi/contractorPanel/updateStatusByIds/$id";
+          "https://civm2.ariespro.com/civm2/contractorPanel/updateStatusByIds/$id";
       print(apiUrl);
       Map<String, dynamic> updatedData = {"status": "new_status"};
       final http.Response response = await http.put(
@@ -1930,7 +1930,7 @@ class _CrewChangeOrderFormState extends State<CrewChangeOrderForm> {
 
   //   try {
   //     var uri = Uri.parse(
-  //         "https://civmapi.ariespro.com/civmapi/contractorPanel/uploadFiles");
+  //         "https://civm2.ariespro.com/civm2/contractorPanel/uploadFiles");
   //     var request = http.MultipartRequest("POST", uri);
 
   //     final userPreferences = Provider.of<UserPref>(context, listen: false);
@@ -2202,7 +2202,7 @@ class _CrewChangeOrderFormState extends State<CrewChangeOrderForm> {
     Map<String, String> mappedData,
   ) async {
     String apiUrl =
-        'https://civmapi.ariespro.com/civmapi/changeOrderLcpCreateOrder/updateStatusAndCrewNotesByTokenNo';
+        'https://civm2.ariespro.com/civm2/changeOrderLcpCreateOrder/updateStatusAndCrewNotesByTokenNo';
 
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();

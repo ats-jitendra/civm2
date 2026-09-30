@@ -1270,7 +1270,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
 
   Future<void> resetPasswordAPI(String email, String newPassword) async {
     const String url =
-        "https://civmapi.ariespro.com/civmapi/login_user/resetPassword";
+        "https://civm2.ariespro.com/civm2/login_user/resetPassword";
 
     final Map<String, dynamic> body = {
       "email": email,

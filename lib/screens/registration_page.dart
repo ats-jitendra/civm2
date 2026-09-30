@@ -538,7 +538,7 @@ class _RagistrationPageState extends State<RagistrationPage> {
   }
 
   Future<void> registrationUser() async {
-    var APIURL = "https://civmapi.ariespro.com/civmapi/login_user/signup_user/";
+    var APIURL = "https://civm2.ariespro.com/civm2/login_user/signup_user/";
     //  "http://civmapi.ariespro.com/api/login/SignUp"; // old API, new integrated on 07Oct2025
     Map<String, dynamic> mappedData = {
       "email": _email.text.trim(),
