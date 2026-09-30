@@ -3998,7 +3998,7 @@ class _MapScreenLeafLatState extends State<MapScreenLeafLat>
   Future<List<dynamic>?> fetchDataByLatLong(
       double latitude, double longitude) async {
     const String baseUrl =
-        'https://civmapi.ariespro.com/civmapi/supervisorLoginPanel/getDataByLatitudeLongitude';
+        'https://civm2.ariespro.com/civm2/supervisorLoginPanel/getDataByLatitudeLongitude';
     final Uri url =
         Uri.parse('$baseUrl?latitude=$latitude&longitude=$longitude');
     print(url);
@@ -4263,7 +4263,7 @@ class _MapScreenLeafLatState extends State<MapScreenLeafLat>
     //102114900
     print('inside getDataByNameAndAccountNumber');
     const String endpoint =
-        "https://civmapi.ariespro.com/civmapi/supervisorLoginPanel/suggestions";
+        "https://civm2.ariespro.com/civm2/supervisorLoginPanel/suggestions";
     final Uri url = Uri.parse(
       "$endpoint?searchTerm=$accOrName&substation=",
     );
@@ -4475,7 +4475,7 @@ class _MapScreenLeafLatState extends State<MapScreenLeafLat>
   Future<void> getMapLinesBySubstation(
       BuildContext context, String substationName) async {
     final String url =
-        'https://civmapi.ariespro.com/civmapi/supervisorLoginPanel/getMapLinesBySubstationAndType?substationName=$substationName';
+        'https://civm2.ariespro.com/civm2/supervisorLoginPanel/getMapLinesBySubstationAndType?substationName=$substationName';
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
     print('Fetching map lines from URL: $url');
