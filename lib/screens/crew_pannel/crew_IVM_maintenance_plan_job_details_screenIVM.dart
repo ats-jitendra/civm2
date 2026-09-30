@@ -8,6 +8,7 @@ import 'package:CIVM/screens/crew_pannel/crew_ivm_maintenance_form_final.dart';
 import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/screens/login_page.dart';
 import 'package:CIVM/screens/my_chrome_safari_map_recording.dart';
+import 'package:CIVM/screens/offline_map/map_screen_crew.dart';
 import 'package:CIVM/screens/row_method_progress_widget.dart';
 import 'package:CIVM/screens/work_progress_span_widget.dart';
 import 'package:CIVM/utils/common_functions.dart';
@@ -25,8 +26,6 @@ import 'package:mailer/smtp_server/gmail.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:photo_view/photo_view_gallery.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:CIVM/repository/map_url.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
@@ -252,55 +251,46 @@ class _CrewIVMmAINTENANCEpLanJobDetailsScreenState
 
                                   InkWell(
                                     onTap: () async {
-                                      // if (maintYear != "N/A" &&
-                                      //     int.tryParse(maintYear) != null &&
-                                      //     int.parse(maintYear) >
-                                      //         DateTime.now().year) {
-                                      //   CustomToastSnackBarProgressDialog.flushBarErrorMessage(
-                                      //     'This job is planned for the future, map will open in $maintYear',
-                                      //     context,
-                                      //   );
-                                      // } else {
-                                        String id = '';
-                                        final userPreferences1 =
-                                            Provider.of<UserPref>(
-                                              context,
-                                              listen: false,
-                                            );
-                                        UserModel data = await userPreferences1
-                                            .getUser();
-                                        id = data.user!.id.toString();
+                                     
+                                        // String id = '';
+                                        // final userPreferences1 =
+                                        //     Provider.of<UserPref>(
+                                        //       context,
+                                        //       listen: false,
+                                        //     );
+                                        // UserModel data = await userPreferences1
+                                        //     .getUser();
+                                        // id = data.user!.id.toString();
 
-                                        await browser.open(
-                                          url: WebUri(
-                                            MapUrl.getCrewWithWorkOrderNoEndPoint(
-                                              widget.tokenNo,
-                                              id,
+                                        // await browser.open(
+                                        //   url: WebUri(
+                                        //     MapUrl.getCrewWithWorkOrderNoEndPoint(
+                                        //       widget.tokenNo,
+                                        //       id,
+                                        //     ),
+                                        //   ),
+                                        //   settings: ChromeSafariBrowserSettings(
+                                        //     shareState: CustomTabsShareState
+                                        //         .SHARE_STATE_OFF,
+                                        //     barCollapsingEnabled: true,
+                                        //   ),
+                                        // );
+                                       Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MapScreenCrew(
+                                            jobNo: "${item!.tokenNo}",
+                                            substation: "${item!.substation}",
+                                            feeder: item!.fdrName!
+                                                .split('(')
+                                                .first
+                                                .trim(),
+                                            year: getYearOrNA(
+                                              item!.nextMaintDue.toString(),
                                             ),
                                           ),
-                                          settings: ChromeSafariBrowserSettings(
-                                            shareState: CustomTabsShareState
-                                                .SHARE_STATE_OFF,
-                                            barCollapsingEnabled: true,
-                                          ),
-                                        );
-                                      // }
-                                      //  Navigator.push(
-                                      //   context,
-                                      //   MaterialPageRoute(
-                                      //     builder: (context) => MapScreenCrew(
-                                      //       jobNo: "${item!.tokenNo}",
-                                      //       substation: "${item!.substation}",
-                                      //       feeder: item!.fdrName!
-                                      //           .split('(')
-                                      //           .first
-                                      //           .trim(),
-                                      //       year: getYearOrNA(
-                                      //         item!.nextMaintDue.toString(),
-                                      //       ),
-                                      //     ),
-                                      //   ),
-                                      // );
+                                        ),
+                                      );
                                     },
                                     child: Container(
                                       padding: const EdgeInsets.symmetric(
