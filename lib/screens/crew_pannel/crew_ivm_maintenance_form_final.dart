@@ -3,11 +3,13 @@ import 'dart:io';
 import 'package:CIVM/repository/map_url.dart';
 import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/screens/login_page.dart';
+import 'package:CIVM/screens/offline_map/map_screen_crew.dart';
 // import 'package:CIVM/screens/map_view.dart';
 import 'package:CIVM/screens/video_folder/bloc/camera_bloc.dart';
 import 'package:CIVM/screens/video_folder/utils/camera_utils.dart';
 import 'package:CIVM/screens/video_folder/utils/permission_utils.dart';
 import 'package:CIVM/screens/video_folder/view/pages/camera_page.dart';
+import 'package:CIVM/utils/common_functions.dart';
 import 'package:camera/camera.dart';
 import 'package:CIVM/data/response/status.dart';
 import 'package:CIVM/models/contractor_row_maintenance_progress_model.dart';
@@ -3652,45 +3654,35 @@ class _CrewTempRowMaintenanceProgressContractorNewState
                                                               .getUser();
                                                       id = data.user!.id
                                                           .toString();
-                                                      //  Navigator.push(
-                                                      //                               context,
-                                                      //                               MaterialPageRoute(
-                                                      //                                 builder: (context) =>
-                                                      //                                     MapViewPage(
-                                                      //                                   url: MapUrl
-                                                      //                                               .getCrewWithWorkOrderNoEndPoint(
-                                                      //                                                   selectedChangeOrderNo,id),
-                                                      //                                 ),
-                                                      //                               ),
-                                                      //                             );
-                                                      await browser.open(
-                                                          url: WebUri(MapUrl 
-                                                              .getCrewWithWorkOrderNoEndPoint(
-                                                                  selectedChangeOrderNo,
-                                                                  id)),
-                                                          // "https://mapapi.ariespro.com/main/crew/CIVM_Map/$selectedChangeOrderNo/USRQWXH589Z"),
-                                                          settings: ChromeSafariBrowserSettings(
-                                                              shareState:
-                                                                  CustomTabsShareState
-                                                                      .SHARE_STATE_OFF,
-                                                              barCollapsingEnabled:
-                                                                  true));
+                                                     
+                                                      // await browser.open(
+                                                      //     url: WebUri(MapUrl 
+                                                      //         .getCrewWithWorkOrderNoEndPoint(
+                                                      //             selectedChangeOrderNo,
+                                                      //             id)),
+                                                      //     // "https://mapapi.ariespro.com/main/crew/CIVM_Map/$selectedChangeOrderNo/USRQWXH589Z"),
+                                                      //     settings: ChromeSafariBrowserSettings(
+                                                      //         shareState:
+                                                      //             CustomTabsShareState
+                                                      //                 .SHARE_STATE_OFF,
+                                                      //         barCollapsingEnabled:
+                                                      //             true));
                                                       
-                                      //                  Navigator.push(
-                                      //   context,
-                                      //   MaterialPageRoute(
-                                      //     builder: (context) => MapScreenCrew(
-                                      //       jobNo: widget.jobNo,
-                                      //       substation: widget.substation,
-                                      //       feeder: widget.feeder.split('(')
-                                      //           .first
-                                      //           .trim(),
-                                      //       year: getYearOrNA(
-                                      //         widget.nextMaintDue,
-                                      //       ),
-                                      //     ),
-                                      //   ),
-                                      // );
+                                                       Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MapScreenCrew(
+                                            jobNo: widget.jobNo,
+                                            substation: widget.substation,
+                                            feeder: widget.feeder.split('(')
+                                                .first
+                                                .trim(),
+                                            year: getYearOrNA(
+                                              widget.nextMaintDue,
+                                            ),
+                                          ),
+                                        ),
+                                      );
                                                     },
                                                     child: Container(
                                                       margin:

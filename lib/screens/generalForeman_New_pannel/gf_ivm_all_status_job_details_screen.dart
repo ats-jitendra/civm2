@@ -5,6 +5,7 @@ import 'package:CIVM/models/primary_secondary_mile_model.dart';
 import 'package:CIVM/models/user_model.dart';
 import 'package:CIVM/models/work_progress_model.dart';
 import 'package:CIVM/screens/login_page.dart';
+import 'package:CIVM/screens/offline_map/map_screen_gf.dart';
 import 'package:CIVM/screens/row_method_progress_widget.dart';
 import 'package:CIVM/screens/work_progress_span_widget.dart';
 import 'package:CIVM/utils/history_card.dart';
@@ -413,44 +414,44 @@ class _GFIvmAllStatusJobDetailsScreenState
                                   /// VIEW MAP BUTTON
                                   InkWell(
                                     onTap: () async {
-                                      String id = '';
-                                      final userPreferences1 =
-                                          Provider.of<UserPref>(
-                                            context,
-                                            listen: false,
-                                          );
-                                      UserModel data = await userPreferences1
-                                          .getUser();
-                                      id = data.user!.id.toString();
+                                      // String id = '';
+                                      // final userPreferences1 =
+                                      //     Provider.of<UserPref>(
+                                      //       context,
+                                      //       listen: false,
+                                      //     );
+                                      // UserModel data = await userPreferences1
+                                      //     .getUser();
+                                      // id = data.user!.id.toString();
 
-                                      await browser.open(
-                                        url: WebUri(
-                                          // "https://mapapi.ariespro.com/main/contractor/CIVM_Map/${lCPWorkOrderPendingViewModel.lcpWorkOrderPendingGetTabularData.data!.findAllTableData![index].tokenNo.toString()}/USRQWXH589Z"),
-                                          MapUrl.getGfEndPoint(
-                                            item!.tokenNo.toString(),
-                                            id,
-                                          ),
-                                        ),
-                                        settings: ChromeSafariBrowserSettings(
-                                          shareState: CustomTabsShareState
-                                              .SHARE_STATE_OFF,
-                                          barCollapsingEnabled: true,
+                                      // await browser.open(
+                                      //   url: WebUri(
+                                      //     // "https://mapapi.ariespro.com/main/contractor/CIVM_Map/${lCPWorkOrderPendingViewModel.lcpWorkOrderPendingGetTabularData.data!.findAllTableData![index].tokenNo.toString()}/USRQWXH589Z"),
+                                      //     MapUrl.getGfEndPoint(
+                                      //       item!.tokenNo.toString(),
+                                      //       id,
+                                      //     ),
+                                      //   ),
+                                      //   settings: ChromeSafariBrowserSettings(
+                                      //     shareState: CustomTabsShareState
+                                      //         .SHARE_STATE_OFF,
+                                      //     barCollapsingEnabled: true,
+                                      //   ),
+                                      // );
+                                     await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                               MapScreenGF(
+                                                jobNo: widget.tokenNo,
+                                                substation: item!.substation.toString(),
+                                                feeder: item!.fdrName!.split('(').first.trim(),
+                                                visibilityFlag: item!.visibilityFlag.toString(),
+                                                type: item!.type.toString(),
+                                                 sourcePage: '',
+                                              ),
                                         ),
                                       );
-                                    //  await Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //       builder: (context) =>
-                                    //            MapScreenGF(
-                                    //             jobNo: widget.tokenNo,
-                                    //             substation: item!.substation.toString(),
-                                    //             feeder: item!.fdrName!.split('(').first.trim(),
-                                    //             visibilityFlag: item!.visibilityFlag.toString(),
-                                    //             type: item!.type.toString(),
-                                    //              sourcePage: '',
-                                    //           ),
-                                    //     ),
-                                    //   );
                                       await fetchDetails(context);
                                     },
                                     child: Container(

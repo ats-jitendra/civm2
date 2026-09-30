@@ -7,6 +7,7 @@ import 'package:CIVM/screens/leaflat_map/leaf_lat_map_wakeLock.dart';
 import 'package:CIVM/screens/login_page.dart';
 import 'package:CIVM/screens/map/provider/location_provider.dart';
 import 'package:CIVM/screens/my_chrome_safari_map_recording.dart';
+import 'package:CIVM/screens/offline_map/map_screen.dart';
 import 'package:CIVM/screens/planner_pannel.dart/planner_add_crew_memeber.dart';
 import 'package:CIVM/screens/planner_pannel.dart/planner_add_new_row_table.dart';
 import 'package:CIVM/screens/planner_pannel.dart/planner_job_details_screen.dart';
@@ -1260,46 +1261,46 @@ class _DrawerManuState extends State<DrawerManu> {
                     },
                   ),
 
+                  // ListTile(
+                  //   leading: const Icon(Icons.location_searching),
+                  //   title: const Text('Add Row Maintenance Map'),
+                  //   textColor: const Color.fromARGB(255, 7, 59, 120),
+                  //   iconColor: const Color.fromARGB(255, 7, 59, 120),
+                  //   onTap: () async {
+                  //     String id = '';
+                  //     final userPreferences1 = Provider.of<UserPref>(
+                  //       context,
+                  //       listen: false,
+                  //     );
+                  //     UserModel data = await userPreferences1.getUser();
+                  //     id = data.user!.id.toString();
+                  //     await browser.open(
+                  //       url: WebUri(
+                  //         // "https://mapapi.ariespro.com/main/planner/CIVM_Map/USRQWXH589Z"),
+                  //         MapUrl.getPlannerWithoutTokenEndPoint(id),
+                  //       ),
+                  //       settings: ChromeSafariBrowserSettings(
+                  //         shareState: CustomTabsShareState.SHARE_STATE_OFF,
+                  //         barCollapsingEnabled: true,
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
+
                   ListTile(
                     leading: const Icon(Icons.location_searching),
                     title: const Text('Add Row Maintenance Map'),
                     textColor: const Color.fromARGB(255, 7, 59, 120),
                     iconColor: const Color.fromARGB(255, 7, 59, 120),
-                    onTap: () async {
-                      String id = '';
-                      final userPreferences1 = Provider.of<UserPref>(
+                    onTap: () {
+                      Navigator.push(
                         context,
-                        listen: false,
-                      );
-                      UserModel data = await userPreferences1.getUser();
-                      id = data.user!.id.toString();
-                      await browser.open(
-                        url: WebUri(
-                          // "https://mapapi.ariespro.com/main/planner/CIVM_Map/USRQWXH589Z"),
-                          MapUrl.getPlannerWithoutTokenEndPoint(id),
-                        ),
-                        settings: ChromeSafariBrowserSettings(
-                          shareState: CustomTabsShareState.SHARE_STATE_OFF,
-                          barCollapsingEnabled: true,
+                        MaterialPageRoute(
+                          builder: (context) => const MapScreen(),
                         ),
                       );
                     },
                   ),
-
-                  // ListTile(
-                  //   leading: const Icon(Icons.location_searching),
-                  //   title: const Text('IVM System Map'),
-                  //   textColor: const Color.fromARGB(255, 7, 59, 120),
-                  //   iconColor: const Color.fromARGB(255, 7, 59, 120),
-                  //   onTap: () {
-                  //     Navigator.push(
-                  //       context,
-                  //       MaterialPageRoute(
-                  //         builder: (context) => const MapScreen(),
-                  //       ),
-                  //     );
-                  //   },
-                  // ),
                   ListTile(
                     leading: const Icon(Icons.location_on),
                     title: const Text('Live IVM System Map'),

@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:CIVM/models/primary_secondary_mile_model.dart';
 import 'package:CIVM/repository/map_url.dart';
 import 'package:CIVM/screens/login_page.dart';
+import 'package:CIVM/screens/offline_map/map_screen_gf.dart';
 import 'package:CIVM/screens/work_progress_span_widget.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:intl/intl.dart';
@@ -969,58 +970,58 @@ class _GFMaintenanceReportViewDetailsScreenState
                                                   label: "View Map",
                                                   color: Colors.blue,
                                                   onTap: () async {
-                                                    String id = '';
-                                                    final userPreferences1 =
-                                                        Provider.of<UserPref>(
-                                                          context,
-                                                          listen: false,
-                                                        );
-                                                    UserModel data =
-                                                        await userPreferences1
-                                                            .getUser();
-                                                    id = data.user!.id
-                                                        .toString();
-                                                    print(
-                                                      'map url:: ${MapUrl.getGfEndPoint(widget.tokenNo.toString(), id)}',
-                                                    );
-                                                    await browser.open(
-                                                      url: WebUri(
-                                                        MapUrl.getGfEndPoint(
-                                                          widget.tokenNo
-                                                              .toString(),
-                                                          id,
-                                                        ),
-                                                      ),
-                                                      settings: ChromeSafariBrowserSettings(
-                                                        shareState:
-                                                            CustomTabsShareState
-                                                                .SHARE_STATE_OFF,
-                                                        barCollapsingEnabled:
-                                                            true,
-                                                      ),
-                                                    );
-                                                    // Navigator.push(
-                                                    //   context,
-                                                    //   MaterialPageRoute(
-                                                    //     builder: (context) =>
-                                                    //         MapScreenGF(
-                                                    //           jobNo: widget
-                                                    //               .tokenNo,
-                                                    //           substation:
-                                                    //               "${reportList[0]["subStateName"]}",
-                                                    //           feeder:
-                                                    //               reportList[0]["feederName"]
-                                                    //                   .split(
-                                                    //                     '(',
-                                                    //                   )
-                                                    //                   .first
-                                                    //                   .trim(),
-                                                    //           visibilityFlag:  "1",
-                                                    //           type:  "${reportList[0]["type"]}",
-                                                    //           sourcePage: "maintenanceReportView"
-                                                    //         ),
+                                                    // String id = '';
+                                                    // final userPreferences1 =
+                                                    //     Provider.of<UserPref>(
+                                                    //       context,
+                                                    //       listen: false,
+                                                    //     );
+                                                    // UserModel data =
+                                                    //     await userPreferences1
+                                                    //         .getUser();
+                                                    // id = data.user!.id
+                                                    //     .toString();
+                                                    // print(
+                                                    //   'map url:: ${MapUrl.getGfEndPoint(widget.tokenNo.toString(), id)}',
+                                                    // );
+                                                    // await browser.open(
+                                                    //   url: WebUri(
+                                                    //     MapUrl.getGfEndPoint(
+                                                    //       widget.tokenNo
+                                                    //           .toString(),
+                                                    //       id,
+                                                    //     ),
+                                                    //   ),
+                                                    //   settings: ChromeSafariBrowserSettings(
+                                                    //     shareState:
+                                                    //         CustomTabsShareState
+                                                    //             .SHARE_STATE_OFF,
+                                                    //     barCollapsingEnabled:
+                                                    //         true,
                                                     //   ),
                                                     // );
+                                                    Navigator.push(
+                                                      context,
+                                                      MaterialPageRoute(
+                                                        builder: (context) =>
+                                                            MapScreenGF(
+                                                              jobNo: widget
+                                                                  .tokenNo,
+                                                              substation:
+                                                                  "${reportList[0]["subStateName"]}",
+                                                              feeder:
+                                                                  reportList[0]["feederName"]
+                                                                      .split(
+                                                                        '(',
+                                                                      )
+                                                                      .first
+                                                                      .trim(),
+                                                              visibilityFlag:  "1",
+                                                              type:  "${reportList[0]["type"]}",
+                                                              sourcePage: "maintenanceReportView"
+                                                            ),
+                                                      ),
+                                                    );
                                                   },
                                                 ),
                                               ),

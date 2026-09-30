@@ -6,6 +6,7 @@ import 'package:CIVM/models/user_model.dart';
 import 'package:CIVM/models/work_progress_model.dart';
 import 'package:CIVM/screens/chat_history.dart';
 import 'package:CIVM/screens/login_page.dart';
+import 'package:CIVM/screens/offline_map/map_screen_planner.dart';
 import 'package:CIVM/screens/row_method_progress_widget.dart';
 import 'package:CIVM/screens/work_progress_span_widget.dart';
 import 'package:CIVM/utils/history_card.dart';
@@ -380,44 +381,44 @@ class _PlannerAddNewRowMaintenancePlanDetailsScreenState
                                   /// VIEW MAP BUTTON
                                   InkWell(
                                     onTap: () async {
-                                      String id = '';
-                                      final userPreferences1 =
-                                          Provider.of<UserPref>(
-                                            context,
-                                            listen: false,
-                                          );
-                                      UserModel data = await userPreferences1
-                                          .getUser();
-                                      id = data.user!.id.toString();
+                                      // String id = '';
+                                      // final userPreferences1 =
+                                      //     Provider.of<UserPref>(
+                                      //       context,
+                                      //       listen: false,
+                                      //     );
+                                      // UserModel data = await userPreferences1
+                                      //     .getUser();
+                                      // id = data.user!.id.toString();
 
-                                      await browser.open(
-                                        url: WebUri(
-                                          MapUrl.getPlannerWithTokenEndPoint(
-                                            item!.tokenNo.toString(),
-                                            id,
-                                          ),
-                                        ),
-                                        // "https://mapapi.ariespro.com/main/planner/CIVM_Map/${addNewRowMaintenancePlanViewModel.addNewRowMaintenancePlanGetTabularData.data!.getAlls![index].tokenNo.toString()}/USRQWXH589Z"),
-                                        settings: ChromeSafariBrowserSettings(
-                                          shareState: CustomTabsShareState
-                                              .SHARE_STATE_OFF,
-                                          barCollapsingEnabled: true,
+                                      // await browser.open(
+                                      //   url: WebUri(
+                                      //     MapUrl.getPlannerWithTokenEndPoint(
+                                      //       item!.tokenNo.toString(),
+                                      //       id,
+                                      //     ),
+                                      //   ),
+                                      //   // "https://mapapi.ariespro.com/main/planner/CIVM_Map/${addNewRowMaintenancePlanViewModel.addNewRowMaintenancePlanGetTabularData.data!.getAlls![index].tokenNo.toString()}/USRQWXH589Z"),
+                                      //   settings: ChromeSafariBrowserSettings(
+                                      //     shareState: CustomTabsShareState
+                                      //         .SHARE_STATE_OFF,
+                                      //     barCollapsingEnabled: true,
+                                      //   ),
+                                      // );
+
+                                    await  Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                               MapScreenPlanner(
+                                               jobNo: widget.tokenNo,
+                                                substation: item!.substation.toString(),
+                                                feeder: item!.feeder!.split('(').first.trim(),
+                                                visibilityFlag: item!.visibilityFlag.toString(),
+                                                type: item!.type.toString()
+                                              ),
                                         ),
                                       );
-
-                                    // await  Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //       builder: (context) =>
-                                    //            MapScreenPlanner(
-                                    //            jobNo: widget.tokenNo,
-                                    //             substation: item!.substation.toString(),
-                                    //             feeder: item!.feeder!.split('(').first.trim(),
-                                    //             visibilityFlag: item!.visibilityFlag.toString(),
-                                    //             type: item!.type.toString()
-                                    //           ),
-                                    //     ),
-                                    //   );
                                       await fetchDetails(context);
                                     },
                                     child: Container(

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:CIVM/models/add_new_row_maintenance_tabular_detail_model.dart';
 import 'package:CIVM/models/log_model.dart';
 import 'package:CIVM/screens/login_page.dart';
+import 'package:CIVM/screens/offline_map/map_screen_supervisor.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:CIVM/repository/map_url.dart';
 import 'package:CIVM/models/primary_secondary_mile_model.dart';
@@ -271,43 +272,43 @@ class _SupervisorAddNewRowMaintenancePlanDetailsScreenState
                                   ),
                                   InkWell(
                                     onTap: () async {
-                                     String id = '';
-                                    final userPreferences1 =
-                                        Provider.of<UserPref>(
-                                          context,
-                                          listen: false,
-                                        );
-                                    UserModel data = await userPreferences1
-                                        .getUser();
-                                    id = data.user!.id.toString();
+                                    //  String id = '';
+                                    // final userPreferences1 =
+                                    //     Provider.of<UserPref>(
+                                    //       context,
+                                    //       listen: false,
+                                    //     );
+                                    // UserModel data = await userPreferences1
+                                    //     .getUser();
+                                    // id = data.user!.id.toString();
 
-                                    await browser.open(
-                                      url: WebUri(
-                                        MapUrl.getSupervisorEndPoint(
-                                          item!.tokenNo.toString(),
-                                          id,
+                                    // await browser.open(
+                                    //   url: WebUri(
+                                    //     MapUrl.getSupervisorEndPoint(
+                                    //       item!.tokenNo.toString(),
+                                    //       id,
+                                    //     ),
+                                    //   ),
+                                    //   // "https://mapapi.ariespro.com/main/supervisor/CIVM_Map/${lCPDocumentApprovalPendingViewModel.lcpDocumentApprovalPendingGetTabularData.data!.findAllTableData![index].tokenNo.toString()}/USRQWXH589Z"),
+                                    //   settings: ChromeSafariBrowserSettings(
+                                    //     shareState: CustomTabsShareState
+                                    //         .SHARE_STATE_OFF,
+                                    //     barCollapsingEnabled: true,
+                                    //   ),
+                                    // );
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MapScreenSupervisor(
+                                            jobNo: "${item!.tokenNo}",
+                                            substation: "${item!.substation}",
+                                            feeder: item!.feeder!
+                                                .split('(')
+                                                .first
+                                                .trim(),
+                                          ),
                                         ),
-                                      ),
-                                      // "https://mapapi.ariespro.com/main/supervisor/CIVM_Map/${lCPDocumentApprovalPendingViewModel.lcpDocumentApprovalPendingGetTabularData.data!.findAllTableData![index].tokenNo.toString()}/USRQWXH589Z"),
-                                      settings: ChromeSafariBrowserSettings(
-                                        shareState: CustomTabsShareState
-                                            .SHARE_STATE_OFF,
-                                        barCollapsingEnabled: true,
-                                      ),
-                                    );
-                                      // Navigator.push(
-                                      //   context,
-                                      //   MaterialPageRoute(
-                                      //     builder: (context) => MapScreenSupervisor(
-                                      //       jobNo: "${item!.tokenNo}",
-                                      //       substation: "${item!.substation}",
-                                      //       feeder: item!.feeder!
-                                      //           .split('(')
-                                      //           .first
-                                      //           .trim(),
-                                      //     ),
-                                      //   ),
-                                      // );
+                                      );
                                     },
                                     child: Container(
                                       margin: const EdgeInsets.only(right: 0),

@@ -5,6 +5,7 @@ import 'package:CIVM/models/primary_secondary_mile_model.dart';
 import 'package:CIVM/models/user_model.dart';
 import 'package:CIVM/models/work_progress_model.dart';
 import 'package:CIVM/screens/login_page.dart';
+import 'package:CIVM/screens/offline_map/map_screen_admin.dart';
 import 'package:CIVM/screens/work_progress_span_widget.dart';
 import 'package:CIVM/screens/chat_history.dart';
 import 'package:CIVM/screens/row_method_progress_widget.dart';
@@ -275,43 +276,43 @@ class _AddNewRowMaintenancePlanDetailsScreenState
                                   
                                   InkWell(
                                     onTap: () async {
-                                      String id = '';
-                                      final userPreferences1 =
-                                          Provider.of<UserPref>(
-                                            context,
-                                            listen: false,
-                                          );
-                                      UserModel data = await userPreferences1
-                                          .getUser();
-                                      id = data.user!.id.toString();
+                                      // String id = '';
+                                      // final userPreferences1 =
+                                      //     Provider.of<UserPref>(
+                                      //       context,
+                                      //       listen: false,
+                                      //     );
+                                      // UserModel data = await userPreferences1
+                                      //     .getUser();
+                                      // id = data.user!.id.toString();
 
-                                      await browser.open(
-                                        url: WebUri(
-                                          MapUrl.getAdminEndPoint(
-                                            item!.tokenNo.toString(),
-                                            id,
-                                          ),
-                                          // "https://mapapi.ariespro.com/main/admin/CIVM_Map/${addNewRowMaintenancePlanViewModel.addNewRowMaintenancePlanGetTabularData.data!.getAlls![index].tokenNo.toString()}/USRQWXH589Z"
-                                        ),
-                                        settings: ChromeSafariBrowserSettings(
-                                          shareState: CustomTabsShareState
-                                              .SHARE_STATE_OFF,
-                                          barCollapsingEnabled: true,
-                                        ),
-                                      );
-                                      // Navigator.push(
-                                      //   context,
-                                      //   MaterialPageRoute(
-                                      //     builder: (context) => MapScreenAdmin(
-                                      //       jobNo: "${item!.tokenNo}",
-                                      //       substation: "${item!.substation}",
-                                      //       feeder: item!.feeder!
-                                      //           .split('(')
-                                      //           .first
-                                      //           .trim(),
+                                      // await browser.open(
+                                      //   url: WebUri(
+                                      //     MapUrl.getAdminEndPoint(
+                                      //       item!.tokenNo.toString(),
+                                      //       id,
                                       //     ),
+                                      //     // "https://mapapi.ariespro.com/main/admin/CIVM_Map/${addNewRowMaintenancePlanViewModel.addNewRowMaintenancePlanGetTabularData.data!.getAlls![index].tokenNo.toString()}/USRQWXH589Z"
+                                      //   ),
+                                      //   settings: ChromeSafariBrowserSettings(
+                                      //     shareState: CustomTabsShareState
+                                      //         .SHARE_STATE_OFF,
+                                      //     barCollapsingEnabled: true,
                                       //   ),
                                       // );
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MapScreenAdmin(
+                                            jobNo: "${item!.tokenNo}",
+                                            substation: "${item!.substation}",
+                                            feeder: item!.feeder!
+                                                .split('(')
+                                                .first
+                                                .trim(),
+                                          ),
+                                        ),
+                                      );
                                     },
                                     child: Container(
                                       margin: const EdgeInsets.only(right: 0),

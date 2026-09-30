@@ -6,6 +6,7 @@ import 'package:CIVM/models/user_model.dart';
 import 'package:CIVM/models/work_progress_model.dart';
 import 'package:CIVM/screens/admin_pannel/row_maintenance_view/image_paint_screen.dart';
 import 'package:CIVM/screens/login_page.dart';
+import 'package:CIVM/screens/offline_map/map_screen_supervisor.dart';
 import 'package:CIVM/screens/row_method_progress_widget.dart';
 import 'package:CIVM/screens/work_progress_span_widget.dart';
 import 'package:CIVM/utils/history_card.dart';
@@ -215,43 +216,43 @@ class _SupervisorIvmAllStatusJobDetailsScreenState
                                 padding: const EdgeInsets.only(top: 8.0),
                                 child: InkWell(
                                   onTap: () async {
-                                    String id = '';
-                                    final userPreferences1 =
-                                        Provider.of<UserPref>(
-                                          context,
-                                          listen: false,
-                                        );
-                                    UserModel data = await userPreferences1
-                                        .getUser();
-                                    id = data.user!.id.toString();
+                                    // String id = '';
+                                    // final userPreferences1 =
+                                    //     Provider.of<UserPref>(
+                                    //       context,
+                                    //       listen: false,
+                                    //     );
+                                    // UserModel data = await userPreferences1
+                                    //     .getUser();
+                                    // id = data.user!.id.toString();
 
-                                    await browser.open(
-                                      url: WebUri(
-                                        MapUrl.getSupervisorEndPoint(
-                                          item!.tokenNo.toString(),
-                                          id,
-                                        ),
-                                      ),
-                                      // "https://mapapi.ariespro.com/main/supervisor/CIVM_Map/${lCPDocumentApprovalPendingViewModel.lcpDocumentApprovalPendingGetTabularData.data!.findAllTableData![index].tokenNo.toString()}/USRQWXH589Z"),
-                                      settings: ChromeSafariBrowserSettings(
-                                        shareState: CustomTabsShareState
-                                            .SHARE_STATE_OFF,
-                                        barCollapsingEnabled: true,
-                                      ),
-                                    );
-                                    //  Navigator.push(
-                                    //     context,
-                                    //     MaterialPageRoute(
-                                    //       builder: (context) => MapScreenSupervisor(
-                                    //         jobNo: "${item!.tokenNo}",
-                                    //         substation: "${item!.substation}",
-                                    //         feeder: item!.fdrName!
-                                    //             .split('(')
-                                    //             .first
-                                    //             .trim(),
-                                    //       ),
+                                    // await browser.open(
+                                    //   url: WebUri(
+                                    //     MapUrl.getSupervisorEndPoint(
+                                    //       item!.tokenNo.toString(),
+                                    //       id,
                                     //     ),
-                                    //   );
+                                    //   ),
+                                    //   // "https://mapapi.ariespro.com/main/supervisor/CIVM_Map/${lCPDocumentApprovalPendingViewModel.lcpDocumentApprovalPendingGetTabularData.data!.findAllTableData![index].tokenNo.toString()}/USRQWXH589Z"),
+                                    //   settings: ChromeSafariBrowserSettings(
+                                    //     shareState: CustomTabsShareState
+                                    //         .SHARE_STATE_OFF,
+                                    //     barCollapsingEnabled: true,
+                                    //   ),
+                                    // );
+                                     Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => MapScreenSupervisor(
+                                            jobNo: "${item!.tokenNo}",
+                                            substation: "${item!.substation}",
+                                            feeder: item!.fdrName!
+                                                .split('(')
+                                                .first
+                                                .trim(),
+                                          ),
+                                        ),
+                                      );
                                   },
                                   child: Container(
                                     margin: const EdgeInsets.only(right: 0),
