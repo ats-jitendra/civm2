@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "wmUplineSo": "SAND LAKE", "wmType": "Underground" }, "geometry": { "type": "LineString", "coordinates": [ [ -92.628295899999898, 47.656936650009499 ], [ -92.628325, 47.6569024000095 ] ] } },
+{ "type": "Feature", "properties": { "wmUplineSo": "SAND LAKE", "wmType": "Underground" }, "geometry": { "type": "LineString", "coordinates": [ [ -92.631424426328707, 47.6587587018346 ], [ -92.631173049450794, 47.659091558223402 ] ] } },
+{ "type": "Feature", "properties": { "wmUplineSo": "SAND LAKE", "wmType": "Underground" }, "geometry": { "type": "LineString", "coordinates": [ [ -92.633286596722499, 47.659446930765696 ], [ -92.633203562883295, 47.659541161397598 ] ] } },
+{ "type": "Feature", "properties": { "wmUplineSo": "SAND LAKE", "wmType": "Underground" }, "geometry": { "type": "LineString", "coordinates": [ [ -92.628632281774799, 47.658457926898102 ], [ -92.628674749736305, 47.658468986931602 ] ] } },
+{ "type": "Feature", "properties": { "wmUplineSo": "SAND LAKE", "wmType": "Underground" }, "geometry": { "type": "LineString", "coordinates": [ [ -92.628674749736305, 47.658468986931602 ], [ -92.630546922874203, 47.658885574104701 ], [ -92.630893815780595, 47.659002239166497 ], [ -92.632311109440593, 47.659378238572799 ], [ -92.633110331936095, 47.659818539181799 ], [ -92.633143614075294, 47.659935996107897 ] ] } },
+{ "type": "Feature", "properties": { "wmUplineSo": "SAND LAKE", "wmType": "Underground" }, "geometry": { "type": "LineString", "coordinates": [ [ -92.628489502991997, 47.6584909440896 ], [ -92.628632281774799, 47.658457926898102 ] ] } }
+]
+}

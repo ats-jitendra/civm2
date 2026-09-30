@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "Carrboro_Carrboro_overhead",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Carrboro", "SUBSTATION_NAME": "Carrboro", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.08185311463897 35.88406570364626, -79.0818559305537 35.88405747638715)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.081853114638974, 35.884065703646257 ], [ -79.081855930553701, 35.884057476387149 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Carrboro", "SUBSTATION_NAME": "Carrboro", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.0818559305537 35.88405747638715, -79.08185834542869 35.88405023723457)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.081855930553701, 35.884057476387149 ], [ -79.081858345428685, 35.884050237234568 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Carrboro", "SUBSTATION_NAME": "Carrboro", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.08185834542869 35.88405023723457, -79.08186757932397 35.88402207586612)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.081858345428685, 35.884050237234568 ], [ -79.081867579323969, 35.88402207586612 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Carrboro", "SUBSTATION_NAME": "Carrboro", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.08185834542869 35.88405023723457, -79.08185090766607 35.88402999876703)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.081858345428685, 35.884050237234568 ], [ -79.081850907666066, 35.884029998767033 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Carrboro", "SUBSTATION_NAME": "Carrboro", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.08185834542869 35.88405023723457, -79.08185831400557 35.8840279703527)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.081858345428685, 35.884050237234568 ], [ -79.081858314005572, 35.884027970352697 ] ] } }
+]
+}

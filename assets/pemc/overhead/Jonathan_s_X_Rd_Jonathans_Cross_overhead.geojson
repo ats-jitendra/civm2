@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "Jonathan_s_X_Rd_Jonathans_Cross_overhead",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Jonathans Cross", "SUBSTATION_NAME": "Jonathan's X Rd.", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.6716288011705 36.52284991670467, -78.67164435924438 36.522853694005356)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.671628801170499, 36.522849916704672 ], [ -78.671644359244382, 36.522853694005356 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Jonathans Cross", "SUBSTATION_NAME": "Jonathan's X Rd.", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.6715717062817 36.5228514708511, -78.67160554030403 36.522850707896616)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.671571706281696, 36.522851470851101 ], [ -78.671605540304029, 36.522850707896616 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Jonathans Cross", "SUBSTATION_NAME": "Jonathan's X Rd.", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.67160554030403 36.522850707896616, -78.6716288011705 36.52284991670467)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.671605540304029, 36.522850707896616 ], [ -78.671628801170499, 36.522849916704672 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Jonathans Cross", "SUBSTATION_NAME": "Jonathan's X Rd.", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.6716288011705 36.52284991670467, -78.6716413405093 36.52284444024528)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.671628801170499, 36.522849916704672 ], [ -78.671641340509296, 36.522844440245279 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Jonathans Cross", "SUBSTATION_NAME": "Jonathan's X Rd.", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.6716288011705 36.52284991670467, -78.67164558214809 36.522849494760756)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.671628801170499, 36.522849916704672 ], [ -78.671645582148088, 36.522849494760756 ] ] } }
+]
+}

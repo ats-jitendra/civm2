@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "N__Roxboro_N__Roxboro_overhead",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "FEEDER_NAME": "N. Roxboro", "SUBSTATION_NAME": "N. Roxboro", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.9429392193054 36.420585752360175, -78.94293600445602 36.42060203910817)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.942939219305401, 36.420585752360175 ], [ -78.942936004456016, 36.420602039108168 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "N. Roxboro", "SUBSTATION_NAME": "N. Roxboro", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.9429392193054 36.420585752360175, -78.94295602884392 36.420589782667925)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.942939219305401, 36.420585752360175 ], [ -78.942956028843923, 36.420589782667925 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "N. Roxboro", "SUBSTATION_NAME": "N. Roxboro", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.94280757611392 36.420553570606614, -78.9429392193054 36.420585752360175)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.942807576113921, 36.420553570606614 ], [ -78.942939219305401, 36.420585752360175 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "N. Roxboro", "SUBSTATION_NAME": "N. Roxboro", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.94279295603558 36.42054999635253, -78.94280757611392 36.420553570606614)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.942792956035575, 36.420549996352527 ], [ -78.942807576113921, 36.420553570606614 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "N. Roxboro", "SUBSTATION_NAME": "N. Roxboro", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.9429392193054 36.420585752360175, -78.94294929667379 36.42056636541917)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.942939219305401, 36.420585752360175 ], [ -78.942949296673788, 36.42056636541917 ] ] } }
+]
+}

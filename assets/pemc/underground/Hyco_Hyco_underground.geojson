@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "Hyco_Hyco_underground",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Hyco", "SUBSTATION_NAME": "Hyco", "wmType": "PRIMARY UNDERGROUND", "WKT": "LINESTRING (-79.05599449043234 36.45352578894208, -79.05606710396003 36.45354675014035)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.05599449043234, 36.453525788942081 ], [ -79.056067103960032, 36.453546750140347 ] ] } }
+]
+}

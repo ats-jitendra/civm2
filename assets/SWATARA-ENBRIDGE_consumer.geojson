@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "SWATARA-ENBRIDGE_consumer",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "Name": "ENBRIDGE ENERGY L TD PT", "Address": "SWATARA PUMP STATION-LINE 3", "Phone": "2187556702.0", "Phase": "ABC", "Substation": "SWATARA-ENBRIDGE", "Map_location": "366003050", "PARCEL_NUMBER": null }, "geometry": { "type": "Point", "coordinates": [ -93.685767913736399, 46.8686737950798 ] } }
+]
+}

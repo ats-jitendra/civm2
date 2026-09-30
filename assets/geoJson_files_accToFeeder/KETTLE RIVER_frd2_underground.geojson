@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "wmUplineSo": "KETTLE RIVER", "wmType": "Underground" }, "geometry": { "type": "LineString", "coordinates": [ [ -92.875225027933396, 46.491706664403303 ], [ -92.874910928872197, 46.491710133158598 ] ] } },
+{ "type": "Feature", "properties": { "wmUplineSo": "KETTLE RIVER", "wmType": "Underground" }, "geometry": { "type": "LineString", "coordinates": [ [ -92.874910928872197, 46.491710133158598 ], [ -92.874584, 46.491703999999899 ] ] } },
+{ "type": "Feature", "properties": { "wmUplineSo": "KETTLE RIVER", "wmType": "Underground" }, "geometry": { "type": "LineString", "coordinates": [ [ -92.874584, 46.491703999999899 ], [ -92.874557, 46.491696 ] ] } },
+{ "type": "Feature", "properties": { "wmUplineSo": "KETTLE RIVER", "wmType": "Underground" }, "geometry": { "type": "LineString", "coordinates": [ [ -92.8781790665805, 46.4861949887474 ], [ -92.8780471, 46.486099900008199 ] ] } },
+{ "type": "Feature", "properties": { "wmUplineSo": "KETTLE RIVER", "wmType": "Underground" }, "geometry": { "type": "LineString", "coordinates": [ [ -92.876926288460297, 46.490002951570503 ], [ -92.8765997, 46.489901200008198 ] ] } },
+{ "type": "Feature", "properties": { "wmUplineSo": "KETTLE RIVER", "wmType": "Underground" }, "geometry": { "type": "LineString", "coordinates": [ [ -92.878566388919594, 46.487126183207899 ], [ -92.8786715, 46.487243600008199 ] ] } }
+]
+}

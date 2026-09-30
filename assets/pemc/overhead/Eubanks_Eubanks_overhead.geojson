@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "Eubanks_Eubanks_overhead",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Eubanks", "SUBSTATION_NAME": "Eubanks", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.03361017603017 36.0015876567705, -79.03358235381528 36.001587710386495)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.033610176030166, 36.001587656770504 ], [ -79.033582353815277, 36.001587710386495 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Eubanks", "SUBSTATION_NAME": "Eubanks", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.03355336583664 36.001649012012805, -79.03350207174059 36.00165235989252)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.033553365836639, 36.001649012012805 ], [ -79.033502071740585, 36.001652359892518 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Eubanks", "SUBSTATION_NAME": "Eubanks", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.03361017603017 36.0015876567705, -79.03355336583664 36.001649012012805)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.033610176030166, 36.001587656770504 ], [ -79.033553365836639, 36.001649012012805 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Eubanks", "SUBSTATION_NAME": "Eubanks", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.03361017603017 36.0015876567705, -79.03360831475041 36.001632661365875)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.033610176030166, 36.001587656770504 ], [ -79.03360831475041, 36.001632661365875 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Eubanks", "SUBSTATION_NAME": "Eubanks", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.03361974364394 36.001486473808846, -79.03361017603017 36.0015876567705)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.033619743643939, 36.001486473808846 ], [ -79.033610176030166, 36.001587656770504 ] ] } }
+]
+}

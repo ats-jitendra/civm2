@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "Dixon_Store_Dixon_Store_overhead",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Dixon Store", "SUBSTATION_NAME": "Dixon Store", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.86257023926089 36.47857834033649, -78.86251770561799 36.478836759949814)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.86257023926089, 36.47857834033649 ], [ -78.862517705617989, 36.478836759949814 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Dixon Store", "SUBSTATION_NAME": "Dixon Store", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.86251770561799 36.478836759949814, -78.86251884320465 36.47886177223195)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.862517705617989, 36.478836759949814 ], [ -78.862518843204654, 36.478861772231951 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Dixon Store", "SUBSTATION_NAME": "Dixon Store", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.86251770561799 36.478836759949814, -78.86254755334987 36.478861559247854)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.862517705617989, 36.478836759949814 ], [ -78.86254755334987, 36.478861559247854 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Dixon Store", "SUBSTATION_NAME": "Dixon Store", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.86251884320465 36.47886177223195, -78.86251993996605 36.47888586717845)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.862518843204654, 36.478861772231951 ], [ -78.862519939966049, 36.478885867178448 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Dixon Store", "SUBSTATION_NAME": "Dixon Store", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.86251770561799 36.478836759949814, -78.86248215925986 36.47885969477891)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.862517705617989, 36.478836759949814 ], [ -78.862482159259855, 36.478859694778912 ] ] } }
+]
+}

@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "E__Willardsville_E__Willardsville_overhead",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "FEEDER_NAME": "E. Willardsville", "SUBSTATION_NAME": "E. Willardsville", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.85429381966091 36.13133042157753, -78.85428379903962 36.13131744283937)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.85429381966091, 36.13133042157753 ], [ -78.854283799039621, 36.131317442839368 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "E. Willardsville", "SUBSTATION_NAME": "E. Willardsville", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.85426961831051 36.13129687715122, -78.85423212234036 36.131300103934095)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.854269618310511, 36.131296877151222 ], [ -78.854232122340363, 36.131300103934095 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "E. Willardsville", "SUBSTATION_NAME": "E. Willardsville", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.85426961831051 36.13129687715122, -78.85428776186484 36.13127442854626)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.854269618310511, 36.131296877151222 ], [ -78.854287761864839, 36.131274428546263 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "E. Willardsville", "SUBSTATION_NAME": "E. Willardsville", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.8543121252289 36.13135413203671, -78.85429381966091 36.13133042157753)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.854312125228901, 36.131354132036712 ], [ -78.85429381966091, 36.13133042157753 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "E. Willardsville", "SUBSTATION_NAME": "E. Willardsville", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-78.85428379903962 36.13131744283937, -78.85426961831051 36.13129687715122)" }, "geometry": { "type": "LineString", "coordinates": [ [ -78.854283799039621, 36.131317442839368 ], [ -78.854269618310511, 36.131296877151222 ] ] } }
+]
+}

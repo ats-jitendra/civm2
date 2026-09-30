@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "Little_River_Little_River_underground",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Little River", "SUBSTATION_NAME": "Little River", "wmType": "PRIMARY UNDERGROUND", "WKT": "LINESTRING (-79.00057467212089 36.21218911721531, -79.00046498372136 36.21223252259843)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.000574672120891, 36.21218911721531 ], [ -79.000464983721358, 36.212232522598427 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Little River", "SUBSTATION_NAME": "Little River", "wmType": "PRIMARY UNDERGROUND", "WKT": "LINESTRING (-79.00057467212089 36.21218911721531, -79.00047662382902 36.21225014262135)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.000574672120891, 36.21218911721531 ], [ -79.000476623829016, 36.21225014262135 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Little River", "SUBSTATION_NAME": "Little River", "wmType": "PRIMARY UNDERGROUND", "WKT": "LINESTRING (-79.00057467212089 36.21218911721531, -79.00050247837807 36.212266500018266)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.000574672120891, 36.21218911721531 ], [ -79.000502478378067, 36.212266500018266 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Little River", "SUBSTATION_NAME": "Little River", "wmType": "PRIMARY UNDERGROUND", "WKT": "LINESTRING (-79.00057467212089 36.21218911721531, -79.00053159904915 36.21227820184787)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.000574672120891, 36.21218911721531 ], [ -79.000531599049154, 36.212278201847873 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Little River", "SUBSTATION_NAME": "Little River", "wmType": "PRIMARY UNDERGROUND", "WKT": "LINESTRING (-79.00057467212089 36.21218911721531, -79.000560862088 36.212292005244926)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.000574672120891, 36.21218911721531 ], [ -79.000560862087994, 36.212292005244926 ] ] } }
+]
+}

@@ -1,0 +1,12 @@
+{
+"type": "FeatureCollection",
+"name": "Hyco_Hyco_overhead",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Hyco", "SUBSTATION_NAME": "Hyco", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.05602303470432 36.453461554019135, -79.05600756728364 36.45348231118527)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.056023034704324, 36.453461554019135 ], [ -79.056007567283643, 36.453482311185269 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Hyco", "SUBSTATION_NAME": "Hyco", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.05600756728364 36.45348231118527, -79.05599130166222 36.453505299791814)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.056007567283643, 36.453482311185269 ], [ -79.055991301662218, 36.453505299791814 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Hyco", "SUBSTATION_NAME": "Hyco", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.05599130166222 36.453505299791814, -79.05599449043234 36.45352578894208)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.055991301662218, 36.453505299791814 ], [ -79.05599449043234, 36.453525788942081 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Hyco", "SUBSTATION_NAME": "Hyco", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.05599130166222 36.453505299791814, -79.05596407465696 36.45351359854429)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.055991301662218, 36.453505299791814 ], [ -79.055964074656956, 36.453513598544291 ] ] } },
+{ "type": "Feature", "properties": { "FEEDER_NAME": "Hyco", "SUBSTATION_NAME": "Hyco", "wmType": "PRIMARY OVERHEAD", "WKT": "LINESTRING (-79.05599449043234 36.45352578894208, -79.05599496258895 36.45353425889709)" }, "geometry": { "type": "LineString", "coordinates": [ [ -79.05599449043234, 36.453525788942081 ], [ -79.055994962588954, 36.453534258897093 ] ] } }
+]
+}
