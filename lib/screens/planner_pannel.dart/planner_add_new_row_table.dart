@@ -13,8 +13,6 @@ import 'package:CIVM/screens/planner_pannel.dart/planner_add_new_row_maintenance
 import 'package:CIVM/utils/common_functions.dart';
 import 'package:CIVM/utils/user_pref.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-// import 'package:flutter_sms/flutter_sms.dart';
 import 'package:intl/intl.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
@@ -707,7 +705,7 @@ class _PlannerAddNewRowTableState extends State<PlannerAddNewRowTable> {
         var msg =
             'Job No. $token IVM Maintenance Successfully Shared with you on $formattedDate.';
 
-        // _sendMail(subject, msg, generalForemanEmailId);
+        _sendMail(subject, msg, generalForemanEmailId);
         ////////****************message sending code*********************/////////////
         // sendSmsTulio("+917018775670", 'Hellow CIVM sms testing Twilio');
         // Navigator.pop(context);
@@ -729,42 +727,42 @@ class _PlannerAddNewRowTableState extends State<PlannerAddNewRowTable> {
     }
   }
 
-  // Future<void> _sendMail(
-  //   String subject,
-  //   String content,
-  //   String generalForemanEmailId,
-  // ) async {
-  //   List<String> recipientsList = [];
-  //   for (int i = 0; i < recipientsList.length; i++) {
-  //     recipientsList.add(recipientsList[i]);
-  //   }
+  Future<void> _sendMail(
+    String subject,
+    String content,
+    String generalForemanEmailId,
+  ) async {
+    List<String> recipientsList = [];
+    for (int i = 0; i < recipientsList.length; i++) {
+      recipientsList.add(recipientsList[i]);
+    }
 
-  //   String username = 'ats.ariespro@gmail.com';
-  //   String password = 'ahbfhcshjujvkgge';
+    String username = 'ats.ariespro@gmail.com';
+    String password = 'ahbfhcshjujvkgge';
 
-  //   final smtpServer = gmail(username, password);
-  //   final message = Message()
-  //     ..from = Address(username, 'CIVM')
-  //     ..recipients.addAll([
-  //       // 'jitendra.kushwaha@ariespro.com',
-  //       // 'preetika.patel@ariespro.com',
-  //       generalForemanEmailId,
-  //     ])
-  //     ..subject = subject
-  //     // ..html = "<h4>Hi,</h4>\n<p>${content}</p>";
-  //     ..html =
-  //         "<h4>Hi,</h4>\n<p>$content</p>\n<p>Note: DO NOT REPLY TO THIS EMAIL. </p>\n<p>Thank you, </p>\n<p>AriesPro Utilities</p>";
+    final smtpServer = gmail(username, password);
+    final message = Message()
+      ..from = Address(username, 'CIVM')
+      ..recipients.addAll([
+        // 'jitendra.kushwaha@ariespro.com',
+        // 'preetika.patel@ariespro.com',
+        generalForemanEmailId,
+      ])
+      ..subject = subject
+      // ..html = "<h4>Hi,</h4>\n<p>${content}</p>";
+      ..html =
+          "<h4>Hi,</h4>\n<p>$content</p>\n<p>Note: DO NOT REPLY TO THIS EMAIL. </p>\n<p>Thank you, </p>\n<p>AriesPro Utilities</p>";
 
-  //   try {
-  //     final sendReport = await send(message, smtpServer);
-  //     print('Message sent: ' + sendReport.toString());
-  //   } on MailerException catch (e) {
-  //     print('Message not sent.');
-  //     for (var p in e.problems) {
-  //       print('Problem: ${p.code}: ${p.msg}');
-  //     }
-  //   }
-  // }
+    try {
+      final sendReport = await send(message, smtpServer);
+      print('Message sent: ' + sendReport.toString());
+    } on MailerException catch (e) {
+      print('Message not sent.');
+      for (var p in e.problems) {
+        print('Problem: ${p.code}: ${p.msg}');
+      }
+    }
+  }
 
   // Future<void> sendSmsTulio(String to, String message) async {
   //   final String url =
