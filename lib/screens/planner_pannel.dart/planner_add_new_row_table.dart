@@ -1131,7 +1131,7 @@ class _PlannerAddNewRowTableState extends State<PlannerAddNewRowTable> {
     // data.user!.id.toString();
 
     String url = AppUrl.crewList;
-    // "https://civmapi.ariespro.com/civmapi/login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
+    // "https://civm2.ariespro.com/civm2/login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
 
     try {
       final response = await http.get(

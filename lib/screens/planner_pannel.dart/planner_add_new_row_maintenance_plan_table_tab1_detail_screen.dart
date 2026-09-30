@@ -1673,7 +1673,7 @@ class _PlannerAddNewRowMaintenancePlanDetailsScreenState
   Future<void> deleteOnlineImageApi2(String fileName, String tokenNo) async {
     final apiUrl =
         "${AppUrl.baseUrl}changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo";
-    // 'https://civmapi.ariespro.com/civmapi/changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo';
+    // 'https://civm2.ariespro.com/civm2/changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo';
     print(apiUrl);
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
@@ -2225,7 +2225,7 @@ class _PlannerAddNewRowMaintenancePlanDetailsScreenState
 
   Future<void> updateFlagValue(String token, int flag) async {
     String url = "${AppUrl.baseUrl}vma_row_custom_main_plan/updateFlagValue";
-    // 'https://civmapi.ariespro.com/civmapi/vma_row_custom_main_plan/updateFlagValue';
+    // 'https://civm2.ariespro.com/civm2/vma_row_custom_main_plan/updateFlagValue';
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
     try {
@@ -2494,7 +2494,7 @@ class _PlannerAddNewRowMaintenancePlanDetailsScreenState
 
   Future<void> updateSubmitForApprovalStatus(String tokenNo) async {
     String baseUrl =
-        'https://civmapi.ariespro.com/civmapi/workOrderPendingAndReject/updateStatusFromRejectedToPendingApproval';
+        'https://civm2.ariespro.com/civm2/workOrderPendingAndReject/updateStatusFromRejectedToPendingApproval';
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
     final Map<String, String> queryParams = {
@@ -3281,7 +3281,7 @@ class _PlannerAddNewRowMaintenancePlanDetailsScreenState
     // data.user!.id.toString();
 
     String url = AppUrl.crewList;
-    // "https://civmapi.ariespro.com/civmapi/login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
+    // "https://civm2.ariespro.com/civm2/login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
 
     try {
       final response = await http.get(
