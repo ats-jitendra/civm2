@@ -1156,8 +1156,7 @@ CREATE TABLE inspectionListTable(
             "userName": item["userName"] ?? "",
             "userId": item["userId"]?.toString() ?? "",
             "mapLocation": item["mapLocation"]?.toString() ?? mapLocation,
-            "flag":"1",
-            //item["flag"] ?? "",
+            "flag": item["flag"]?.toString() ?? "",
             "status": 1,
             "fetchId": fetchId,
           }, conflictAlgorithm: ConflictAlgorithm.replace);
