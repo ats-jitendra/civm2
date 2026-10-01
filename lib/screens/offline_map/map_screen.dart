@@ -188,7 +188,7 @@ class _MapScreenState extends State<MapScreen> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-    ensureCameraInitialized();
+     ensureCameraInitialized();
     _startListeningToCompass();
     /////
   }
@@ -4594,7 +4594,13 @@ class _MapScreenState extends State<MapScreen> {
         "${AppUrl.baseUrl}login_user/deleteComment?mapLocation=$mapLocation&flag=$flag",
       );
 
-      final response = await http.delete(url);
+      final response = await http.delete(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
 
       print("Delete API Status: ${response.statusCode}");
       print("Delete API Response: ${url}");
@@ -6250,7 +6256,7 @@ class _MapScreenState extends State<MapScreen> {
                                             commentsData[0]["flag"]
                                                 ?.toString() ??
                                             "";
-
+                                        print('flag ------- $flag');
                                         return GestureDetector(
                                           onTap: () {
                                             if (flag == "1") {
