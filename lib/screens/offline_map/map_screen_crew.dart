@@ -199,9 +199,8 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     _initializeMap();
     WakelockPlus.enable();
     /////
-     ensureCameraInitialized();
+    ensureCameraInitialized();
     _startListeningToCompass();
-    // cameraInit();
   }
 
   @override
@@ -687,7 +686,12 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                               ) {
                                 // final index = entry.key;
                                 final polyline = entry.value;
+                                ////Mark as Completed grey fix---
+                                final isMarkAsCompletedForThisSpan = lines.any(
+                                  (e) => e["mapId"] == polyline.oid.toString(),
+                                );
 
+                                ///---------------
                                 final maintTypes = polyline.maintType
                                     .split(",")
                                     .map((e) => e.trim().toUpperCase())
@@ -705,16 +709,14 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                     Polyline(
                                       points: polyline.points,
                                       strokeWidth: 12,
-                                     // color: polyline.originalColor,
+                                      // color: polyline.originalColor,
                                       ////lightenColor color bug fix(01-10-2026)
-                                          color:
-                                              selectedPolylineIndexes.contains(
-                                                entry.key,
-                                              )
-                                              ? lightenColor(
-                                                  polyline.originalColor,
-                                                )
-                                              : polyline.originalColor,
+                                      color:
+                                          selectedPolylineIndexes.contains(
+                                            entry.key,
+                                          )
+                                          ? lightenColor(polyline.originalColor)
+                                          : polyline.originalColor,
                                     ),
                                   ];
                                 }
@@ -739,7 +741,10 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                     Polyline(
                                       points: polyline.points,
                                       strokeWidth: 12,
-                                      color: polyline.originalColor,
+                                      ////Mark as Completed grey fix---
+                                      color: isMarkAsCompletedForThisSpan
+                                          ? Colors.grey
+                                          : polyline.originalColor,
                                     ),
                                   ];
                                 }
@@ -755,11 +760,13 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                   final status = i < maintStatuses.length
                                       ? maintStatuses[i].toLowerCase()
                                       : "";
-
+                                  ////Mark as Completed grey fix---
                                   final Color color =
-                                      status == "completed" ||
-                                          status == "rework completed" ||
-                                          status == "final completed"
+                                      isMarkAsCompletedForThisSpan
+                                      ? Colors.grey
+                                      : status == "completed" ||
+                                            status == "rework completed" ||
+                                            status == "final completed"
                                       ? Colors.grey
                                       : getColorFromName(type);
 
@@ -784,8 +791,10 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                   final status = i < maintStatuses.length
                                       ? maintStatuses[i].toLowerCase()
                                       : "";
-
-                                  if (status == "completed" ||
+                                  ////Mark as Completed grey fix---
+                                  if (isMarkAsCompletedForThisSpan) {
+                                    visibleColors.add(Colors.grey);
+                                  } else if (status == "completed" ||
                                       status == "rework completed" ||
                                       status == "final completed") {
                                     visibleColors.add(Colors.grey);
@@ -800,14 +809,14 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                   visibleColors.length,
                                 );
 
-                                final List<Polyline> lines = [];
+                                final List<Polyline> splitPolylines = [];
 
                                 for (
                                   int i = 0;
                                   i < splitPoints.length - 1;
                                   i++
                                 ) {
-                                  lines.add(
+                                  splitPolylines.add(
                                     Polyline(
                                       points: [
                                         splitPoints[i],
@@ -819,7 +828,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                   );
                                 }
 
-                                return lines;
+                                return splitPolylines;
                               }).toList(),
                             ), //////////////////////////////////added20-8-2026
                           //-------------------------
@@ -2726,7 +2735,8 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     print('open popup');
     print('jobNo------- ${overHeadPolylines[selectedPolylineIndex!].jobNo}');
     final polyline = overHeadPolylines[selectedPolylineIndex!];
-
+    // // Check whether this particular span was marked as completed
+    // isMarkAsRead = lines.any((e) => e["mapId"] == polyline.oid.toString());
     // If Mark As Read is already checked globally,
     // automatically add this span's maintTypes.
     if (isMarkAsRead) {
@@ -3514,6 +3524,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
         print(' selectedMaintStatus $selectedMaintStatus');
       }
     }
+    bool isSendButton = false;
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -3823,110 +3834,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                               ),
 
                             SizedBox(height: 10),
-                            // if (showUpdateCardView)
-                            //   Container(
-                            //     width: double.infinity,
-                            //     // margin: const EdgeInsets.all(10),
-                            //     padding: const EdgeInsets.all(6),
-                            //     decoration: BoxDecoration(
-                            //       color: Colors.white,
-                            //       // color: const Color.fromARGB(255, 238, 241, 243),
-                            //       borderRadius: BorderRadius.circular(14),
-                            //       border: const Border(
-                            //         left: BorderSide(
-                            //           color: Color.fromARGB(
-                            //             255,
-                            //             7,
-                            //             59,
-                            //             120,
-                            //           ), // your border color
-                            //           width: 5, // border thickness
-                            //         ),
-                            //       ),
-                            //     ),
-                            //     child: Column(
-                            //       children: [
-                            //         Row(
-                            //           crossAxisAlignment: CrossAxisAlignment.start,
-                            //           children: [
-                            //             Expanded(
-                            //               child: _detailRow(
-                            //                 "Maint Type",
-                            //                 selectedMaintType,
-                            //                 //  selectedWorkTypesUpdate.join(", "),
-                            //               ),
-                            //             ),
-                            //             Expanded(
-                            //               child: _detailRow(
-                            //                 "Job No",
-                            //                 overHeadPolylines[index].jobNo,
-                            //               ),
-                            //             ),
-                            //           ],
-                            //         ),
-                            //         Row(
-                            //           crossAxisAlignment: CrossAxisAlignment.start,
-                            //           children: [
-                            //             Expanded(
-                            //               child: _detailRow(
-                            //                 "Distance",
-                            //                 "${overHeadPolylines[index].spanDistanceApi.toString()} miles",
-                            //               ),
-                            //             ),
-                            //             const SizedBox(height: 4),
-                            //             Expanded(
-                            //               child: _detailRow(
-                            //                 "Total Distance",
-                            //                 "${overHeadPolylines[index].totalMilesApi.toString()} miles",
-                            //               ),
-                            //             ),
-                            //           ],
-                            //         ),
 
-                            //         Row(
-                            //           crossAxisAlignment: CrossAxisAlignment.start,
-                            //           children: [
-                            //             Expanded(
-                            //               child: _detailRow(
-                            //                 "Create Date",
-                            //                 formatDate(
-                            //                   overHeadPolylines[index].createDate,
-                            //                 ),
-                            //               ),
-                            //             ),
-                            //             const SizedBox(height: 4),
-                            //             Expanded(
-                            //               child: _detailRow(
-                            //                 "Span Name",
-                            //                 overHeadPolylines[index].elementName,
-                            //               ),
-                            //             ),
-                            //           ],
-                            //         ),
-                            //         Row(
-                            //           crossAxisAlignment: CrossAxisAlignment.start,
-                            //           children: [
-                            //             Expanded(
-                            //               child: _detailRow(
-                            //                 "Status",
-                            //                 selectedMaintStatus,
-                            //                 // overHeadPolylines[index].maintStatus,
-                            //               ),
-                            //             ),
-                            //             const SizedBox(height: 4),
-                            //             Expanded(child: Container()),
-                            //             // Expanded(
-                            //             //   child: _detailRow(
-                            //             //     "",
-                            //             //     "",
-                            //             //     // overHeadPolylines[index].elementName,
-                            //             //   ),
-                            //             // ),
-                            //           ],
-                            //         ),
-                            //       ],
-                            //     ),
-                            //   ),
                             if (showUpdateCardView)
                               LayoutBuilder(
                                 builder: (context, constraints) {
@@ -4157,35 +4065,61 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                           child: SizedBox(
                                             height: 42,
                                             child: ElevatedButton(
-                                              onPressed: () async {
-                                                if (chatController.text
-                                                    .trim()
-                                                    .isEmpty) {
-                                                  return;
-                                                }
+                                              onPressed: isSendButton
+                                                  ? null
+                                                  : () async {
+                                                      setDialogState(() {
+                                                        isSendButton = true;
+                                                      });
 
-                                                final data = {
-                                                  "lineId":
-                                                      overHeadPolylines[index]
-                                                          .oid,
-                                                  "description": chatController
-                                                      .text
-                                                      .trim(),
-                                                  "userId": id.toString(),
-                                                };
-                                                // showLoader(context);
-                                                await updateMessageData(
-                                                  data,
-                                                  () {
-                                                    setDialogState(() {});
-                                                  },
-                                                );
-                                              },
+                                                      try {
+                                                        if (chatController.text
+                                                            .trim()
+                                                            .isEmpty) {
+                                                          return;
+                                                        }
+
+                                                        final data = {
+                                                          "lineId":
+                                                              overHeadPolylines[index]
+                                                                  .oid,
+                                                          "description":
+                                                              chatController
+                                                                  .text
+                                                                  .trim(),
+                                                          "userId": id
+                                                              .toString(),
+                                                        };
+                                                        // showLoader(context);
+                                                        await updateMessageData(
+                                                          data,
+                                                          () {
+                                                            setDialogState(
+                                                              () {},
+                                                            );
+                                                          },
+                                                        );
+                                                      } finally {
+                                                        if (mounted) {
+                                                          setDialogState(() {
+                                                            isSendButton =
+                                                                false;
+                                                          });
+                                                        }
+                                                      }
+                                                    },
+
                                               style: ElevatedButton.styleFrom(
                                                 backgroundColor: Colors.teal,
                                                 foregroundColor: Colors.white,
+                                                disabledBackgroundColor:
+                                                    Colors.teal,
+                                                disabledForegroundColor:
+                                                    Colors.white,
                                               ),
-                                              child: const Text("Send"),
+                                              child: isSendButton
+                                                  ? progressBar()
+                                                  : const Text("Send"),
                                             ),
                                           ),
                                         ),
@@ -4198,141 +4132,6 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      // Row(
-                                      //   mainAxisAlignment:
-                                      //       MainAxisAlignment.spaceBetween,
-                                      //   children: [
-                                      //     Expanded(
-                                      //       child: Padding(
-                                      //         padding:
-                                      //             const EdgeInsets.symmetric(
-                                      //               horizontal: 0,
-                                      //             ),
-                                      //         child: InkWell(
-                                      //           borderRadius:
-                                      //               BorderRadius.circular(12),
-                                      //           onTap: () async {
-                                      //             //  await ensureCameraInitialized();
-                                      //             _takePictureDialog();
-                                      //           },
-                                      //           child: Container(
-                                      //             //  width: 200,
-                                      //             // width: double.infinity,
-                                      //             padding:
-                                      //                 const EdgeInsets.symmetric(
-                                      //                   horizontal: 16,
-                                      //                   vertical: 14,
-                                      //                 ),
-                                      //             decoration: BoxDecoration(
-                                      //               color: Colors.white,
-                                      //               border: Border.all(
-                                      //                 color:
-                                      //                     Colors.grey.shade400,
-                                      //                 width: 1.2,
-                                      //               ),
-                                      //               borderRadius:
-                                      //                   BorderRadius.circular(
-                                      //                     12,
-                                      //                   ),
-                                      //             ),
-                                      //             child: Row(
-                                      //               children: [
-                                      //                 const Icon(
-                                      //                   Icons
-                                      //                       .upload_file_outlined,
-                                      //                   color: Color(
-                                      //                     0xFF073B78,
-                                      //                   ),
-                                      //                   size: 26,
-                                      //                 ),
-                                      //                 const SizedBox(width: 12),
-                                      //                 const Expanded(
-                                      //                   child: Text(
-                                      //                     "Choose Files",
-                                      //                     style: TextStyle(
-                                      //                       fontSize: 16,
-                                      //                       fontWeight:
-                                      //                           FontWeight.w600,
-                                      //                     ),
-                                      //                   ),
-                                      //                 ),
-                                      //                 if (imagePaths.isNotEmpty)
-                                      //                   Container(
-                                      //                     padding:
-                                      //                         const EdgeInsets.symmetric(
-                                      //                           horizontal: 10,
-                                      //                           vertical: 4,
-                                      //                         ),
-                                      //                     decoration: BoxDecoration(
-                                      //                       color: Colors
-                                      //                           .green
-                                      //                           .shade100,
-                                      //                       borderRadius:
-                                      //                           BorderRadius.circular(
-                                      //                             20,
-                                      //                           ),
-                                      //                     ),
-                                      //                     child: Text(
-                                      //                       "${imagePaths.length}",
-                                      //                       style: TextStyle(
-                                      //                         fontSize: 13,
-                                      //                         fontWeight:
-                                      //                             FontWeight
-                                      //                                 .bold,
-                                      //                         color: Colors
-                                      //                             .green
-                                      //                             .shade800,
-                                      //                       ),
-                                      //                     ),
-                                      //                   ),
-                                      //                 const SizedBox(width: 8),
-                                      //                 Icon(
-                                      //                   Icons.chevron_right,
-                                      //                   color: Colors
-                                      //                       .grey
-                                      //                       .shade600,
-                                      //                 ),
-                                      //               ],
-                                      //             ),
-                                      //           ),
-                                      //         ),
-                                      //       ),
-                                      //     ),
-                                      //     Padding(
-                                      //       padding: const EdgeInsets.only(
-                                      //         right: 8.0,
-                                      //         left: 8,
-                                      //       ),
-                                      //       child: SizedBox(
-                                      //         height: 42,
-
-                                      //         child: ElevatedButton(
-                                      //           onPressed: () async {
-                                      //             await submitImage(
-                                      //               imagePaths,
-                                      //               widget.jobNo,
-                                      //             );
-                                      //             setState(() {
-                                      //               isUploadLoading = true;
-                                      //             });
-                                      //           },
-                                      //           style: ElevatedButton.styleFrom(
-                                      //             backgroundColor: Colors.teal,
-                                      //             foregroundColor: Colors.white,
-                                      //             padding:
-                                      //                 const EdgeInsets.symmetric(
-                                      //                   horizontal: 8,
-                                      //                   vertical: 6,
-                                      //                 ), // Reduce padding
-                                      //           ),
-                                      //           child: isUploadLoading
-                                      //               ? progressBar()
-                                      //               : Text("Upload"),
-                                      //         ),
-                                      //       ),
-                                      //     ),
-                                      //   ],
-                                      // ),
                                       Padding(
                                         padding: const EdgeInsets.only(
                                           right: 8.0,
@@ -5480,8 +5279,8 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     final spanItems = allLines.where((item) {
       return addedTypes.add(item["maintTypes"].toString());
     }).toList();
-  // Clear current selection
-  lines.clear();
+    // Clear current selection
+    lines.clear();
     // Initially everything is unchecked
     List<String> tempSelectedTypes = [];
     showDialog(
@@ -7387,7 +7186,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     if (data != null && data.isNotEmpty) {
       final screenHeight = MediaQuery.of(context).size.height;
       final maxChatHeight = screenHeight * 0.30;
-
+      bool isSendButton = false;
       showDialog(
         context: ctx,
         builder: (context) {
@@ -7688,27 +7487,67 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                   SizedBox(
                                     height: 42,
                                     child: ElevatedButton(
-                                      onPressed: () async {
-                                        final comment = chatController.text
-                                            .trim();
+                                      onPressed: isSendButton
+                                          ? null
+                                          : () async {
+                                              setDialogState(() {
+                                                isSendButton = true;
+                                              });
 
-                                        if (comment.isEmpty) {
-                                          return;
-                                        }
+                                              try {
+                                                final comment = chatController
+                                                    .text
+                                                    .trim();
 
-                                        final data = {
-                                          "mapLocation": mapLocation.toString(),
-                                          "description": comment,
-                                          "userId": id.toString(),
-                                        };
+                                                if (comment.isEmpty) {
+                                                  return;
+                                                }
 
-                                        await updateCommentData(data, () {
-                                          setDialogState(() {});
-                                        });
-                                      },
+                                                final data = {
+                                                  "mapLocation": mapLocation
+                                                      .toString(),
+                                                  "description": comment,
+                                                  "userId": id.toString(),
+                                                };
+
+                                                await updateCommentData(
+                                                  data,
+                                                  () {
+                                                    setDialogState(() {});
+                                                  },
+                                                );
+                                              } finally {
+                                                if (mounted) {
+                                                  setDialogState(() {
+                                                    isSendButton = false;
+                                                  });
+                                                }
+                                              }
+                                            },
+
+                                      // onPressed: () async {
+                                      //   final comment = chatController.text
+                                      //       .trim();
+
+                                      //   if (comment.isEmpty) {
+                                      //     return;
+                                      //   }
+
+                                      //   final data = {
+                                      //     "mapLocation": mapLocation.toString(),
+                                      //     "description": comment,
+                                      //     "userId": id.toString(),
+                                      //   };
+
+                                      //   await updateCommentData(data, () {
+                                      //     setDialogState(() {});
+                                      //   });
+                                      // },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.teal,
                                         foregroundColor: Colors.white,
+                                        disabledBackgroundColor: Colors.teal,
+                                        disabledForegroundColor: Colors.white,
                                       ),
                                       child: const Text("Send"),
                                     ),

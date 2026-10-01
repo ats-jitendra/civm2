@@ -213,7 +213,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     _initializeMap();
     WakelockPlus.enable();
     /////
-    cameraInit();
+      cameraInit();
     _startListeningToCompass();
   }
 
@@ -530,7 +530,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                 ? "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
                                 //"https://tile.openstreetmap.de/{z}/{x}/{y}.png"
                                 : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-                            
+
                             userAgentPackageName: "com.ariespro.civm2",
                           ),
                           if (showSubstationLayer)
@@ -678,16 +678,14 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                     Polyline(
                                       points: polyline.points,
                                       strokeWidth: 12,
-                                     // color: polyline.originalColor,
+                                      // color: polyline.originalColor,
                                       ////lightenColor color bug fix(01-10-2026)
-                                          color:
-                                              selectedPolylineIndexes.contains(
-                                                entry.key,
-                                              )
-                                              ? lightenColor(
-                                                  polyline.originalColor,
-                                                )
-                                              : polyline.originalColor,
+                                      color:
+                                          selectedPolylineIndexes.contains(
+                                            entry.key,
+                                          )
+                                          ? lightenColor(polyline.originalColor)
+                                          : polyline.originalColor,
                                     ),
                                   ];
                                 }
@@ -798,11 +796,10 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                           //-------------------------
                           if (showUnderGroundLayer)
                             PolylineLayer(polylines: underGroundPolylines),
-                        
+
                           if (showConsumerLayer)
                             MarkerLayer(markers: consumerMarkers),
-                             if (showPoleLayer)
-                                MarkerLayer(markers: poleMarkers),
+                          if (showPoleLayer) MarkerLayer(markers: poleMarkers),
                           MarkerLayer(markers: _markers),
                           MarkerLayer(markers: completedMarkers),
                           MarkerLayer(markers: chatMarkers),
@@ -1625,7 +1622,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
         // final Color lineColor = maintType.isNotEmpty
         //     ? lightenColor(polylineColor)
         //     : polylineColor;
-         //////////// //////////////////////////////////added20-8-2026
+        //////////// //////////////////////////////////added20-8-2026
         // Always keep the actual original feeder color.
         // final Color lineColor = polylineColor;
         // service = 1 -> Black
@@ -1737,7 +1734,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
           Polyline(
             points: parseLineString(wkt),
             strokeWidth: 8,
-            color:row["service"] == "1" ? Colors.black : undergroundColor,
+            color: row["service"] == "1" ? Colors.black : undergroundColor,
             pattern: StrokePattern.dashed(segments: [5, 10]),
           ),
         );
@@ -3046,6 +3043,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
         print(' selectedMaintStatus $selectedMaintStatus');
       }
     }
+    bool isSendButton = false;
     try {
       await showDialog(
         context: context,
@@ -3434,196 +3432,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                             ],
                           ),
                         const SizedBox(height: 8),
-                        // if (showUpdateCardView)
-                        //   Container(
-                        //     width: double.infinity,
-                        //     // margin: const EdgeInsets.all(10),
-                        //     padding: const EdgeInsets.all(6),
-                        //     decoration: BoxDecoration(
-                        //       color: Colors.white,
-                        //       // color: const Color.fromARGB(255, 238, 241, 243),
-                        //       borderRadius: BorderRadius.circular(14),
-                        //       border: const Border(
-                        //         left: BorderSide(
-                        //           color: Color.fromARGB(
-                        //             255,
-                        //             7,
-                        //             59,
-                        //             120,
-                        //           ), // your border color
-                        //           width: 5, // border thickness
-                        //         ),
-                        //       ),
-                        //     ),
-                        //     child: Column(
-                        //       children: [
-                        //         Row(
-                        //           crossAxisAlignment: CrossAxisAlignment.start,
-                        //           children: [
-                        //             Expanded(
-                        //               child: _detailRow(
-                        //                 "Maint Type",
-                        //                 selectedMaintType,
-                        //                 //  selectedWorkTypesUpdate.join(", "),
-                        //               ),
-                        //             ),
-                        //             Expanded(
-                        //               child: _detailRow(
-                        //                 "Job No",
-                        //                 overHeadPolylines[index].jobNo,
-                        //               ),
-                        //             ),
-                        //           ],
-                        //         ),
-                        //         Row(
-                        //           crossAxisAlignment: CrossAxisAlignment.start,
-                        //           children: [
-                        //             Expanded(
-                        //               child: _detailRow(
-                        //                 "Distance",
-                        //                 "${overHeadPolylines[index].spanDistanceApi.toString()} miles",
-                        //               ),
-                        //             ),
-                        //             const SizedBox(height: 4),
-                        //             Expanded(
-                        //               child: _detailRow(
-                        //                 "Total Distance",
-                        //                 "${overHeadPolylines[index].totalMilesApi.toString()} miles",
-                        //               ),
-                        //             ),
-                        //           ],
-                        //         ),
 
-                        //         Row(
-                        //           crossAxisAlignment: CrossAxisAlignment.start,
-                        //           children: [
-                        //             Expanded(
-                        //               child: _detailRow(
-                        //                 "Create Date",
-                        //                 formatDate(
-                        //                   overHeadPolylines[index].createDate,
-                        //                 ),
-                        //               ),
-                        //             ),
-                        //             const SizedBox(height: 4),
-                        //             Expanded(
-                        //               child: _detailRow(
-                        //                 "Span Name",
-                        //                 overHeadPolylines[index].elementName,
-                        //               ),
-                        //             ),
-                        //           ],
-                        //         ),
-                        //         Row(
-                        //           crossAxisAlignment: CrossAxisAlignment.start,
-                        //           children: [
-                        //             Expanded(
-                        //               child: _detailRow(
-                        //                 "Status",
-                        //                 selectedMaintStatus,
-                        //                 // overHeadPolylines[index].maintStatus,
-                        //               ),
-                        //             ),
-                        //             const SizedBox(height: 4),
-                        //             Expanded(child: Container()),
-                        //             // Expanded(
-                        //             //   child: _detailRow(
-                        //             //     "",
-                        //             //     "",
-                        //             //     // overHeadPolylines[index].elementName,
-                        //             //   ),
-                        //             // ),
-                        //           ],
-                        //         ),
-                        //         if (selectedMaintStatus == 'Final Completed')
-                        //           Wrap(
-                        //             spacing: 5,
-                        //             runSpacing: 10,
-                        //             children: [
-                        //               ElevatedButton.icon(
-                        //                 onPressed: () {
-                        //                   showFailedDialog(
-                        //                     overHeadPolylines[index]
-                        //                         .coordinateIds,
-                        //                     overHeadPolylines[index].maintType,
-                        //                     overHeadPolylines[index]
-                        //                         .completedByCrewId,
-                        //                     overHeadPolylines[index].maintStatus,
-                        //                   );
-                        //                 },
-                        //                 style: ElevatedButton.styleFrom(
-                        //                   backgroundColor: const Color.fromARGB(
-                        //                     255,
-                        //                     222,
-                        //                     19,
-                        //                     4,
-                        //                   ),
-                        //                   foregroundColor: Colors.white,
-                        //                   padding: const EdgeInsets.symmetric(
-                        //                     vertical: 12,
-                        //                     horizontal: 18,
-                        //                   ),
-                        //                   shape: RoundedRectangleBorder(
-                        //                     borderRadius: BorderRadius.circular(
-                        //                       5,
-                        //                     ),
-                        //                   ),
-                        //                 ),
-                        //                 icon: const Icon(
-                        //                   Icons.warning_amber_rounded,
-                        //                   color: Colors.white,
-                        //                 ),
-                        //                 label: const Text(
-                        //                   "Failed",
-                        //                   style: TextStyle(
-                        //                     fontWeight: FontWeight.bold,
-                        //                     color: Colors.white,
-                        //                   ),
-                        //                 ),
-                        //               ),
-                        //               const SizedBox(width: 12),
-                        //               ElevatedButton.icon(
-                        //                 onPressed: () {
-                        //                   showPassedDialog(
-                        //                     overHeadPolylines[index]
-                        //                         .coordinateIds,
-                        //                     overHeadPolylines[index].maintType,
-                        //                     overHeadPolylines[index]
-                        //                         .completedByCrewId,
-                        //                     overHeadPolylines[index].maintStatus,
-                        //                   );
-                        //                 },
-                        //                 style: ElevatedButton.styleFrom(
-                        //                   backgroundColor: const Color.fromARGB(
-                        //                     255,
-                        //                     22,
-                        //                     138,
-                        //                     26,
-                        //                   ),
-                        //                   foregroundColor: Colors.white,
-                        //                   padding: const EdgeInsets.symmetric(
-                        //                     vertical: 12,
-                        //                     horizontal: 18,
-                        //                   ),
-                        //                   shape: RoundedRectangleBorder(
-                        //                     borderRadius: BorderRadius.circular(
-                        //                       5,
-                        //                     ),
-                        //                   ),
-                        //                 ),
-                        //                 icon: const Icon(Icons.check),
-                        //                 label: const Text(
-                        //                   "Passed",
-                        //                   style: TextStyle(
-                        //                     fontWeight: FontWeight.bold,
-                        //                   ),
-                        //                 ),
-                        //               ),
-                        //             ],
-                        //           ),
-                        //       ],
-                        //     ),
-                        //   ),
                         if (showUpdateCardView)
                           LayoutBuilder(
                             builder: (context, constraints) {
@@ -3910,30 +3719,56 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                       child: SizedBox(
                                         height: 42,
                                         child: ElevatedButton(
-                                          onPressed: () async {
-                                            if (chatController.text
-                                                .trim()
-                                                .isEmpty) {
-                                              return;
-                                            }
+                                          onPressed: isSendButton
+                                              ? null
+                                              : () async {
+                                                  setDialogState(() {
+                                                    isSendButton = true;
+                                                  });
 
-                                            final data = {
-                                              "lineId":
-                                                  overHeadPolylines[index].oid,
-                                              "description": chatController.text
-                                                  .trim(),
-                                              "userId": id.toString(),
-                                            };
-                                            // showLoader(context);
-                                            await updateMessageData(data, () {
-                                              setDialogState(() {});
-                                            });
-                                          },
+                                                  try {
+                                                    if (chatController.text
+                                                        .trim()
+                                                        .isEmpty) {
+                                                      return;
+                                                    }
+
+                                                    final data = {
+                                                      "lineId":
+                                                          overHeadPolylines[index]
+                                                              .oid,
+                                                      "description":
+                                                          chatController.text
+                                                              .trim(),
+                                                      "userId": id.toString(),
+                                                    };
+                                                    // showLoader(context);
+                                                    await updateMessageData(
+                                                      data,
+                                                      () {
+                                                        setDialogState(() {});
+                                                      },
+                                                    );
+                                                  } finally {
+                                                    if (mounted) {
+                                                      setDialogState(() {
+                                                        isSendButton = false;
+                                                      });
+                                                    }
+                                                  }
+                                                },
+
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.teal,
                                             foregroundColor: Colors.white,
+                                            disabledBackgroundColor:
+                                                Colors.teal,
+                                            disabledForegroundColor:
+                                                Colors.white,
                                           ),
-                                          child: const Text("Send"),
+                                          child: isSendButton
+                                              ? progressBar()
+                                              : const Text("Send"),
                                         ),
                                       ),
                                     ),
@@ -4517,9 +4352,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     if (!connectivity.contains(ConnectivityResult.none)) {
       try {
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/createMap",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/createMap"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
@@ -4624,9 +4457,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     if (!connectivity.contains(ConnectivityResult.none)) {
       try {
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/updateJobStatus",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/updateJobStatus"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
@@ -5038,7 +4869,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     switch (color.toUpperCase().trim()) {
       case "JARRAFF":
         return Colors.purple;
-       // return const Color.fromARGB(255, 96, 0, 113);
+      // return const Color.fromARGB(255, 96, 0, 113);
       case "MINI JARRAFF":
         return const Color.fromARGB(255, 247, 19, 2);
       case "NO SPRAY":
@@ -6853,9 +6684,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
         print(jsonEncode(body));
 
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/createChangeOrder",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/createChangeOrder"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
@@ -7688,7 +7517,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     if (data != null && data.isNotEmpty) {
       final screenHeight = MediaQuery.of(context).size.height;
       final maxChatHeight = screenHeight * 0.30;
-
+      bool isSendButton = false;
       showDialog(
         context: ctx,
         builder: (context) {
@@ -7989,29 +7818,53 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                   SizedBox(
                                     height: 42,
                                     child: ElevatedButton(
-                                      onPressed: () async {
-                                        final comment = chatController.text
-                                            .trim();
+                                      onPressed: isSendButton
+                                          ? null
+                                          : () async {
+                                              setDialogState(() {
+                                                isSendButton = true;
+                                              });
 
-                                        if (comment.isEmpty) {
-                                          return;
-                                        }
+                                              try {
+                                                final comment = chatController
+                                                    .text
+                                                    .trim();
 
-                                        final data = {
-                                          "mapLocation": mapLocation.toString(),
-                                          "description": comment,
-                                          "userId": id.toString(),
-                                        };
+                                                if (comment.isEmpty) {
+                                                  return;
+                                                }
 
-                                        await updateCommentData(data, () {
-                                          setDialogState(() {});
-                                        });
-                                      },
+                                                final data = {
+                                                  "mapLocation": mapLocation
+                                                      .toString(),
+                                                  "description": comment,
+                                                  "userId": id.toString(),
+                                                };
+
+                                                await updateCommentData(
+                                                  data,
+                                                  () {
+                                                    setDialogState(() {});
+                                                  },
+                                                );
+                                              } finally {
+                                                if (mounted) {
+                                                  setDialogState(() {
+                                                    isSendButton = false;
+                                                  });
+                                                }
+                                              }
+                                            },
+
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.teal,
                                         foregroundColor: Colors.white,
+                                        disabledBackgroundColor: Colors.teal,
+                                        disabledForegroundColor: Colors.white,
                                       ),
-                                      child: const Text("Send"),
+                                      child: isSendButton
+                                          ? progressBar()
+                                          : const Text("Send"),
                                     ),
                                   ),
                                 ],
@@ -8043,7 +7896,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     double latitude,
     double longitude,
   ) async {
-     String baseUrl =
+    String baseUrl =
         '${AppUrl.baseUrl}supervisorLoginPanel/getDataByLatitudeLongitude';
     final Uri url = Uri.parse(
       '$baseUrl?latitude=$latitude&longitude=$longitude',
@@ -8133,8 +7986,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
   Future<dynamic> getDataByNameAndAccountNumber(String accOrName) async {
     //102114900
     print('inside getDataByNameAndAccountNumber');
-     String endpoint =
-        "${AppUrl.baseUrl}supervisorLoginPanel/suggestions";
+    String endpoint = "${AppUrl.baseUrl}supervisorLoginPanel/suggestions";
     final Uri url = Uri.parse(
       "$endpoint?searchTerm=$accOrName&substation=$selectedSubstation",
     );
@@ -8415,9 +8267,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     if (!connectivity.contains(ConnectivityResult.none)) {
       try {
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/addComment",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/addComment"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
