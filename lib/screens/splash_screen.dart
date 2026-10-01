@@ -22,8 +22,8 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Constants.prefs.setString("VERSION", '1.0.80');
-    Constants.prefs.setString("VERSION_DATE", '09/22/2026');
+    Constants.prefs.setString("VERSION", '1.0.1');
+    Constants.prefs.setString("VERSION_DATE", '10/01/2026');
     splashServices.checkAuthentication(context);
     listenToConnectivity();
   }
