@@ -41,6 +41,7 @@ class MapScreenGF extends StatefulWidget {
   String visibilityFlag;
   String type;
   String sourcePage;
+  String crew;
   MapScreenGF({
     super.key,
     required this.jobNo,
@@ -49,6 +50,7 @@ class MapScreenGF extends StatefulWidget {
     required this.visibilityFlag,
     required this.type,
     required this.sourcePage,
+    required this.crew
   });
 
   @override
@@ -414,6 +416,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                       context,
                       widget.jobNo.toString(),
                       widget.type.toString(),
+                      widget.crew.toString()
                     );
                   },
                 )
@@ -424,6 +427,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                       context,
                       widget.jobNo.toString(),
                       widget.type.toString(),
+                      widget.crew.toString()
                     );
                   },
                 ),
@@ -3333,6 +3337,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
   bool _isPolylineModalOpen = false;
   bool allPending = false;
   void _showDetailsPopupUpdate(int index) async {
+    bool isSendButton = false;
     // Prevent opening multiple modals
     if (_isPolylineModalOpen) {
       return;
@@ -4374,8 +4379,15 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                       child: SizedBox(
                                         height: 42,
                                         child: ElevatedButton(
-                                          onPressed: () async {
-                                            if (chatController.text
+                                             onPressed: isSendButton
+                                  ? null
+                                  : () async {
+                                      setDialogState(() {
+                                        isSendButton = true;
+                                      });
+
+                                      try {
+                                        if (chatController.text
                                                 .trim()
                                                 .isEmpty) {
                                               return;
@@ -4392,12 +4404,22 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                             await updateMessageData(data, () {
                                               setDialogState(() {});
                                             });
-                                          },
+                                      } finally {
+                                        if (mounted) {
+                                          setDialogState(() {
+                                            isSendButton = false;
+                                          });
+                                        }
+                                      }},
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.teal,
                                             foregroundColor: Colors.white,
+                                            disabledBackgroundColor: Colors.teal,
+                                            disabledForegroundColor: Colors.white,
                                           ),
-                                          child: const Text("Send"),
+                                          child: isSendButton
+                                                  ? progressBar()
+                                                  : const Text("Send"),
                                         ),
                                       ),
                                     ),
@@ -8360,6 +8382,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
       await DatabaseHelper.instance.fetchAndSaveCommentHistory(mapLocation);
     }
     commentsData = await DatabaseHelper.instance.getCommentHistory(mapLocation);
+    bool isSendButton = false;
     showDialog(
       context: ctx,
       barrierDismissible: false, // Prevent dismissing while loading
@@ -8696,8 +8719,15 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                   SizedBox(
                                     height: 42,
                                     child: ElevatedButton(
-                                      onPressed: () async {
-                                        final comment = chatController.text
+                                         onPressed: isSendButton
+                                  ? null
+                                  : () async {
+                                      setDialogState(() {
+                                        isSendButton = true;
+                                      });
+
+                                      try {
+                                         final comment = chatController.text
                                             .trim();
 
                                         if (comment.isEmpty) {
@@ -8713,12 +8743,22 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                         await updateCommentData(data, () {
                                           setDialogState(() {});
                                         });
-                                      },
+                                      } finally {
+                                        if (mounted) {
+                                          setDialogState(() {
+                                            isSendButton = false;
+                                          });
+                                        }
+                                      }},
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.teal,
                                         foregroundColor: Colors.white,
+                                        disabledBackgroundColor: Colors.teal,
+                                        disabledForegroundColor: Colors.white,
                                       ),
-                                      child: const Text("Send"),
+                                      child: isSendButton
+                                                  ? progressBar()
+                                                  : const Text("Send"),
                                     ),
                                   ),
                                 ],
@@ -9245,6 +9285,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
     BuildContext context,
     String tokenNo,
     String type,
+    String? crewName,
   ) async {
     await fetchCrewListShare(); // Fetch crew list before showing the dialog
 
@@ -9252,6 +9293,51 @@ class _MapScreenGFState extends State<MapScreenGF> {
     String? errorMessage; // To show validation error message
     _workOrder.text = '${tokenNo} - ${type}';
     print('_workOrder.text ${_workOrder.text}');
+
+    ///////////////////new added on 01oct2026////////////////
+  List<String> dialogSelectedCrewList = [];
+
+  if (crewName != null &&
+      crewName.trim().isNotEmpty &&
+      crewName.trim().toLowerCase() != "null") {
+   
+   final existingCrewIds = crewName
+    .split(',')
+    .map((e) => e.trim())
+    .where((e) => e.isNotEmpty)
+    .toList();
+
+print("crewName from item: $crewName");
+print("Existing Crew IDs: $existingCrewIds");
+
+for (final crew in crewList) {
+  if (existingCrewIds.contains(
+        crew["id"].toString(),
+      ) ||
+      existingCrewIds.contains(
+        crew["loginId"].toString(),
+      )) {
+    
+    final loginId = crew["loginId"].toString();
+
+    dialogSelectedCrewList.add(loginId);
+
+    print(
+      "MATCH FOUND => "
+      "id: ${crew["id"]}, "
+      "loginId: $loginId, "
+      "name: ${crew["name"]}",
+    );
+  }
+}
+  }
+
+  print("crewName from item: $crewName");
+  print("Matched selected crew IDs: $dialogSelectedCrewList");
+
+  selectedCrewList = List<String>.from(dialogSelectedCrewList);
+  selectedCrewLoginID = dialogSelectedCrewList.join(",");
+  ////////////////////////////////////////////////////////////////
     showDialog(
       context: context,
       builder: (BuildContext dialogContext) {
@@ -9332,6 +9418,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                 ),
                               ),
                               MultiSelectDialogField(
+                                initialValue: selectedCrewList,
                                 items: crewList.map((crew) {
                                   return MultiSelectItem<String>(
                                     crew["loginId"].toString(),
@@ -9342,7 +9429,6 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                 title: const Text("Select Crew"),
                                 // selectedColor: Colors.blue,
                                 decoration: BoxDecoration(
-                                  color: Colors.white,
                                   //  borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
                                     color: Color.fromARGB(255, 7, 59, 120),

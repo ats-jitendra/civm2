@@ -448,7 +448,8 @@ class _GFIvmAllStatusJobDetailsScreenState
                                                 feeder: item!.fdrName!.split('(').first.trim(),
                                                 visibilityFlag: item!.visibilityFlag.toString(),
                                                 type: item!.type.toString(),
-                                                 sourcePage: '',
+                                                sourcePage: '',
+                                                crew: item!.crew.toString(),
                                               ),
                                         ),
                                       );

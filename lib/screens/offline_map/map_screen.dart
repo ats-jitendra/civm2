@@ -188,7 +188,7 @@ class _MapScreenState extends State<MapScreen> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-     ensureCameraInitialized();
+    ensureCameraInitialized();
     _startListeningToCompass();
     /////
   }
@@ -2987,6 +2987,7 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   void _showDetailsPopup(int index) async {
+    bool isSavingMapData = false;
     final Map<String, Color> workTypeColors = {
       "JARRAFF": const Color.fromARGB(255, 96, 0, 113),
       "MOWING": const Color.fromARGB(255, 113, 68, 1),
@@ -3364,12 +3365,24 @@ class _MapScreenState extends State<MapScreen> {
                       Row(
                         children: [
                           SizedBox(
-                            //width: double.infinity,
                             child: InkWell(
-                              onTap: () async {
-                                await submitMapData(selectedMapObjects);
-                                // Navigator.pop(context);
-                              },
+                              onTap: isSavingMapData
+                                  ? null
+                                  : () async {
+                                      setDialogState(() {
+                                        isSavingMapData = true;
+                                      });
+
+                                      try {
+                                        await submitMapData(selectedMapObjects);
+                                      } finally {
+                                        if (mounted) {
+                                          setDialogState(() {
+                                            isSavingMapData = false;
+                                          });
+                                        }
+                                      }
+                                    },
                               borderRadius: BorderRadius.circular(8),
                               child: Container(
                                 height: 40,
@@ -3379,14 +3392,26 @@ class _MapScreenState extends State<MapScreen> {
                                   color: Colors.green,
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: const Text(
-                                  "Save",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
+                                child: isSavingMapData
+                                    ? const SizedBox(
+                                        height: 22,
+                                        width: 22,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2.5,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                        ),
+                                      )
+                                    : const Text(
+                                        "Save",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
                               ),
                             ),
                           ),
@@ -3442,7 +3467,7 @@ class _MapScreenState extends State<MapScreen> {
     if (_isPolylineModalOpen) {
       return;
     }
-
+    bool isSendButton = false;
     _isPolylineModalOpen = true;
     chatController.clear();
     final screenHeight = MediaQuery.of(context).size.height;
@@ -3985,8 +4010,15 @@ class _MapScreenState extends State<MapScreen> {
                                       child: SizedBox(
                                         height: 42,
                                         child: ElevatedButton(
-                                          onPressed: () async {
-                                            if (chatController.text
+                                           onPressed: isSendButton
+                                  ? null
+                                  : () async {
+                                      setDialogState(() {
+                                        isSendButton = true;
+                                      });
+
+                                      try {
+                                        if (chatController.text
                                                 .trim()
                                                 .isEmpty) {
                                               return;
@@ -4003,12 +4035,22 @@ class _MapScreenState extends State<MapScreen> {
                                             await updateMessageData(data, () {
                                               setDialogState(() {});
                                             });
-                                          },
+                                      } finally {
+                                        if (mounted) {
+                                          setDialogState(() {
+                                            isSendButton = false;
+                                          });
+                                        }
+                                      }},
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.teal,
                                             foregroundColor: Colors.white,
+                                            disabledBackgroundColor: Colors.teal,
+                                         disabledForegroundColor: Colors.white,
                                           ),
-                                          child: const Text("Send"),
+                                          child: isSendButton
+                                                  ? progressBar()
+                                                  : const Text("Send"),
                                         ),
                                       ),
                                     ),
@@ -4978,17 +5020,20 @@ class _MapScreenState extends State<MapScreen> {
                               ),
                             ),
                             InkWell(
-                              borderRadius: BorderRadius.circular(20),
-                              onTap: () => Navigator.pop(context),
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                child: const Icon(
-                                  Icons.close,
-                                  color: Colors.grey,
-                                  size: 24,
-                                ),
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            borderRadius: BorderRadius.circular(20),
+                            child: const Padding(
+                              padding: EdgeInsets.all(4),
+                              child: Icon(
+                                Icons.cancel_presentation_sharp,
+                                color: Colors.red,
+                                size: 22,
                               ),
                             ),
+                          ),
+                          
                           ],
                         ),
                       ),
@@ -5891,6 +5936,7 @@ class _MapScreenState extends State<MapScreen> {
     String mapLocation,
     String hasComment,
   ) async {
+    bool isSendButton = false;
     final connectivityResult = await Connectivity().checkConnectivity();
     if (!connectivityResult.contains(ConnectivityResult.none)) {
       await DatabaseHelper.instance.fetchAndSaveCommentHistory(mapLocation);
@@ -6232,7 +6278,14 @@ class _MapScreenState extends State<MapScreen> {
                                   SizedBox(
                                     height: 42,
                                     child: ElevatedButton(
-                                      onPressed: () async {
+                                       onPressed: isSendButton
+                                  ? null
+                                  : () async {
+                                      setDialogState(() {
+                                        isSendButton = true;
+                                      });
+
+                                      try {
                                         final comment = chatController.text
                                             .trim();
 
@@ -6249,12 +6302,23 @@ class _MapScreenState extends State<MapScreen> {
                                         await updateCommentData(data, () {
                                           setDialogState(() {});
                                         });
-                                      },
+                                      } finally {
+                                        if (mounted) {
+                                          setDialogState(() {
+                                            isSendButton = false;
+                                          });
+                                        }
+                                      }},
+                                      
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.teal,
                                         foregroundColor: Colors.white,
+                                        disabledBackgroundColor: Colors.teal,
+                                         disabledForegroundColor: Colors.white,
                                       ),
-                                      child: const Text("Send"),
+                                      child: isSendButton
+                                                  ? progressBar()
+                                                  : const Text("Send"),
                                     ),
                                   ),
                                   SizedBox(width: 8),

@@ -41,6 +41,7 @@ class MapScreenPlanner extends StatefulWidget {
   String feeder;
   String visibilityFlag;
   String type;
+  String crew;
   MapScreenPlanner({
     super.key,
     required this.jobNo,
@@ -48,6 +49,7 @@ class MapScreenPlanner extends StatefulWidget {
     required this.feeder,
     required this.visibilityFlag,
     required this.type,
+    required this.crew,
   });
 
   @override
@@ -414,6 +416,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                       context,
                       widget.jobNo.toString(),
                       widget.type.toString(),
+                      widget.crew.toString(),
                     );
                   },
                 )
@@ -424,6 +427,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                       context,
                       widget.jobNo.toString(),
                       widget.type.toString(),
+                      widget.crew.toString(),
                     );
                   },
                 ),
@@ -3337,6 +3341,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
   bool _isPolylineModalOpen = false;
   bool allPending = false;
   void _showDetailsPopupUpdate(int index) async {
+    bool isSendButton = false;
     // Prevent opening multiple modals
     if (_isPolylineModalOpen) {
       return;
@@ -4219,8 +4224,15 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                       child: SizedBox(
                                         height: 42,
                                         child: ElevatedButton(
-                                          onPressed: () async {
-                                            if (chatController.text
+                                          onPressed: isSendButton
+                                  ? null
+                                  : () async {
+                                      setDialogState(() {
+                                        isSendButton = true;
+                                      });
+
+                                      try {
+                                         if (chatController.text
                                                 .trim()
                                                 .isEmpty) {
                                               return;
@@ -4237,12 +4249,23 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                             await updateMessageData(data, () {
                                               setDialogState(() {});
                                             });
-                                          },
+                                      } finally {
+                                        if (mounted) {
+                                          setDialogState(() {
+                                            isSendButton = false;
+                                          });
+                                        }
+                                      }},
+                                          
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.teal,
                                             foregroundColor: Colors.white,
+                                            disabledBackgroundColor: Colors.teal,
+                                         disabledForegroundColor: Colors.white,
                                           ),
-                                          child: const Text("Send"),
+                                          child: isSendButton
+                                                  ? progressBar()
+                                                  :const Text("Send"),
                                         ),
                                       ),
                                     ),
@@ -5807,6 +5830,9 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
 
         // Handle the success response
       } else {
+         ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Failed to submit images.")),
+        );
         print("Failed to submit images. Status code: ${response.statusCode}");
         print("Failed to submit images. response body: ${response.body}");
       }
@@ -5884,18 +5910,20 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                 ),
                               ),
                             ),
-                            InkWell(
-                              borderRadius: BorderRadius.circular(20),
-                              onTap: () => Navigator.pop(context),
-                              child: Container(
-                                padding: const EdgeInsets.all(6),
-                                child: const Icon(
-                                  Icons.close,
-                                  color: Colors.grey,
-                                  size: 24,
-                                ),
+                              InkWell(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            borderRadius: BorderRadius.circular(20),
+                            child: const Padding(
+                              padding: EdgeInsets.all(4),
+                              child: Icon(
+                                Icons.cancel_presentation_sharp,
+                                color: Colors.red,
+                                size: 22,
                               ),
                             ),
+                          ),
                           ],
                         ),
                       ),
@@ -6558,6 +6586,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
       await DatabaseHelper.instance.fetchAndSaveCommentHistory(mapLocation);
     }
     commentsData = await DatabaseHelper.instance.getCommentHistory(mapLocation);
+    bool isSendButton = false;
     showDialog(
       context: ctx,
       barrierDismissible: false, // Prevent dismissing while loading
@@ -6894,7 +6923,14 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                   SizedBox(
                                     height: 42,
                                     child: ElevatedButton(
-                                      onPressed: () async {
+                                       onPressed: isSendButton
+                                  ? null
+                                  : () async {
+                                      setDialogState(() {
+                                        isSendButton = true;
+                                      });
+
+                                      try {
                                         final comment = chatController.text
                                             .trim();
 
@@ -6911,12 +6947,22 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                         await updateCommentData(data, () {
                                           setDialogState(() {});
                                         });
-                                      },
+                                      } finally {
+                                        if (mounted) {
+                                          setDialogState(() {
+                                            isSendButton = false;
+                                          });
+                                        }
+                                      }},
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.teal,
                                         foregroundColor: Colors.white,
+                                        disabledBackgroundColor: Colors.teal,
+                                        disabledForegroundColor: Colors.white,
                                       ),
-                                      child: const Text("Send"),
+                                      child: isSendButton
+                                                  ? progressBar()
+                                                  : const Text("Send"),
                                     ),
                                   ),
                                 ],
@@ -7320,308 +7366,392 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
 
   bool isSubmitting = false; // loader state for YES button
   List<String> selectedCrewList = [];
-  void showCrewDialogIVM(
-    BuildContext context,
-    String tokenNo,
-    String type,
-  ) async {
-    await fetchCrewListShare(); // Fetch crew list before showing the dialog
+   void showCrewDialogIVM(
+  BuildContext context,
+  String tokenNo,
+  String type,
+  String? crewName,
+) async {
+  await fetchCrewListShare();
 
-    // String? selectedCrew; // Local state for dropdown selection
-    String? errorMessage; // To show validation error message
-    _workOrder.text = '${tokenNo} - ${type}';
-    print('_workOrder.text ${_workOrder.text}');
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            return AlertDialog(
-              title: const Text(
-                "SELECT CREW",
-                style: TextStyle(
-                  fontSize: 20.0,
-                  color: Color.fromARGB(255, 7, 59, 120),
-                  fontWeight: FontWeight.bold,
-                ),
+  String? errorMessage;
+
+  _workOrder.text = '$tokenNo - $type';
+
+  // ----------------------------------------------------------
+  // PRESELECT EXISTING CREW
+  // crewName contains loginIds like: "214,215"
+  // ----------------------------------------------------------
+  List<String> dialogSelectedCrewList = [];
+
+  if (crewName != null &&
+      crewName.trim().isNotEmpty &&
+      crewName.trim().toLowerCase() != "null") {
+    final existingCrewIds = crewName
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    print("crewName from item: $crewName");
+    print("Existing Crew IDs: $existingCrewIds");
+
+    dialogSelectedCrewList = crewList
+        .where(
+          (crew) => existingCrewIds.contains(
+            crew["loginId"].toString(),
+          ),
+        )
+        .map(
+          (crew) => crew["loginId"].toString(),
+        )
+        .toList();
+
+    print("Matched selected crew IDs: $dialogSelectedCrewList");
+
+    // Keep the selected values in your existing variables
+    selectedCrewList = List<String>.from(dialogSelectedCrewList);
+    selectedCrewLoginID = dialogSelectedCrewList.join(",");
+
+    // Get crew names
+    crewNames = crewList
+        .where(
+          (crew) => dialogSelectedCrewList.contains(
+            crew["loginId"].toString(),
+          ),
+        )
+        .map(
+          (crew) => crew["name"].toString(),
+        )
+        .join(", ");
+
+    print("Selected Crew Names: $crewNames");
+    print("Selected Crew Login IDs: $selectedCrewLoginID");
+  } else {
+    selectedCrewList = [];
+    selectedCrewLoginID = "";
+    crewNames = "";
+  }
+
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (BuildContext dialogContext) {
+      return StatefulBuilder(
+        builder: (context, setStateDialog) {
+          return AlertDialog(
+            title: const Text(
+              "SELECT CREW",
+              style: TextStyle(
+                fontSize: 20.0,
+                color: Color.fromARGB(255, 7, 59, 120),
+                fontWeight: FontWeight.bold,
               ),
-              content: isLoadingIVM
-                  ? const Center(child: CircularProgressIndicator())
-                  : Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Align(
+            ),
+            content: isLoadingIVM
+                ? const Center(
+                    child: CircularProgressIndicator(),
+                  )
+                : Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "WORK ORDER",
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            color: Color.fromARGB(255, 7, 59, 120),
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: TextFormField(
+                            enabled: false,
+                            controller: _workOrder,
+                            style: const TextStyle(
+                              color: Color.fromARGB(255, 7, 59, 120),
+                              fontSize: 16,
+                            ),
+                            keyboardType:
+                                const TextInputType.numberWithOptions(
+                              decimal: true,
+                              signed: false,
+                            ),
+                            decoration: const InputDecoration(
+                              border: OutlineInputBorder(),
+                              disabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Color.fromARGB(255, 7, 59, 120),
+                                ),
+                              ),
+                              hintText: '',
+                            ),
+                            maxLines: null,
+                            minLines: 1,
+                            expands: false,
+                          ),
+                        ),
+                      ),
+
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8.0),
+                        child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            "WORK ORDER",
+                            "SHARE WITH*",
                             style: TextStyle(
-                              fontSize: 16.0,
+                              fontSize: 16,
                               color: Color.fromARGB(255, 7, 59, 120),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: TextFormField(
-                              enabled: false,
-                              controller: _workOrder,
-                              style: const TextStyle(
-                                color: Color.fromARGB(255, 7, 59, 120),
-                                fontSize: 16,
-                              ),
-                              obscureText: false,
-                              // keyboardType:
-                              //     TextInputType.number,
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                    signed: false,
-                                  ),
-                              decoration: const InputDecoration(
-                                border: OutlineInputBorder(),
-                                disabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Color.fromARGB(255, 7, 59, 120),
-                                  ),
-                                ),
-                                hintText: '',
-                              ),
-                              maxLines: null,
-                              minLines: 1,
-                              expands: false,
-                            ),
-                          ),
-                        ),
-                        const Padding(
-                          padding: EdgeInsets.only(top: 8.0),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              // "BUDGET TYPE*",
-                              "SHARE WITH*",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 7, 59, 120),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: DropdownButtonFormField<String>(
-                              hint: const Text('-Select-'),
-                              dropdownColor: Colors.white,
-                              value: crewOrGF,
-                              style: const TextStyle(
-                                color: Color.fromARGB(255, 7, 59, 120),
-                                fontSize: 16,
-                              ),
-                              icon: const Icon(
-                                Icons.arrow_drop_down,
-                                color: Color.fromARGB(255, 7, 59, 120),
-                                size: 40,
-                              ),
-                              decoration: const InputDecoration(
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Color.fromARGB(255, 7, 59, 120),
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Color.fromARGB(255, 7, 59, 120),
-                                  ),
-                                ),
-                              ),
-                              isExpanded: true,
-                              items: select_crewOrGF
-                                  .map(buildMenuItem)
-                                  .toList(),
-                              onChanged: (value) {
-                                setStateDialog(() {
-                                  crewOrGF = value!;
-                                  _isVisibleCrewList =
-                                      (crewOrGF ==
-                                      'Crew'); // Correct way to update visibility
-                                });
-                              },
-                              validator: (value) =>
-                                  value == null ? 'field required' : null,
-                            ),
-                          ),
-                        ),
-                        Visibility(
-                          visible: _isVisibleCrewList,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Column(
-                              children: [
-                                const Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    "CREW NAME",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Color.fromARGB(255, 7, 59, 120),
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                MultiSelectDialogField(
-                                  items: crewList.map((crew) {
-                                    return MultiSelectItem<String>(
-                                      crew["loginId"].toString(),
-                                      crew["name"],
-                                    );
-                                  }).toList(),
-                                  listType: MultiSelectListType.CHIP,
-                                  title: const Text("Select Crew"),
-                                  // selectedColor: Colors.blue,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    //  borderRadius: BorderRadius.circular(8),
-                                    border: Border.all(
-                                      color: Color.fromARGB(255, 7, 59, 120),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  buttonIcon: const Icon(
-                                    Icons.arrow_drop_down,
-                                    size: 40,
-                                    color: Color.fromARGB(255, 7, 59, 120),
-                                  ),
-                                  buttonText: const Text(
-                                    "Select Crew",
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 16,
-                                    ),
-                                  ),
+                      ),
 
-                                  onConfirm: (values) {
-                                    setStateDialog(() {
-                                      selectedCrewList = values.cast<String>();
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.all(2.0),
+                          child: DropdownButtonFormField<String>(
+                            hint: const Text('-Select-'),
+                            dropdownColor: Colors.white,
+                            value: crewOrGF,
+                            style: const TextStyle(
+                              color: Color.fromARGB(255, 7, 59, 120),
+                              fontSize: 16,
+                            ),
+                            icon: const Icon(
+                              Icons.arrow_drop_down,
+                              color: Color.fromARGB(255, 7, 59, 120),
+                              size: 40,
+                            ),
+                            decoration: const InputDecoration(
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Color.fromARGB(255, 7, 59, 120),
+                                ),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Color.fromARGB(255, 7, 59, 120),
+                                ),
+                              ),
+                            ),
+                            isExpanded: true,
+                            items: select_crewOrGF
+                                .map(buildMenuItem)
+                                .toList(),
+                            onChanged: (value) {
+                              setStateDialog(() {
+                                crewOrGF = value!;
+                                _isVisibleCrewList = crewOrGF == 'Crew';
+                              });
+                            },
+                            validator: (value) =>
+                                value == null ? 'field required' : null,
+                          ),
+                        ),
+                      ),
 
-                                      errorMessage = null; // Clear error
-                                    });
-                                    selectedCrewLoginID = selectedCrewList.join(
-                                      ",",
+                      Visibility(
+                        visible: _isVisibleCrewList,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: Column(
+                            children: [
+                              const Align(
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  "CREW NAME",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Color.fromARGB(255, 7, 59, 120),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+
+                              MultiSelectDialogField<String>(
+                                items: crewList.map((crew) {
+                                  return MultiSelectItem<String>(
+                                    crew["loginId"].toString(),
+                                    crew["name"].toString(),
+                                  );
+                                }).toList(),
+
+                                // IMPORTANT:
+                                // This preselects existing crew
+                                initialValue: dialogSelectedCrewList,
+
+                                listType: MultiSelectListType.CHIP,
+                                title: const Text("Select Crew"),
+
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: const Color.fromARGB(
+                                      255,
+                                      7,
+                                      59,
+                                      120,
+                                    ),
+                                    width: 1,
+                                  ),
+                                ),
+
+                                buttonIcon: const Icon(
+                                  Icons.arrow_drop_down,
+                                  size: 40,
+                                  color: Color.fromARGB(
+                                    255,
+                                    7,
+                                    59,
+                                    120,
+                                  ),
+                                ),
+
+                                buttonText: const Text(
+                                  "Select Crew",
+                                  style: TextStyle(
+                                    color: Colors.black,
+                                    fontSize: 16,
+                                  ),
+                                ),
+
+                                onConfirm: (values) {
+                                  setStateDialog(() {
+                                    dialogSelectedCrewList =
+                                        values.cast<String>();
+
+                                    selectedCrewList =
+                                        List<String>.from(
+                                      dialogSelectedCrewList,
                                     );
+
+                                    selectedCrewLoginID =
+                                        dialogSelectedCrewList.join(",");
+
+                                    errorMessage = null;
+
                                     crewNames = crewList
                                         .where(
-                                          (crew) => selectedCrewList.contains(
+                                          (crew) =>
+                                              dialogSelectedCrewList.contains(
                                             crew["loginId"].toString(),
                                           ),
                                         )
-                                        .map((crew) => crew["name"].toString())
+                                        .map(
+                                          (crew) =>
+                                              crew["name"].toString(),
+                                        )
                                         .join(", ");
+                                  });
 
-                                    print(selectedCrewList);
-                                    print(
-                                      'selectedCrewLoginID ${selectedCrewLoginID}',
-                                    );
-                                  },
-                                ),
+                                  print(
+                                    "Selected Crew IDs: "
+                                    "$dialogSelectedCrewList",
+                                  );
 
-                                if (errorMessage !=
-                                    null) // Show error if exists
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: Text(
-                                      errorMessage!,
-                                      style: const TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 14,
-                                      ),
+                                  print(
+                                    "Selected Crew Login IDs: "
+                                    "$selectedCrewLoginID",
+                                  );
+
+                                  print(
+                                    "Selected Crew Names: $crewNames",
+                                  );
+                                },
+                              ),
+
+                              if (errorMessage != null)
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.only(top: 8.0),
+                                  child: Text(
+                                    errorMessage!,
+                                    style: const TextStyle(
+                                      color: Colors.red,
+                                      fontSize: 14,
                                     ),
                                   ),
-                              ],
-                            ),
+                                ),
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-              actions: [
-                Align(
-                  alignment: Alignment.center,
-                  child: Row(
-                    children: [
-                      // NO Button
-                      _buildDialogButtonIVM(
-                        context,
-                        text: "Close",
-                        color: Colors.red,
-                        onTap: () => Navigator.pop(dialogContext),
-                      ),
-
-                      // YES Button (with validation)
-                      _buildDialogButtonIVM(
-                        context,
-                        text: "Share",
-                        color: Colors.green,
-                        isLoading: isSubmitting,
-                        onTap: () async {
-                          if (crewOrGF == 'Crew' && selectedCrewLoginID == "") {
-                            print('22222222');
-                            setStateDialog(() {
-                              print('3333333');
-                              errorMessage = "Please select a crew.";
-                            });
-                            print('44444');
-                            return;
-                          }
-                          setStateDialog(() {
-                            isSubmitting = true; // START LOADER
-                          });
-                          print('55555');
-                          // Updating flag value based on selection
-                          // if (crewOrGF == 'Crew') {
-                          //   print('if condition');
-                          //   updateFlagValue(tokenNo, 2);
-                          // } else {
-                          //   print('else condition');
-                          //   updateFlagValue(tokenNo, 1);
-                          // }
-                          try {
-                            if (crewOrGF == 'Crew') {
-                              await updateFlagValueIVM(tokenNo, 2, "ASSIGNED");
-                            } else {
-                              await updateFlagValueIVM(
-                                tokenNo,
-                                1,
-                                "PENDING ZIELIES ASSIGNMENT",
-                              );
-                            }
-
-                            Navigator.pop(
-                              dialogContext,
-                            ); // close dialog after success
-                          } catch (e) {
-                            print(e);
-                          } finally {
-                            setStateDialog(() {
-                              isSubmitting = false; // STOP LOADER
-                            });
-                          }
-                          //
-                        },
                       ),
                     ],
                   ),
+
+            actions: [
+              Align(
+                alignment: Alignment.center,
+                child: Row(
+                  children: [
+                    _buildDialogButtonIVM(
+                      context,
+                      text: "NO",
+                      color: Colors.red,
+                      onTap: () => Navigator.pop(dialogContext),
+                    ),
+
+                    _buildDialogButtonIVM(
+                      context,
+                      text: "YES",
+                      color: Colors.green,
+                      isLoading: isSubmitting,
+                      onTap: () async {
+                        if (crewOrGF == 'Crew' &&
+                            selectedCrewLoginID.isEmpty) {
+                          setStateDialog(() {
+                            errorMessage = "Please select a crew.";
+                          });
+                          return;
+                        }
+
+                        setStateDialog(() {
+                          isSubmitting = true;
+                        });
+
+                        try {
+                          if (crewOrGF == 'Crew') {
+                            await updateFlagValueIVM(
+                              tokenNo,
+                              2,
+                              "ASSIGNED",
+                            );
+                          } else {
+                            await updateFlagValueIVM(
+                              tokenNo,
+                              1,
+                              "PENDING ZIELIES ASSIGNMENT",
+                            );
+                          }
+
+                          Navigator.pop(dialogContext);
+                        } catch (e) {
+                          print(e);
+                        } finally {
+                          setStateDialog(() {
+                            isSubmitting = false;
+                          });
+                        }
+                      },
+                    ),
+                  ],
                 ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
 
   Future<void> fetchCrewListShare() async {
     setState(() {
