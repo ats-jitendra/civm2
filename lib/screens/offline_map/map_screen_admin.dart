@@ -2995,6 +2995,7 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
     if (_isPolylineModalOpen) {
       return;
     }
+    bool isSendButton = false;
     _isPolylineModalOpen = true;
     chatController.clear();
     selectedMapObjectsUpdate.clear();
@@ -3804,8 +3805,15 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                       child: SizedBox(
                                         height: 42,
                                         child: ElevatedButton(
-                                          onPressed: () async {
-                                            if (chatController.text
+                                           onPressed: isSendButton
+                                  ? null
+                                  : () async {
+                                      setDialogState(() {
+                                        isSendButton = true;
+                                      });
+
+                                      try {
+                                        if (chatController.text
                                                 .trim()
                                                 .isEmpty) {
                                               return;
@@ -3822,12 +3830,22 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                             await updateMessageData(data, () {
                                               setDialogState(() {});
                                             });
-                                          },
+                                      } finally {
+                                        if (mounted) {
+                                          setDialogState(() {
+                                            isSendButton = false;
+                                          });
+                                        }
+                                      }},
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.teal,
                                             foregroundColor: Colors.white,
+                                            disabledBackgroundColor: Colors.teal,
+                                         disabledForegroundColor: Colors.white,
                                           ),
-                                          child: const Text("Send"),
+                                          child:  isSendButton
+                                                  ? progressBar()
+                                                  : const Text("Send"),
                                         ),
                                       ),
                                     ),
@@ -7333,6 +7351,7 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
     double longitude,
     String mapLocation,
   ) async {
+    bool isSendButton = false;
     final connectivityResult = await Connectivity().checkConnectivity();
     if (!connectivityResult.contains(ConnectivityResult.none)) {
       await DatabaseHelper.instance.fetchAndSaveCommentHistory(mapLocation);
@@ -7674,7 +7693,14 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                   SizedBox(
                                     height: 42,
                                     child: ElevatedButton(
-                                      onPressed: () async {
+                                       onPressed: isSendButton
+                                  ? null
+                                  : () async {
+                                      setDialogState(() {
+                                        isSendButton = true;
+                                      });
+
+                                      try {
                                         final comment = chatController.text
                                             .trim();
 
@@ -7691,12 +7717,23 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                         await updateCommentData(data, () {
                                           setDialogState(() {});
                                         });
-                                      },
+                                      } finally {
+                                        if (mounted) {
+                                          setDialogState(() {
+                                            isSendButton = false;
+                                          });
+                                        }
+                                      }},
+                                      
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.teal,
                                         foregroundColor: Colors.white,
+                                        disabledBackgroundColor: Colors.teal,
+                                         disabledForegroundColor: Colors.white,
                                       ),
-                                      child: const Text("Send"),
+                                      child:  isSendButton
+                                                  ? progressBar()
+                                                  : const Text("Send"),
                                     ),
                                   ),
                                 ],

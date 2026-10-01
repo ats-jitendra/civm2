@@ -1018,7 +1018,8 @@ class _GFMaintenanceReportViewDetailsScreenState
                                                                       .trim(),
                                                               visibilityFlag:  "1",
                                                               type:  "${reportList[0]["type"]}",
-                                                              sourcePage: "maintenanceReportView"
+                                                              sourcePage: "maintenanceReportView",
+                                                              crew: item!.crew.toString(),
                                                             ),
                                                       ),
                                                     );

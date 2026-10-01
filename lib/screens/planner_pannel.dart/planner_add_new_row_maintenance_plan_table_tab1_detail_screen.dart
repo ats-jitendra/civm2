@@ -415,7 +415,7 @@ class _PlannerAddNewRowMaintenancePlanDetailsScreenState
                                                 substation: item!.substation.toString(),
                                                 feeder: item!.feeder!.split('(').first.trim(),
                                                 visibilityFlag: item!.visibilityFlag.toString(),
-                                                type: item!.type.toString()
+                                                type: item!.type.toString(), crew: item!.crew.toString(),
                                               ),
                                         ),
                                       );
