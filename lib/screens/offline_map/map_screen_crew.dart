@@ -5480,7 +5480,8 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     final spanItems = allLines.where((item) {
       return addedTypes.add(item["maintTypes"].toString());
     }).toList();
-
+  // Clear current selection
+  lines.clear();
     // Initially everything is unchecked
     List<String> tempSelectedTypes = [];
     showDialog(
