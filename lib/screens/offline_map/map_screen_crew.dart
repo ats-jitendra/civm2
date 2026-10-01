@@ -705,7 +705,16 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                     Polyline(
                                       points: polyline.points,
                                       strokeWidth: 12,
-                                      color: polyline.originalColor,
+                                     // color: polyline.originalColor,
+                                      ////lightenColor color bug fix(01-10-2026)
+                                          color:
+                                              selectedPolylineIndexes.contains(
+                                                entry.key,
+                                              )
+                                              ? lightenColor(
+                                                  polyline.originalColor,
+                                                )
+                                              : polyline.originalColor,
                                     ),
                                   ];
                                 }
