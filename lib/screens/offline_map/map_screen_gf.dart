@@ -607,13 +607,25 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                 _onPolylineTap(latLng);
                               },
                               onPositionChanged: (position, hasGesture) {
-                                final zoom = position.zoom.clamp(1.0, 22.0);
+                                final zoom = position.zoom.clamp(1.0, 22.0).toDouble();
+                            //to hide poles and consumers when extream zoom in
+                                 final bool wasStreetLevel = _currentZoom >= 15.0;
+  final bool isStreetLevel = zoom >= 15.0;
 
-                                if (_currentZoom != zoom) {
-                                  setState(() {
-                                    _currentZoom = zoom;
-                                  });
-                                }
+  if (wasStreetLevel != isStreetLevel) {
+    setState(() {
+      _currentZoom = zoom;
+    });
+  } else {
+    _currentZoom = zoom;
+  }
+
+
+                                // if (_currentZoom != zoom) {
+                                //   setState(() {
+                                //     _currentZoom = zoom;
+                                //   });
+                                // }
 
                                 if (showPopup) {
                                   _updatePopupPosition();
@@ -915,9 +927,9 @@ class _MapScreenGFState extends State<MapScreenGF> {
                               if (showUnderGroundLayer)
                                 PolylineLayer(polylines: underGroundPolylines),
 
-                              if (showConsumerLayer)
+                              if (showConsumerLayer && _currentZoom >= 15.0)
                                 MarkerLayer(markers: consumerMarkers),
-                              if (showPoleLayer)
+                              if (showPoleLayer && _currentZoom >= 15.0)
                                 MarkerLayer(markers: poleMarkers),
                               MarkerLayer(markers: _markers),
                               MarkerLayer(markers: completedMarkers),
@@ -8616,24 +8628,54 @@ class _MapScreenGFState extends State<MapScreenGF> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        RichText(
-                          text: TextSpan(
-                            text: 'Comment : ',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: data[0]['comment'] ?? "",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                ),
+                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'LCP Comment : ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
-                            ],
-                          ),
+                            ),
+
+                            const SizedBox(width: 4),
+
+                           Expanded(
+  child: Container(
+    height: 62,
+    padding: const EdgeInsets.symmetric(
+      horizontal: 8,
+      vertical: 5,
+    ),
+    decoration: BoxDecoration(
+      color: Colors.grey.shade50,
+      borderRadius: BorderRadius.circular(6),
+      border: Border.all(
+        color: Colors.grey.shade300,
+      ),
+    ),
+    child: Scrollbar(
+      thumbVisibility: true,
+      thickness: 4,
+      radius: const Radius.circular(10),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Text(
+          data[0]['wmBF_Comme']?.toString() ?? "",
+          style: const TextStyle(
+            fontWeight: FontWeight.normal,
+            color: Colors.black,
+            height: 1.3,
+          ),
+        ),
+      ),
+    ),
+  ),
+),
+                          ],
                         ),
-                        const SizedBox(height: 8),
+                       const SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.only(
                             top: 8,
