@@ -116,6 +116,7 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
   List<Marker> chatMarkers = [];
   List<Marker> completedMarkers = [];
+  List<Marker> noSprayMarkers = [];
   final ScrollController chatScrollController = ScrollController();
   final ScrollController _layerScrollController = ScrollController();
   Color polylineColor = Colors.grey;
@@ -509,18 +510,20 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                             _onPolylineTap(latLng);
                           },
                           onPositionChanged: (position, hasGesture) {
-                            final zoom = position.zoom.clamp(1.0, 22.0).toDouble();
+                            final zoom = position.zoom
+                                .clamp(1.0, 22.0)
+                                .toDouble();
                             //to hide poles and consumers when extream zoom in
-                             final bool wasStreetLevel = _currentZoom >= 15.0;
-  final bool isStreetLevel = zoom >= 15.0;
+                            final bool wasStreetLevel = _currentZoom >= 15.0;
+                            final bool isStreetLevel = zoom >= 15.0;
 
-  if (wasStreetLevel != isStreetLevel) {
-    setState(() {
-      _currentZoom = zoom;
-    });
-  } else {
-    _currentZoom = zoom;
-  }
+                            if (wasStreetLevel != isStreetLevel) {
+                              setState(() {
+                                _currentZoom = zoom;
+                              });
+                            } else {
+                              _currentZoom = zoom;
+                            }
 
                             // if (_currentZoom != zoom) {
                             //   setState(() {
@@ -689,15 +692,13 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                       points: polyline.points,
                                       strokeWidth: 12,
                                       //color: polyline.originalColor,
-                                       ////lightenColor color bug fix(01-10-2026)
-                                          color:
-                                              selectedPolylineIndexes.contains(
-                                                entry.key,
-                                              )
-                                              ? lightenColor(
-                                                  polyline.originalColor,
-                                                )
-                                              : polyline.originalColor,
+                                      ////lightenColor color bug fix(01-10-2026)
+                                      color:
+                                          selectedPolylineIndexes.contains(
+                                            entry.key,
+                                          )
+                                          ? lightenColor(polyline.originalColor)
+                                          : polyline.originalColor,
                                     ),
                                   ];
                                 }
@@ -744,7 +745,10 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                           status == "rework completed" ||
                                           status == "final completed"
                                       ? Colors.grey
-                                      : getColorFromName(type);
+                                      : getColorFromName(
+                                          type,
+                                          noSprayColor: polyline.originalColor,
+                                        );
 
                                   return [
                                     Polyline(
@@ -773,7 +777,12 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                       status == "final completed") {
                                     visibleColors.add(Colors.grey);
                                   } else {
-                                    visibleColors.add(getColorFromName(type));
+                                    visibleColors.add(
+                                      getColorFromName(
+                                        type,
+                                        noSprayColor: polyline.originalColor,
+                                      ),
+                                    );
                                   }
                                 }
 
@@ -808,10 +817,13 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                           //-------------------------
                           if (showUnderGroundLayer)
                             PolylineLayer(polylines: underGroundPolylines),
-
+                          if (showOverHeadLayer &&
+                              (workLayerVisibility["NO SPRAY"] ?? false))
+                            MarkerLayer(markers: noSprayMarkers),
                           if (showConsumerLayer && _currentZoom >= 15.0)
                             MarkerLayer(markers: consumerMarkers),
-                          if (showPoleLayer && _currentZoom >= 15.0) MarkerLayer(markers: poleMarkers),
+                          if (showPoleLayer && _currentZoom >= 15.0)
+                            MarkerLayer(markers: poleMarkers),
                           MarkerLayer(markers: _markers),
                           MarkerLayer(markers: completedMarkers),
                           MarkerLayer(markers: chatMarkers),
@@ -1240,11 +1252,25 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                                           // showOverHeadLayer =
                                                           //     v!;
                                                           // Update all work layer checkboxes
-                                                          workLayerVisibility
-                                                              .updateAll(
-                                                                (key, value) =>
-                                                                    showMaintLayer,
-                                                              );
+                                                          if (showMaintLayer) {
+                                                            updateWorkLayerVisibilityFromMaintType(
+                                                              overHeadPolylines,
+                                                            );
+                                                          } else {
+                                                            workLayerVisibility
+                                                                .updateAll(
+                                                                  (
+                                                                    key,
+                                                                    value,
+                                                                  ) => false,
+                                                                );
+                                                          }
+                                                          //IVM WORK PLAN ALL BOXES CHECK and UNCHECK CODE
+                                                          // workLayerVisibility
+                                                          //     .updateAll(
+                                                          //       (key, value) =>
+                                                          //           showMaintLayer,
+                                                          //     );
                                                         });
                                                         setState(() {
                                                           _buildStatusMarkers();
@@ -1711,6 +1737,95 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
         ),
       );
     }
+    // ================= NO SPRAY MARKERS =================
+    noSprayMarkers.clear();
+
+    for (int i = 0; i < overHeadPolylines.length; i++) {
+      final polyline = overHeadPolylines[i];
+
+      if (polyline.points.isEmpty) {
+        continue;
+      }
+
+      final maintTypes = polyline.maintType
+          .split(",")
+          .map((e) => e.trim().toUpperCase())
+          .where((e) => e.isNotEmpty)
+          .toList();
+
+      final noSprayIndex = maintTypes.indexOf("NO SPRAY");
+
+      if (noSprayIndex == -1) {
+        continue;
+      }
+
+      // Optional:
+      // Show label only when NO SPRAY layer is enabled.
+      if (!(workLayerVisibility["NO SPRAY"] ?? false)) {
+        continue;
+      }
+
+      // Split the same way as your polyline
+      // so the label is placed in the NO SPRAY section.
+      final splitPoints = splitLineIntoSegments(
+        polyline.points.first,
+        polyline.points.last,
+        maintTypes.length,
+      );
+
+      if (splitPoints.length < 2) {
+        continue;
+      }
+
+      final startPoint =
+          splitPoints[noSprayIndex.clamp(0, splitPoints.length - 2)];
+
+      final endPoint =
+          splitPoints[(noSprayIndex + 1).clamp(1, splitPoints.length - 1)];
+
+      final noSprayCenter = LatLng(
+        (startPoint.latitude + endPoint.latitude) / 2,
+        (startPoint.longitude + endPoint.longitude) / 2,
+      );
+
+      noSprayMarkers.add(
+        Marker(
+          point: noSprayCenter,
+
+          // Small label
+          width: 65,
+          height: 25,
+
+          // Point of Marker is at the top,
+          // so label appears just below the polyline.
+          alignment: Alignment.topCenter,
+
+          child: GestureDetector(
+            onTap: () {
+              _showDetailsPopupUpdate(i);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE85B5B),
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(color: Colors.white, width: 1),
+              ),
+              child: const Text(
+                "No Spray",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 9,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    //////////////-------------------
     //////////////////underground////
     final undergroundData = await DatabaseHelper.instance.getUnderGroundData(
       selectedSubstation.toString(),
@@ -3816,47 +3931,55 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                       child: SizedBox(
                                         height: 42,
                                         child: ElevatedButton(
-                                           onPressed: isSendButton
-                                  ? null
-                                  : () async {
-                                      setDialogState(() {
-                                        isSendButton = true;
-                                      });
+                                          onPressed: isSendButton
+                                              ? null
+                                              : () async {
+                                                  setDialogState(() {
+                                                    isSendButton = true;
+                                                  });
 
-                                      try {
-                                        if (chatController.text
-                                                .trim()
-                                                .isEmpty) {
-                                              return;
-                                            }
+                                                  try {
+                                                    if (chatController.text
+                                                        .trim()
+                                                        .isEmpty) {
+                                                      return;
+                                                    }
 
-                                            final data = {
-                                              "lineId":
-                                                  overHeadPolylines[index].oid,
-                                              "description": chatController.text
-                                                  .trim(),
-                                              "userId": id.toString(),
-                                            };
-                                            // showLoader(context);
-                                            await updateMessageData(data, () {
-                                              setDialogState(() {});
-                                            });
-                                      } finally {
-                                        if (mounted) {
-                                          setDialogState(() {
-                                            isSendButton = false;
-                                          });
-                                        }
-                                      }},
+                                                    final data = {
+                                                      "lineId":
+                                                          overHeadPolylines[index]
+                                                              .oid,
+                                                      "description":
+                                                          chatController.text
+                                                              .trim(),
+                                                      "userId": id.toString(),
+                                                    };
+                                                    // showLoader(context);
+                                                    await updateMessageData(
+                                                      data,
+                                                      () {
+                                                        setDialogState(() {});
+                                                      },
+                                                    );
+                                                  } finally {
+                                                    if (mounted) {
+                                                      setDialogState(() {
+                                                        isSendButton = false;
+                                                      });
+                                                    }
+                                                  }
+                                                },
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.teal,
                                             foregroundColor: Colors.white,
-                                            disabledBackgroundColor: Colors.teal,
-                                         disabledForegroundColor: Colors.white,
+                                            disabledBackgroundColor:
+                                                Colors.teal,
+                                            disabledForegroundColor:
+                                                Colors.white,
                                           ),
-                                          child:  isSendButton
-                                                  ? progressBar()
-                                                  : const Text("Send"),
+                                          child: isSendButton
+                                              ? progressBar()
+                                              : const Text("Send"),
                                         ),
                                       ),
                                     ),
@@ -4888,7 +5011,7 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
     return LatLng((minLat + maxLat) / 2, (minLng + maxLng) / 2);
   }
 
-  Color getColorFromName(String color) {
+  Color getColorFromName(String color, {Color? noSprayColor}) {
     switch (color.toUpperCase().trim()) {
       case "JARRAFF":
         return Colors.purple;
@@ -4896,6 +5019,10 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
       case "MINI JARRAFF":
         return const Color.fromARGB(255, 247, 19, 2);
       case "NO SPRAY":
+        ///////no spray label fix
+        if (noSprayColor != null) {
+          return lightenColor(noSprayColor);
+        }
         return const Color.fromARGB(255, 252, 199, 249);
       case "MOWING":
         return const Color.fromARGB(255, 113, 68, 1);
@@ -7601,7 +7728,7 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                         Row(
+                        Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
@@ -7615,40 +7742,40 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                             const SizedBox(width: 4),
 
                             Expanded(
-  child: Container(
-    height: 62,
-    padding: const EdgeInsets.symmetric(
-      horizontal: 8,
-      vertical: 5,
-    ),
-    decoration: BoxDecoration(
-      color: Colors.grey.shade50,
-      borderRadius: BorderRadius.circular(6),
-      border: Border.all(
-        color: Colors.grey.shade300,
-      ),
-    ),
-    child: Scrollbar(
-      thumbVisibility: true,
-      thickness: 4,
-      radius: const Radius.circular(10),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Text(
-          data[0]['wmBF_Comme']?.toString() ?? "",
-          style: const TextStyle(
-            fontWeight: FontWeight.normal,
-            color: Colors.black,
-            height: 1.3,
-          ),
-        ),
-      ),
-    ),
-  ),
-),
+                              child: Container(
+                                height: 62,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade50,
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: Colors.grey.shade300,
+                                  ),
+                                ),
+                                child: Scrollbar(
+                                  thumbVisibility: true,
+                                  thickness: 4,
+                                  radius: const Radius.circular(10),
+                                  child: SingleChildScrollView(
+                                    scrollDirection: Axis.vertical,
+                                    child: Text(
+                                      data[0]['wmBF_Comme']?.toString() ?? "",
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.normal,
+                                        color: Colors.black,
+                                        height: 1.3,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
                           ],
                         ),
-                      const SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.only(
                             top: 8,
@@ -7734,47 +7861,53 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                   SizedBox(
                                     height: 42,
                                     child: ElevatedButton(
-                                       onPressed: isSendButton
-                                  ? null
-                                  : () async {
-                                      setDialogState(() {
-                                        isSendButton = true;
-                                      });
+                                      onPressed: isSendButton
+                                          ? null
+                                          : () async {
+                                              setDialogState(() {
+                                                isSendButton = true;
+                                              });
 
-                                      try {
-                                        final comment = chatController.text
-                                            .trim();
+                                              try {
+                                                final comment = chatController
+                                                    .text
+                                                    .trim();
 
-                                        if (comment.isEmpty) {
-                                          return;
-                                        }
+                                                if (comment.isEmpty) {
+                                                  return;
+                                                }
 
-                                        final data = {
-                                          "mapLocation": mapLocation.toString(),
-                                          "description": comment,
-                                          "userId": id.toString(),
-                                        };
+                                                final data = {
+                                                  "mapLocation": mapLocation
+                                                      .toString(),
+                                                  "description": comment,
+                                                  "userId": id.toString(),
+                                                };
 
-                                        await updateCommentData(data, () {
-                                          setDialogState(() {});
-                                        });
-                                      } finally {
-                                        if (mounted) {
-                                          setDialogState(() {
-                                            isSendButton = false;
-                                          });
-                                        }
-                                      }},
-                                      
+                                                await updateCommentData(
+                                                  data,
+                                                  () {
+                                                    setDialogState(() {});
+                                                  },
+                                                );
+                                              } finally {
+                                                if (mounted) {
+                                                  setDialogState(() {
+                                                    isSendButton = false;
+                                                  });
+                                                }
+                                              }
+                                            },
+
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.teal,
                                         foregroundColor: Colors.white,
                                         disabledBackgroundColor: Colors.teal,
-                                         disabledForegroundColor: Colors.white,
+                                        disabledForegroundColor: Colors.white,
                                       ),
-                                      child:  isSendButton
-                                                  ? progressBar()
-                                                  : const Text("Send"),
+                                      child: isSendButton
+                                          ? progressBar()
+                                          : const Text("Send"),
                                     ),
                                   ),
                                 ],

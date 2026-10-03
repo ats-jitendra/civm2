@@ -116,6 +116,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
   List<Marker> chatMarkers = [];
   List<Marker> completedMarkers = [];
+    List<Marker> noSprayMarkers = [];
   final ScrollController chatScrollController = ScrollController();
   final ScrollController _layerScrollController = ScrollController();
   Color polylineColor = Colors.grey;
@@ -744,7 +745,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                           status == "rework completed" ||
                                           status == "final completed"
                                       ? Colors.grey
-                                      : getColorFromName(type);
+                                      : getColorFromName(type,noSprayColor: polyline.originalColor);
 
                                   return [
                                     Polyline(
@@ -773,7 +774,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                       status == "final completed") {
                                     visibleColors.add(Colors.grey);
                                   } else {
-                                    visibleColors.add(getColorFromName(type));
+                                    visibleColors.add(getColorFromName(type,noSprayColor: polyline.originalColor));
                                   }
                                 }
 
@@ -808,7 +809,9 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                           //-------------------------
                           if (showUnderGroundLayer)
                             PolylineLayer(polylines: underGroundPolylines),
-
+  if (showOverHeadLayer &&
+                              (workLayerVisibility["NO SPRAY"] ?? false))
+                            MarkerLayer(markers: noSprayMarkers),
                           if (showConsumerLayer && _currentZoom >= 15.0)
                             MarkerLayer(markers: consumerMarkers),
                           if (showPoleLayer && _currentZoom >= 15.0) MarkerLayer(markers: poleMarkers),
@@ -1240,11 +1243,25 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                                           // showOverHeadLayer =
                                                           //     v!;
                                                           // Update all work layer checkboxes
-                                                          workLayerVisibility
-                                                              .updateAll(
-                                                                (key, value) =>
-                                                                    showMaintLayer,
-                                                              );
+                                                          if (showMaintLayer) {
+                                                            updateWorkLayerVisibilityFromMaintType(
+                                                              overHeadPolylines,
+                                                            );
+                                                          } else {
+                                                            workLayerVisibility
+                                                                .updateAll(
+                                                                  (
+                                                                    key,
+                                                                    value,
+                                                                  ) => false,
+                                                                );
+                                                          }
+                                                          //IVM WORK PLAN ALL BOXES CHECK and UNCHECK CODE
+                                                          // workLayerVisibility
+                                                          //     .updateAll(
+                                                          //       (key, value) =>
+                                                          //           showMaintLayer,
+                                                          //     );
                                                         });
                                                         setState(() {
                                                           _buildStatusMarkers();
@@ -1711,6 +1728,95 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
         ),
       );
     }
+       // ================= NO SPRAY MARKERS =================
+    noSprayMarkers.clear();
+
+    for (int i = 0; i < overHeadPolylines.length; i++) {
+      final polyline = overHeadPolylines[i];
+
+      if (polyline.points.isEmpty) {
+        continue;
+      }
+
+      final maintTypes = polyline.maintType
+          .split(",")
+          .map((e) => e.trim().toUpperCase())
+          .where((e) => e.isNotEmpty)
+          .toList();
+
+      final noSprayIndex = maintTypes.indexOf("NO SPRAY");
+
+      if (noSprayIndex == -1) {
+        continue;
+      }
+
+      // Optional:
+      // Show label only when NO SPRAY layer is enabled.
+      if (!(workLayerVisibility["NO SPRAY"] ?? false)) {
+        continue;
+      }
+
+      // Split the same way as your polyline
+      // so the label is placed in the NO SPRAY section.
+      final splitPoints = splitLineIntoSegments(
+        polyline.points.first,
+        polyline.points.last,
+        maintTypes.length,
+      );
+
+      if (splitPoints.length < 2) {
+        continue;
+      }
+
+      final startPoint =
+          splitPoints[noSprayIndex.clamp(0, splitPoints.length - 2)];
+
+      final endPoint =
+          splitPoints[(noSprayIndex + 1).clamp(1, splitPoints.length - 1)];
+
+      final noSprayCenter = LatLng(
+        (startPoint.latitude + endPoint.latitude) / 2,
+        (startPoint.longitude + endPoint.longitude) / 2,
+      );
+
+      noSprayMarkers.add(
+        Marker(
+          point: noSprayCenter,
+
+          // Small label
+          width: 65,
+          height: 25,
+
+          // Point of Marker is at the top,
+          // so label appears just below the polyline.
+          alignment: Alignment.topCenter,
+
+          child: GestureDetector(
+            onTap: () {
+              _showDetailsPopupUpdate(i);
+            },
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              decoration: BoxDecoration(
+                color: const Color(0xFFE85B5B),
+                borderRadius: BorderRadius.circular(5),
+                border: Border.all(color: Colors.white, width: 1),
+              ),
+              child: const Text(
+                "No Spray",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 9,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+    //////////////-------------------
     //////////////////underground////
     final undergroundData = await DatabaseHelper.instance.getUnderGroundData(
       selectedSubstation.toString(),
@@ -4877,7 +4983,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     return LatLng((minLat + maxLat) / 2, (minLng + maxLng) / 2);
   }
 
-  Color getColorFromName(String color) {
+  Color getColorFromName(String color, {Color? noSprayColor}) {
     switch (color.toUpperCase().trim()) {
       case "JARRAFF":
         return Colors.purple;
@@ -4885,6 +4991,10 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
       case "MINI JARRAFF":
         return const Color.fromARGB(255, 247, 19, 2);
       case "NO SPRAY":
+       ///////no spray label fix
+        if (noSprayColor != null) {
+          return lightenColor(noSprayColor);
+        }
         return const Color.fromARGB(255, 252, 199, 249);
       case "MOWING":
         return const Color.fromARGB(255, 113, 68, 1);
