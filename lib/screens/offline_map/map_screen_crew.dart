@@ -5274,8 +5274,12 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
 
   void _showSubmitProgressDialog() {
     // Copy available maintenance objects
-    availableLines = lines.map((e) => Map<String, dynamic>.from(e)).toList();
-
+//availableLines = lines.map((e) => Map<String, dynamic>.from(e)).toList();
+//removed NO SPRAY objects from  availableLines
+availableLines = lines
+    .where((e) => e["maintTypes"].toString().trim().toUpperCase() != "NO SPRAY")
+    .map((e) => Map<String, dynamic>.from(e))
+    .toList();
     // Selected list starts empty
     // lines.clear();
 
