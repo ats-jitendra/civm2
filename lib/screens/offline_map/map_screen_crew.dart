@@ -532,13 +532,24 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                             // showPopup = false;
                           },
                           onPositionChanged: (position, hasGesture) {
-                            final zoom = position.zoom.clamp(1.0, 22.0);
+                            final zoom = position.zoom.clamp(1.0, 22.0).toDouble();
+                            //to hide poles and consumers when extream zoom in
+                             final bool wasStreetLevel = _currentZoom >= 15.0;
+  final bool isStreetLevel = zoom >= 15.0;
 
-                            if (_currentZoom != zoom) {
-                              setState(() {
-                                _currentZoom = zoom;
-                              });
-                            }
+  if (wasStreetLevel != isStreetLevel) {
+    setState(() {
+      _currentZoom = zoom;
+    });
+  } else {
+    _currentZoom = zoom;
+  }
+
+                            // if (_currentZoom != zoom) {
+                            //   setState(() {
+                            //     _currentZoom = zoom;
+                            //   });
+                            // }
 
                             if (showPopup) {
                               _updatePopupPosition();
@@ -724,9 +735,9 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                           if (showOverHeadLayer &&
                               (workLayerVisibility["NO SPRAY"] ?? false))
                             MarkerLayer(markers: noSprayMarkers),
-                          if (showConsumerLayer)
+                          if (showConsumerLayer && _currentZoom >= 15.0)
                             MarkerLayer(markers: consumerMarkers),
-                          if (showPoleLayer) MarkerLayer(markers: poleMarkers),
+                          if (showPoleLayer && _currentZoom >= 15.0) MarkerLayer(markers: poleMarkers),
                           MarkerLayer(markers: _markers),
                           //current position marker
                           MarkerLayer(markers: completedMarkers),
