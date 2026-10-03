@@ -622,13 +622,26 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                               //   }
                               // },
                               onPositionChanged: (position, hasGesture) {
-                                final zoom = position.zoom.clamp(1.0, 22.0);
+                                final zoom = position.zoom.clamp(1.0, 22.0).toDouble();
+                            //to hide poles and consumers when extream zoom in
 
-                                if (_currentZoom != zoom) {
-                                  setState(() {
-                                    _currentZoom = zoom;
-                                  });
-                                }
+                                final bool wasStreetLevel = _currentZoom >= 15.0;
+                                final bool isStreetLevel = zoom >= 15.0;
+
+                                  if (wasStreetLevel != isStreetLevel) {
+    setState(() {
+      _currentZoom = zoom;
+    });
+  } else {
+    _currentZoom = zoom;
+  }
+
+
+                                // if (_currentZoom != zoom) {
+                                //   setState(() {
+                                //     _currentZoom = zoom;
+                                //   });
+                                // }
 
                                 if (showPopup) {
                                   _updatePopupPosition();
@@ -802,7 +815,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                         Polyline(
                                           points: polyline.points,
                                           strokeWidth: 12,
-                                         // color: polyline.originalColor,
+                                          // color: polyline.originalColor,
                                           ////lightenColor color bug fix(01-10-2026)
                                           color:
                                               selectedPolylineIndexes.contains(
@@ -929,9 +942,10 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                               if (showUnderGroundLayer)
                                 PolylineLayer(polylines: underGroundPolylines),
 
-                              if (showConsumerLayer)
+                              // if (showConsumerLayer)
+                              if (showConsumerLayer && _currentZoom >= 15.0)
                                 MarkerLayer(markers: consumerMarkers),
-                              if (showPoleLayer)
+                              if (showPoleLayer && _currentZoom >= 15.0)
                                 MarkerLayer(markers: poleMarkers),
                               MarkerLayer(markers: _markers),
                               MarkerLayer(markers: completedMarkers),
@@ -4225,47 +4239,55 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                         height: 42,
                                         child: ElevatedButton(
                                           onPressed: isSendButton
-                                  ? null
-                                  : () async {
-                                      setDialogState(() {
-                                        isSendButton = true;
-                                      });
+                                              ? null
+                                              : () async {
+                                                  setDialogState(() {
+                                                    isSendButton = true;
+                                                  });
 
-                                      try {
-                                         if (chatController.text
-                                                .trim()
-                                                .isEmpty) {
-                                              return;
-                                            }
+                                                  try {
+                                                    if (chatController.text
+                                                        .trim()
+                                                        .isEmpty) {
+                                                      return;
+                                                    }
 
-                                            final data = {
-                                              "lineId":
-                                                  overHeadPolylines[index].oid,
-                                              "description": chatController.text
-                                                  .trim(),
-                                              "userId": id.toString(),
-                                            };
-                                            // showLoader(context);
-                                            await updateMessageData(data, () {
-                                              setDialogState(() {});
-                                            });
-                                      } finally {
-                                        if (mounted) {
-                                          setDialogState(() {
-                                            isSendButton = false;
-                                          });
-                                        }
-                                      }},
-                                          
+                                                    final data = {
+                                                      "lineId":
+                                                          overHeadPolylines[index]
+                                                              .oid,
+                                                      "description":
+                                                          chatController.text
+                                                              .trim(),
+                                                      "userId": id.toString(),
+                                                    };
+                                                    // showLoader(context);
+                                                    await updateMessageData(
+                                                      data,
+                                                      () {
+                                                        setDialogState(() {});
+                                                      },
+                                                    );
+                                                  } finally {
+                                                    if (mounted) {
+                                                      setDialogState(() {
+                                                        isSendButton = false;
+                                                      });
+                                                    }
+                                                  }
+                                                },
+
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.teal,
                                             foregroundColor: Colors.white,
-                                            disabledBackgroundColor: Colors.teal,
-                                         disabledForegroundColor: Colors.white,
+                                            disabledBackgroundColor:
+                                                Colors.teal,
+                                            disabledForegroundColor:
+                                                Colors.white,
                                           ),
                                           child: isSendButton
-                                                  ? progressBar()
-                                                  :const Text("Send"),
+                                              ? progressBar()
+                                              : const Text("Send"),
                                         ),
                                       ),
                                     ),
@@ -5830,7 +5852,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
 
         // Handle the success response
       } else {
-         ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Failed to submit images.")),
         );
         print("Failed to submit images. Status code: ${response.statusCode}");
@@ -5910,20 +5932,20 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                 ),
                               ),
                             ),
-                              InkWell(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            borderRadius: BorderRadius.circular(20),
-                            child: const Padding(
-                              padding: EdgeInsets.all(4),
-                              child: Icon(
-                                Icons.cancel_presentation_sharp,
-                                color: Colors.red,
-                                size: 22,
+                            InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              borderRadius: BorderRadius.circular(20),
+                              child: const Padding(
+                                padding: EdgeInsets.all(4),
+                                child: Icon(
+                                  Icons.cancel_presentation_sharp,
+                                  color: Colors.red,
+                                  size: 22,
+                                ),
                               ),
                             ),
-                          ),
                           ],
                         ),
                       ),
@@ -6820,22 +6842,53 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        RichText(
-                          text: TextSpan(
-                            text: 'Comment : ',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
-                            ),
-                            children: [
-                              TextSpan(
-                                text: data[0]['comment'] ?? "",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                ),
+
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'LCP Comment : ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
-                            ],
-                          ),
+                            ),
+
+                            const SizedBox(width: 4),
+
+                            Expanded(
+  child: Container(
+    height: 62,
+    padding: const EdgeInsets.symmetric(
+      horizontal: 8,
+      vertical: 5,
+    ),
+    decoration: BoxDecoration(
+      color: Colors.grey.shade50,
+      borderRadius: BorderRadius.circular(6),
+      border: Border.all(
+        color: Colors.grey.shade300,
+      ),
+    ),
+    child: Scrollbar(
+      thumbVisibility: true,
+      thickness: 4,
+      radius: const Radius.circular(10),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Text(
+          data[0]['wmBF_Comme']?.toString() ?? "",
+          style: const TextStyle(
+            fontWeight: FontWeight.normal,
+            color: Colors.black,
+            height: 1.3,
+          ),
+        ),
+      ),
+    ),
+  ),
+),
+                          ],
                         ),
                         const SizedBox(height: 8),
                         Container(
@@ -6923,37 +6976,43 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                   SizedBox(
                                     height: 42,
                                     child: ElevatedButton(
-                                       onPressed: isSendButton
-                                  ? null
-                                  : () async {
-                                      setDialogState(() {
-                                        isSendButton = true;
-                                      });
+                                      onPressed: isSendButton
+                                          ? null
+                                          : () async {
+                                              setDialogState(() {
+                                                isSendButton = true;
+                                              });
 
-                                      try {
-                                        final comment = chatController.text
-                                            .trim();
+                                              try {
+                                                final comment = chatController
+                                                    .text
+                                                    .trim();
 
-                                        if (comment.isEmpty) {
-                                          return;
-                                        }
+                                                if (comment.isEmpty) {
+                                                  return;
+                                                }
 
-                                        final data = {
-                                          "mapLocation": mapLocation.toString(),
-                                          "description": comment,
-                                          "userId": id.toString(),
-                                        };
+                                                final data = {
+                                                  "mapLocation": mapLocation
+                                                      .toString(),
+                                                  "description": comment,
+                                                  "userId": id.toString(),
+                                                };
 
-                                        await updateCommentData(data, () {
-                                          setDialogState(() {});
-                                        });
-                                      } finally {
-                                        if (mounted) {
-                                          setDialogState(() {
-                                            isSendButton = false;
-                                          });
-                                        }
-                                      }},
+                                                await updateCommentData(
+                                                  data,
+                                                  () {
+                                                    setDialogState(() {});
+                                                  },
+                                                );
+                                              } finally {
+                                                if (mounted) {
+                                                  setDialogState(() {
+                                                    isSendButton = false;
+                                                  });
+                                                }
+                                              }
+                                            },
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.teal,
                                         foregroundColor: Colors.white,
@@ -6961,8 +7020,8 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                         disabledForegroundColor: Colors.white,
                                       ),
                                       child: isSendButton
-                                                  ? progressBar()
-                                                  : const Text("Send"),
+                                          ? progressBar()
+                                          : const Text("Send"),
                                     ),
                                   ),
                                 ],
@@ -7366,392 +7425,367 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
 
   bool isSubmitting = false; // loader state for YES button
   List<String> selectedCrewList = [];
-   void showCrewDialogIVM(
-  BuildContext context,
-  String tokenNo,
-  String type,
-  String? crewName,
-) async {
-  await fetchCrewListShare();
+  void showCrewDialogIVM(
+    BuildContext context,
+    String tokenNo,
+    String type,
+    String? crewName,
+  ) async {
+    await fetchCrewListShare();
 
-  String? errorMessage;
+    String? errorMessage;
 
-  _workOrder.text = '$tokenNo - $type';
+    _workOrder.text = '$tokenNo - $type';
 
-  // ----------------------------------------------------------
-  // PRESELECT EXISTING CREW
-  // crewName contains loginIds like: "214,215"
-  // ----------------------------------------------------------
-  List<String> dialogSelectedCrewList = [];
+    // ----------------------------------------------------------
+    // PRESELECT EXISTING CREW
+    // crewName contains loginIds like: "214,215"
+    // ----------------------------------------------------------
+    List<String> dialogSelectedCrewList = [];
 
-  if (crewName != null &&
-      crewName.trim().isNotEmpty &&
-      crewName.trim().toLowerCase() != "null") {
-    final existingCrewIds = crewName
-        .split(',')
-        .map((e) => e.trim())
-        .where((e) => e.isNotEmpty)
-        .toList();
+    if (crewName != null &&
+        crewName.trim().isNotEmpty &&
+        crewName.trim().toLowerCase() != "null") {
+      final existingCrewIds = crewName
+          .split(',')
+          .map((e) => e.trim())
+          .where((e) => e.isNotEmpty)
+          .toList();
 
-    print("crewName from item: $crewName");
-    print("Existing Crew IDs: $existingCrewIds");
+      print("crewName from item: $crewName");
+      print("Existing Crew IDs: $existingCrewIds");
 
-    dialogSelectedCrewList = crewList
-        .where(
-          (crew) => existingCrewIds.contains(
-            crew["loginId"].toString(),
-          ),
-        )
-        .map(
-          (crew) => crew["loginId"].toString(),
-        )
-        .toList();
+      dialogSelectedCrewList = crewList
+          .where((crew) => existingCrewIds.contains(crew["loginId"].toString()))
+          .map((crew) => crew["loginId"].toString())
+          .toList();
 
-    print("Matched selected crew IDs: $dialogSelectedCrewList");
+      print("Matched selected crew IDs: $dialogSelectedCrewList");
 
-    // Keep the selected values in your existing variables
-    selectedCrewList = List<String>.from(dialogSelectedCrewList);
-    selectedCrewLoginID = dialogSelectedCrewList.join(",");
+      // Keep the selected values in your existing variables
+      selectedCrewList = List<String>.from(dialogSelectedCrewList);
+      selectedCrewLoginID = dialogSelectedCrewList.join(",");
 
-    // Get crew names
-    crewNames = crewList
-        .where(
-          (crew) => dialogSelectedCrewList.contains(
-            crew["loginId"].toString(),
-          ),
-        )
-        .map(
-          (crew) => crew["name"].toString(),
-        )
-        .join(", ");
+      // Get crew names
+      crewNames = crewList
+          .where(
+            (crew) =>
+                dialogSelectedCrewList.contains(crew["loginId"].toString()),
+          )
+          .map((crew) => crew["name"].toString())
+          .join(", ");
 
-    print("Selected Crew Names: $crewNames");
-    print("Selected Crew Login IDs: $selectedCrewLoginID");
-  } else {
-    selectedCrewList = [];
-    selectedCrewLoginID = "";
-    crewNames = "";
-  }
+      print("Selected Crew Names: $crewNames");
+      print("Selected Crew Login IDs: $selectedCrewLoginID");
+    } else {
+      selectedCrewList = [];
+      selectedCrewLoginID = "";
+      crewNames = "";
+    }
 
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (BuildContext dialogContext) {
-      return StatefulBuilder(
-        builder: (context, setStateDialog) {
-          return AlertDialog(
-            title: const Text(
-              "SELECT CREW",
-              style: TextStyle(
-                fontSize: 20.0,
-                color: Color.fromARGB(255, 7, 59, 120),
-                fontWeight: FontWeight.bold,
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text(
+                "SELECT CREW",
+                style: TextStyle(
+                  fontSize: 20.0,
+                  color: Color.fromARGB(255, 7, 59, 120),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            content: isLoadingIVM
-                ? const Center(
-                    child: CircularProgressIndicator(),
-                  )
-                : Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "WORK ORDER",
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            color: Color.fromARGB(255, 7, 59, 120),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: TextFormField(
-                            enabled: false,
-                            controller: _workOrder,
-                            style: const TextStyle(
-                              color: Color.fromARGB(255, 7, 59, 120),
-                              fontSize: 16,
-                            ),
-                            keyboardType:
-                                const TextInputType.numberWithOptions(
-                              decimal: true,
-                              signed: false,
-                            ),
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                              disabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color.fromARGB(255, 7, 59, 120),
-                                ),
-                              ),
-                              hintText: '',
-                            ),
-                            maxLines: null,
-                            minLines: 1,
-                            expands: false,
-                          ),
-                        ),
-                      ),
-
-                      const Padding(
-                        padding: EdgeInsets.only(top: 8.0),
-                        child: Align(
+              content: isLoadingIVM
+                  ? const Center(child: CircularProgressIndicator())
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            "SHARE WITH*",
+                            "WORK ORDER",
                             style: TextStyle(
-                              fontSize: 16,
+                              fontSize: 16.0,
                               color: Color.fromARGB(255, 7, 59, 120),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
-                      ),
 
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Padding(
-                          padding: const EdgeInsets.all(2.0),
-                          child: DropdownButtonFormField<String>(
-                            hint: const Text('-Select-'),
-                            dropdownColor: Colors.white,
-                            value: crewOrGF,
-                            style: const TextStyle(
-                              color: Color.fromARGB(255, 7, 59, 120),
-                              fontSize: 16,
-                            ),
-                            icon: const Icon(
-                              Icons.arrow_drop_down,
-                              color: Color.fromARGB(255, 7, 59, 120),
-                              size: 40,
-                            ),
-                            decoration: const InputDecoration(
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color.fromARGB(255, 7, 59, 120),
-                                ),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: TextFormField(
+                              enabled: false,
+                              controller: _workOrder,
+                              style: const TextStyle(
+                                color: Color.fromARGB(255, 7, 59, 120),
+                                fontSize: 16,
                               ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: Color.fromARGB(255, 7, 59, 120),
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                    decimal: true,
+                                    signed: false,
+                                  ),
+                              decoration: const InputDecoration(
+                                border: OutlineInputBorder(),
+                                disabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Color.fromARGB(255, 7, 59, 120),
+                                  ),
                                 ),
+                                hintText: '',
                               ),
+                              maxLines: null,
+                              minLines: 1,
+                              expands: false,
                             ),
-                            isExpanded: true,
-                            items: select_crewOrGF
-                                .map(buildMenuItem)
-                                .toList(),
-                            onChanged: (value) {
-                              setStateDialog(() {
-                                crewOrGF = value!;
-                                _isVisibleCrewList = crewOrGF == 'Crew';
-                              });
-                            },
-                            validator: (value) =>
-                                value == null ? 'field required' : null,
                           ),
                         ),
-                      ),
 
-                      Visibility(
-                        visible: _isVisibleCrewList,
-                        child: Padding(
-                          padding: const EdgeInsets.only(top: 8.0),
-                          child: Column(
-                            children: [
-                              const Align(
-                                alignment: Alignment.centerLeft,
-                                child: Text(
-                                  "CREW NAME",
-                                  style: TextStyle(
-                                    fontSize: 16,
+                        const Padding(
+                          padding: EdgeInsets.only(top: 8.0),
+                          child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "SHARE WITH*",
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 7, 59, 120),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.all(2.0),
+                            child: DropdownButtonFormField<String>(
+                              hint: const Text('-Select-'),
+                              dropdownColor: Colors.white,
+                              value: crewOrGF,
+                              style: const TextStyle(
+                                color: Color.fromARGB(255, 7, 59, 120),
+                                fontSize: 16,
+                              ),
+                              icon: const Icon(
+                                Icons.arrow_drop_down,
+                                color: Color.fromARGB(255, 7, 59, 120),
+                                size: 40,
+                              ),
+                              decoration: const InputDecoration(
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
                                     color: Color.fromARGB(255, 7, 59, 120),
-                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: Color.fromARGB(255, 7, 59, 120),
                                   ),
                                 ),
                               ),
+                              isExpanded: true,
+                              items: select_crewOrGF
+                                  .map(buildMenuItem)
+                                  .toList(),
+                              onChanged: (value) {
+                                setStateDialog(() {
+                                  crewOrGF = value!;
+                                  _isVisibleCrewList = crewOrGF == 'Crew';
+                                });
+                              },
+                              validator: (value) =>
+                                  value == null ? 'field required' : null,
+                            ),
+                          ),
+                        ),
 
-                              MultiSelectDialogField<String>(
-                                items: crewList.map((crew) {
-                                  return MultiSelectItem<String>(
-                                    crew["loginId"].toString(),
-                                    crew["name"].toString(),
-                                  );
-                                }).toList(),
-
-                                // IMPORTANT:
-                                // This preselects existing crew
-                                initialValue: dialogSelectedCrewList,
-
-                                listType: MultiSelectListType.CHIP,
-                                title: const Text("Select Crew"),
-
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    color: const Color.fromARGB(
-                                      255,
-                                      7,
-                                      59,
-                                      120,
+                        Visibility(
+                          visible: _isVisibleCrewList,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Column(
+                              children: [
+                                const Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: Text(
+                                    "CREW NAME",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Color.fromARGB(255, 7, 59, 120),
+                                      fontWeight: FontWeight.bold,
                                     ),
-                                    width: 1,
                                   ),
                                 ),
 
-                                buttonIcon: const Icon(
-                                  Icons.arrow_drop_down,
-                                  size: 40,
-                                  color: Color.fromARGB(
-                                    255,
-                                    7,
-                                    59,
-                                    120,
+                                MultiSelectDialogField<String>(
+                                  items: crewList.map((crew) {
+                                    return MultiSelectItem<String>(
+                                      crew["loginId"].toString(),
+                                      crew["name"].toString(),
+                                    );
+                                  }).toList(),
+
+                                  // IMPORTANT:
+                                  // This preselects existing crew
+                                  initialValue: dialogSelectedCrewList,
+
+                                  listType: MultiSelectListType.CHIP,
+                                  title: const Text("Select Crew"),
+
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: const Color.fromARGB(
+                                        255,
+                                        7,
+                                        59,
+                                        120,
+                                      ),
+                                      width: 1,
+                                    ),
                                   ),
-                                ),
 
-                                buttonText: const Text(
-                                  "Select Crew",
-                                  style: TextStyle(
-                                    color: Colors.black,
-                                    fontSize: 16,
+                                  buttonIcon: const Icon(
+                                    Icons.arrow_drop_down,
+                                    size: 40,
+                                    color: Color.fromARGB(255, 7, 59, 120),
                                   ),
-                                ),
 
-                                onConfirm: (values) {
-                                  setStateDialog(() {
-                                    dialogSelectedCrewList =
-                                        values.cast<String>();
+                                  buttonText: const Text(
+                                    "Select Crew",
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontSize: 16,
+                                    ),
+                                  ),
 
-                                    selectedCrewList =
-                                        List<String>.from(
-                                      dialogSelectedCrewList,
+                                  onConfirm: (values) {
+                                    setStateDialog(() {
+                                      dialogSelectedCrewList = values
+                                          .cast<String>();
+
+                                      selectedCrewList = List<String>.from(
+                                        dialogSelectedCrewList,
+                                      );
+
+                                      selectedCrewLoginID =
+                                          dialogSelectedCrewList.join(",");
+
+                                      errorMessage = null;
+
+                                      crewNames = crewList
+                                          .where(
+                                            (crew) =>
+                                                dialogSelectedCrewList.contains(
+                                                  crew["loginId"].toString(),
+                                                ),
+                                          )
+                                          .map(
+                                            (crew) => crew["name"].toString(),
+                                          )
+                                          .join(", ");
+                                    });
+
+                                    print(
+                                      "Selected Crew IDs: "
+                                      "$dialogSelectedCrewList",
                                     );
 
-                                    selectedCrewLoginID =
-                                        dialogSelectedCrewList.join(",");
+                                    print(
+                                      "Selected Crew Login IDs: "
+                                      "$selectedCrewLoginID",
+                                    );
 
-                                    errorMessage = null;
+                                    print("Selected Crew Names: $crewNames");
+                                  },
+                                ),
 
-                                    crewNames = crewList
-                                        .where(
-                                          (crew) =>
-                                              dialogSelectedCrewList.contains(
-                                            crew["loginId"].toString(),
-                                          ),
-                                        )
-                                        .map(
-                                          (crew) =>
-                                              crew["name"].toString(),
-                                        )
-                                        .join(", ");
-                                  });
-
-                                  print(
-                                    "Selected Crew IDs: "
-                                    "$dialogSelectedCrewList",
-                                  );
-
-                                  print(
-                                    "Selected Crew Login IDs: "
-                                    "$selectedCrewLoginID",
-                                  );
-
-                                  print(
-                                    "Selected Crew Names: $crewNames",
-                                  );
-                                },
-                              ),
-
-                              if (errorMessage != null)
-                                Padding(
-                                  padding:
-                                      const EdgeInsets.only(top: 8.0),
-                                  child: Text(
-                                    errorMessage!,
-                                    style: const TextStyle(
-                                      color: Colors.red,
-                                      fontSize: 14,
+                                if (errorMessage != null)
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 8.0),
+                                    child: Text(
+                                      errorMessage!,
+                                      style: const TextStyle(
+                                        color: Colors.red,
+                                        fontSize: 14,
+                                      ),
                                     ),
                                   ),
-                                ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
+                      ],
+                    ),
+
+              actions: [
+                Align(
+                  alignment: Alignment.center,
+                  child: Row(
+                    children: [
+                      _buildDialogButtonIVM(
+                        context,
+                        text: "NO",
+                        color: Colors.red,
+                        onTap: () => Navigator.pop(dialogContext),
+                      ),
+
+                      _buildDialogButtonIVM(
+                        context,
+                        text: "YES",
+                        color: Colors.green,
+                        isLoading: isSubmitting,
+                        onTap: () async {
+                          if (crewOrGF == 'Crew' &&
+                              selectedCrewLoginID.isEmpty) {
+                            setStateDialog(() {
+                              errorMessage = "Please select a crew.";
+                            });
+                            return;
+                          }
+
+                          setStateDialog(() {
+                            isSubmitting = true;
+                          });
+
+                          try {
+                            if (crewOrGF == 'Crew') {
+                              await updateFlagValueIVM(tokenNo, 2, "ASSIGNED");
+                            } else {
+                              await updateFlagValueIVM(
+                                tokenNo,
+                                1,
+                                "PENDING ZIELIES ASSIGNMENT",
+                              );
+                            }
+
+                            Navigator.pop(dialogContext);
+                          } catch (e) {
+                            print(e);
+                          } finally {
+                            setStateDialog(() {
+                              isSubmitting = false;
+                            });
+                          }
+                        },
                       ),
                     ],
                   ),
-
-            actions: [
-              Align(
-                alignment: Alignment.center,
-                child: Row(
-                  children: [
-                    _buildDialogButtonIVM(
-                      context,
-                      text: "NO",
-                      color: Colors.red,
-                      onTap: () => Navigator.pop(dialogContext),
-                    ),
-
-                    _buildDialogButtonIVM(
-                      context,
-                      text: "YES",
-                      color: Colors.green,
-                      isLoading: isSubmitting,
-                      onTap: () async {
-                        if (crewOrGF == 'Crew' &&
-                            selectedCrewLoginID.isEmpty) {
-                          setStateDialog(() {
-                            errorMessage = "Please select a crew.";
-                          });
-                          return;
-                        }
-
-                        setStateDialog(() {
-                          isSubmitting = true;
-                        });
-
-                        try {
-                          if (crewOrGF == 'Crew') {
-                            await updateFlagValueIVM(
-                              tokenNo,
-                              2,
-                              "ASSIGNED",
-                            );
-                          } else {
-                            await updateFlagValueIVM(
-                              tokenNo,
-                              1,
-                              "PENDING ZIELIES ASSIGNMENT",
-                            );
-                          }
-
-                          Navigator.pop(dialogContext);
-                        } catch (e) {
-                          print(e);
-                        } finally {
-                          setStateDialog(() {
-                            isSubmitting = false;
-                          });
-                        }
-                      },
-                    ),
-                  ],
                 ),
-              ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
 
   Future<void> fetchCrewListShare() async {
     setState(() {
