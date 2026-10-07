@@ -81,7 +81,9 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
   //---------
   List<Marker> poleMarkers = [];
   List<Marker> consumerMarkers = [];
-  List<Polyline> underGroundPolylines = [];
+  // List<Polyline> underGroundPolylines = [];
+  List<Polyline> primaryUnderGroundPolylines = [];
+  List<Polyline> secondaryUnderGroundPolylines = [];
   ////
   LatLng? selectedPopupLatLng;
   Offset? popupOffset;
@@ -124,8 +126,15 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
   bool showLayerPanel = false;
   bool expandWorkLayers = true;
   bool showSubstationLayer = true;
-  bool showOverHeadLayer = true;
-  bool showUnderGroundLayer = true;
+  // bool showOverHeadLayer = true;
+  // bool showUnderGroundLayer = true;
+  bool showPrimaryLayer = true;
+  bool showPrimaryOverHeadLayer = true;
+  bool showPrimaryUnderGroundLayer = true;
+
+  bool showSecondaryLayer = true;
+  bool showSecondaryOverHeadLayer = true;
+  bool showSecondaryUnderGroundLayer = true;
   bool showConsumerLayer = true;
   bool showPoleLayer = true;
   bool showMaintLayer = true;
@@ -676,14 +685,27 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                           //         })
                           //         .toList(),
                           //   ),
-                          if (showOverHeadLayer)
+                          // if (showOverHeadLayer)
+                          if (showPrimaryOverHeadLayer ||
+                              showSecondaryOverHeadLayer)
                             PolylineLayer(
                               polylines: overHeadPolylines.asMap().entries.expand((
                                 entry,
                               ) {
                                 // final index = entry.key;
                                 final polyline = entry.value;
+                                final bool isPrimary = polyline.service == "0";
+                                final bool isSecondary =
+                                    polyline.service == "1";
 
+                                if (isPrimary && !showPrimaryOverHeadLayer) {
+                                  return <Polyline>[];
+                                }
+
+                                if (isSecondary &&
+                                    !showSecondaryOverHeadLayer) {
+                                  return <Polyline>[];
+                                }
                                 final maintTypes = polyline.maintType
                                     .split(",")
                                     .map((e) => e.trim().toUpperCase())
@@ -825,15 +847,24 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                               }).toList(),
                             ), //////////////////////////////////added20-8-2026
                           //-------------------------
-                          if (showUnderGroundLayer)
-                            PolylineLayer(polylines: underGroundPolylines),
-                          if (showOverHeadLayer &&
+                          // if (showUnderGroundLayer)
+                          //   PolylineLayer(polylines: underGroundPolylines),
+                          if (showPrimaryUnderGroundLayer)
+                            PolylineLayer(
+                              polylines: primaryUnderGroundPolylines,
+                            ),
+
+                          if (showSecondaryUnderGroundLayer)
+                            PolylineLayer(
+                              polylines: secondaryUnderGroundPolylines,
+                            ),
+                          if ((showPrimaryOverHeadLayer ||
+                                  showSecondaryOverHeadLayer) &&
                               (workLayerVisibility["NO SPRAY"] ?? false))
                             MarkerLayer(markers: noSprayMarkers),
                           if (showConsumerLayer)
                             MarkerLayer(markers: consumerMarkers),
-                          if (showPoleLayer)
-                            MarkerLayer(markers: poleMarkers),
+                          if (showPoleLayer) MarkerLayer(markers: poleMarkers),
                           MarkerLayer(markers: _markers),
                           MarkerLayer(markers: completedMarkers),
                           MarkerLayer(markers: chatMarkers),
@@ -1185,36 +1216,177 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                                 },
                                               ),
 
+                                              // _layerTile(
+                                              //   "Overhead",
+                                              //   showOverHeadLayer,
+                                              //   (v) {
+                                              //     panelState(() {
+                                              //       showOverHeadLayer = v!;
+                                              //       showMaintLayer = v;
+                                              //       // Update all work layer checkboxes
+                                              //       workLayerVisibility
+                                              //           .updateAll(
+                                              //             (key, value) =>
+                                              //                 showOverHeadLayer,
+                                              //           );
+                                              //     });
+                                              //     setState(() {
+                                              //       _buildStatusMarkers();
+                                              //     });
+                                              //   },
+                                              // ),
+
+                                              // _layerTile(
+                                              //   "Underground",
+                                              //   showUnderGroundLayer,
+                                              //   (v) {
+                                              //     panelState(
+                                              //       () => showUnderGroundLayer =
+                                              //           v!,
+                                              //     );
+                                              //     setState(() {});
+                                              //   },
+                                              // ),
                                               _layerTile(
-                                                "Overhead",
-                                                showOverHeadLayer,
+                                                "Primary",
+                                                showPrimaryLayer,
                                                 (v) {
                                                   panelState(() {
-                                                    showOverHeadLayer = v!;
-                                                    showMaintLayer = v;
+                                                    showPrimaryLayer = v!;
+                                                    showPrimaryOverHeadLayer =
+                                                        v;
+                                                    showPrimaryUnderGroundLayer =
+                                                        v;
+                                                    showMaintLayer = v!;
                                                     // Update all work layer checkboxes
-                                                    workLayerVisibility
-                                                        .updateAll(
-                                                          (key, value) =>
-                                                              showOverHeadLayer,
-                                                        );
+                                                    if (showMaintLayer) {
+                                                      updateWorkLayerVisibilityFromMaintType(
+                                                        overHeadPolylines,
+                                                      );
+                                                    } else {
+                                                      workLayerVisibility
+                                                          .updateAll(
+                                                            (key, value) =>
+                                                                false,
+                                                          );
+                                                    }
                                                   });
-                                                  setState(() {
-                                                    _buildStatusMarkers();
-                                                  });
+                                                  setState(() {});
                                                 },
                                               ),
 
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  left: 25,
+                                                ),
+                                                child: _layerTile(
+                                                  "Overhead",
+                                                  showPrimaryOverHeadLayer,
+                                                  (v) {
+                                                    panelState(() {
+                                                      showPrimaryOverHeadLayer =
+                                                          v!;
+
+                                                      showPrimaryLayer =
+                                                          showPrimaryOverHeadLayer ||
+                                                          showPrimaryUnderGroundLayer;
+                                                      showMaintLayer = v!;
+                                                      // Update all work layer checkboxes
+                                                      if (showMaintLayer) {
+                                                        updateWorkLayerVisibilityFromMaintType(
+                                                          overHeadPolylines,
+                                                        );
+                                                      } else {
+                                                        workLayerVisibility
+                                                            .updateAll(
+                                                              (key, value) =>
+                                                                  false,
+                                                            );
+                                                      }
+                                                      ///////////////////
+                                                      // workLayerVisibility
+                                                      //     .updateAll(
+                                                      //       (key, value) =>
+                                                      //           showPrimaryOverHeadLayer,
+                                                      //     );
+                                                    });
+                                                  },
+                                                ),
+                                              ),
+
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  left: 25,
+                                                ),
+                                                child: _layerTile(
+                                                  "Underground",
+                                                  showPrimaryUnderGroundLayer,
+                                                  (v) {
+                                                    panelState(() {
+                                                      showPrimaryUnderGroundLayer =
+                                                          v!;
+
+                                                      showPrimaryLayer =
+                                                          showPrimaryOverHeadLayer ||
+                                                          showPrimaryUnderGroundLayer;
+                                                    });
+                                                  },
+                                                ),
+                                              ),
+
                                               _layerTile(
-                                                "Underground",
-                                                showUnderGroundLayer,
+                                                "Secondary",
+                                                showSecondaryLayer,
                                                 (v) {
-                                                  panelState(
-                                                    () => showUnderGroundLayer =
-                                                        v!,
-                                                  );
+                                                  panelState(() {
+                                                    showSecondaryLayer = v!;
+                                                    showSecondaryOverHeadLayer =
+                                                        v;
+                                                    showSecondaryUnderGroundLayer =
+                                                        v;
+                                                  });
                                                   setState(() {});
                                                 },
+                                              ),
+
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  left: 25,
+                                                ),
+                                                child: _layerTile(
+                                                  "Overhead",
+                                                  showSecondaryOverHeadLayer,
+                                                  (v) {
+                                                    panelState(() {
+                                                      showSecondaryOverHeadLayer =
+                                                          v!;
+
+                                                      showSecondaryLayer =
+                                                          showSecondaryOverHeadLayer ||
+                                                          showSecondaryUnderGroundLayer;
+                                                    });
+                                                  },
+                                                ),
+                                              ),
+
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  left: 25,
+                                                ),
+                                                child: _layerTile(
+                                                  "Underground",
+                                                  showSecondaryUnderGroundLayer,
+                                                  (v) {
+                                                    panelState(() {
+                                                      showSecondaryUnderGroundLayer =
+                                                          v!;
+
+                                                      showSecondaryLayer =
+                                                          showSecondaryOverHeadLayer ||
+                                                          showSecondaryUnderGroundLayer;
+                                                    });
+                                                  },
+                                                ),
                                               ),
 
                                               _layerTile(
@@ -1714,6 +1886,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
             coordinateIds: row["coordinateIds"]?.toString() ?? "",
             rework: row["rework"]?.toString() ?? "",
             completionFlag: row["completionFlag"]?.toString() ?? "",
+            service: row["service"]?.toString() ?? "",
           ),
           /////-------
         );
@@ -1844,8 +2017,9 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
 
     print("Underground rows: ${undergroundData.length}");
 
-    underGroundPolylines.clear();
-
+    // underGroundPolylines.clear();
+    primaryUnderGroundPolylines.clear();
+    secondaryUnderGroundPolylines.clear();
     Color undergroundColor = Colors.orange;
 
     // Optional: use feeder color
@@ -1863,18 +2037,38 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
       undergroundColor = const Color.fromARGB(255, 113, 68, 1);
     }
 
+    // for (var row in undergroundData) {
+    //   final wkt = row["wkt"];
+
+    //   if (wkt != null && wkt.toString().isNotEmpty) {
+    //     underGroundPolylines.add(
+    //       Polyline(
+    //         points: parseLineString(wkt),
+    //         strokeWidth: 8,
+    //         color: row["service"] == "1" ? Colors.black : undergroundColor,
+    //         pattern: StrokePattern.dashed(segments: [5, 10]),
+    //       ),
+    //     );
+    //   }
+    // }
     for (var row in undergroundData) {
       final wkt = row["wkt"];
 
       if (wkt != null && wkt.toString().isNotEmpty) {
-        underGroundPolylines.add(
-          Polyline(
-            points: parseLineString(wkt),
-            strokeWidth: 8,
-            color: row["service"] == "1" ? Colors.black : undergroundColor,
-            pattern: StrokePattern.dashed(segments: [5, 10]),
-          ),
+        final polyline = Polyline(
+          points: parseLineString(wkt),
+          strokeWidth: 8,
+          color: row["service"]?.toString() == "1"
+              ? Colors.black
+              : undergroundColor,
+          pattern: StrokePattern.dashed(segments: [5, 10]),
         );
+
+        if (row["service"]?.toString() == "0") {
+          primaryUnderGroundPolylines.add(polyline);
+        } else if (row["service"]?.toString() == "1") {
+          secondaryUnderGroundPolylines.add(polyline);
+        }
       }
     }
     ////////////////////poles////////////
@@ -2079,10 +2273,17 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
       allPoints.addAll(polyline.points);
     }
     //umder ground
-    for (final polyline in underGroundPolylines) {
+    // for (final polyline in underGroundPolylines) {
+    //   allPoints.addAll(polyline.points);
+    // }
+    // Underground points
+    for (final polyline in primaryUnderGroundPolylines) {
       allPoints.addAll(polyline.points);
     }
 
+    for (final polyline in secondaryUnderGroundPolylines) {
+      allPoints.addAll(polyline.points);
+    }
     // Pole points
     for (final marker in poleMarkers) {
       allPoints.add(marker.point);
@@ -8601,6 +8802,7 @@ class OverHeadPolylineData {
   final String assignedCrewId;
   final String rework;
   final String completionFlag;
+  final String service;
 
   OverHeadPolylineData({
     required this.phase,
@@ -8630,6 +8832,7 @@ class OverHeadPolylineData {
     required this.coordinateIds,
     required this.rework,
     required this.completionFlag,
+    required this.service,
   });
 }
 
