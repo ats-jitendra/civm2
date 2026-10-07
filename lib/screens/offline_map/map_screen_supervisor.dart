@@ -116,7 +116,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
   List<Marker> chatMarkers = [];
   List<Marker> completedMarkers = [];
-    List<Marker> noSprayMarkers = [];
+  List<Marker> noSprayMarkers = [];
   final ScrollController chatScrollController = ScrollController();
   final ScrollController _layerScrollController = ScrollController();
   Color polylineColor = Colors.grey;
@@ -214,7 +214,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     _initializeMap();
     WakelockPlus.enable();
     /////
-      cameraInit();
+    cameraInit();
     _startListeningToCompass();
   }
 
@@ -510,19 +510,21 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                             _onPolylineTap(latLng);
                           },
                           onPositionChanged: (position, hasGesture) {
-                            final zoom = position.zoom.clamp(1.0, 22.0).toDouble();
+                            final zoom = position.zoom
+                                .clamp(1.0, 22.0)
+                                .toDouble();
                             //to hide poles and consumers when extream zoom in
 
-                             final bool wasStreetLevel = _currentZoom >= 15.0;
-  final bool isStreetLevel = zoom >= 15.0;
+                            final bool wasStreetLevel = _currentZoom >= 15.0;
+                            final bool isStreetLevel = zoom >= 15.0;
 
-  if (wasStreetLevel != isStreetLevel) {
-    setState(() {
-      _currentZoom = zoom;
-    });
-  } else {
-    _currentZoom = zoom;
-  }
+                            if (wasStreetLevel != isStreetLevel) {
+                              setState(() {
+                                _currentZoom = zoom;
+                              });
+                            } else {
+                              _currentZoom = zoom;
+                            }
 
                             // if (_currentZoom != zoom) {
                             //   setState(() {
@@ -532,6 +534,14 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
 
                             if (showPopup) {
                               _updatePopupPosition();
+                            }
+                            if (_currentZoom < 15.0) {
+                              showPoleLayer = false;
+                              showConsumerLayer = false;
+                            }
+                            if (_currentZoom >= 15.0) {
+                              showPoleLayer = true;
+                              showConsumerLayer = true;
                             }
                           },
 
@@ -745,7 +755,10 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                           status == "rework completed" ||
                                           status == "final completed"
                                       ? Colors.grey
-                                      : getColorFromName(type,noSprayColor: polyline.originalColor);
+                                      : getColorFromName(
+                                          type,
+                                          noSprayColor: polyline.originalColor,
+                                        );
 
                                   return [
                                     Polyline(
@@ -774,7 +787,12 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                       status == "final completed") {
                                     visibleColors.add(Colors.grey);
                                   } else {
-                                    visibleColors.add(getColorFromName(type,noSprayColor: polyline.originalColor));
+                                    visibleColors.add(
+                                      getColorFromName(
+                                        type,
+                                        noSprayColor: polyline.originalColor,
+                                      ),
+                                    );
                                   }
                                 }
 
@@ -809,12 +827,13 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                           //-------------------------
                           if (showUnderGroundLayer)
                             PolylineLayer(polylines: underGroundPolylines),
-  if (showOverHeadLayer &&
+                          if (showOverHeadLayer &&
                               (workLayerVisibility["NO SPRAY"] ?? false))
                             MarkerLayer(markers: noSprayMarkers),
-                          if (showConsumerLayer && _currentZoom >= 15.0)
+                          if (showConsumerLayer)
                             MarkerLayer(markers: consumerMarkers),
-                          if (showPoleLayer && _currentZoom >= 15.0) MarkerLayer(markers: poleMarkers),
+                          if (showPoleLayer)
+                            MarkerLayer(markers: poleMarkers),
                           MarkerLayer(markers: _markers),
                           MarkerLayer(markers: completedMarkers),
                           MarkerLayer(markers: chatMarkers),
@@ -1728,7 +1747,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
         ),
       );
     }
-       // ================= NO SPRAY MARKERS =================
+    // ================= NO SPRAY MARKERS =================
     noSprayMarkers.clear();
 
     for (int i = 0; i < overHeadPolylines.length; i++) {
@@ -4991,7 +5010,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
       case "MINI JARRAFF":
         return const Color.fromARGB(255, 247, 19, 2);
       case "NO SPRAY":
-       ///////no spray label fix
+        ///////no spray label fix
         if (noSprayColor != null) {
           return lightenColor(noSprayColor);
         }
@@ -7837,7 +7856,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                          Row(
+                        Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Text(
@@ -7849,42 +7868,46 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                             ),
 
                             const SizedBox(width: 4),
-
-                            Expanded(
-  child: Container(
-    height: 62,
-    padding: const EdgeInsets.symmetric(
-      horizontal: 8,
-      vertical: 5,
-    ),
-    decoration: BoxDecoration(
-      color: Colors.grey.shade50,
-      borderRadius: BorderRadius.circular(6),
-      border: Border.all(
-        color: Colors.grey.shade300,
-      ),
-    ),
-    child: Scrollbar(
-      thumbVisibility: true,
-      thickness: 4,
-      radius: const Radius.circular(10),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Text(
-          data[0]['wmBF_Comme']?.toString() ?? "",
-          style: const TextStyle(
-            fontWeight: FontWeight.normal,
-            color: Colors.black,
-            height: 1.3,
-          ),
-        ),
-      ),
-    ),
-  ),
-),
+                            if (data[0]['wmBF_Comme']
+                                    ?.toString()
+                                    .trim()
+                                    .isNotEmpty ??
+                                false)
+                              Expanded(
+                                child: Container(
+                                  height: 62,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                  child: Scrollbar(
+                                    thumbVisibility: true,
+                                    thickness: 4,
+                                    radius: const Radius.circular(10),
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.vertical,
+                                      child: Text(
+                                        data[0]['wmBF_Comme']?.toString() ?? "",
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black,
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
-                      const SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Container(
                           padding: const EdgeInsets.only(
                             top: 8,

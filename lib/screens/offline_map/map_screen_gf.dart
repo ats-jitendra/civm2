@@ -633,6 +633,14 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                 if (showPopup) {
                                   _updatePopupPosition();
                                 }
+                                if (_currentZoom < 15.0) {
+                                  showPoleLayer = false;
+                                  showConsumerLayer = false;
+                                }
+                                if (_currentZoom >= 15.0) {
+                                  showPoleLayer = true;
+                                  showConsumerLayer = true;
+                                }
                               },
 
                               ////////--------------
@@ -940,9 +948,9 @@ class _MapScreenGFState extends State<MapScreenGF> {
                               if (showOverHeadLayer &&
                                   (workLayerVisibility["NO SPRAY"] ?? false))
                                 MarkerLayer(markers: noSprayMarkers),
-                              if (showConsumerLayer && _currentZoom >= 15.0)
+                              if (showConsumerLayer)
                                 MarkerLayer(markers: consumerMarkers),
-                              if (showPoleLayer && _currentZoom >= 15.0)
+                              if (showPoleLayer)
                                 MarkerLayer(markers: poleMarkers),
                               MarkerLayer(markers: _markers),
                               MarkerLayer(markers: completedMarkers),
@@ -8768,39 +8776,43 @@ class _MapScreenGFState extends State<MapScreenGF> {
                             ),
 
                             const SizedBox(width: 4),
-
-                            Expanded(
-                              child: Container(
-                                height: 62,
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade50,
-                                  borderRadius: BorderRadius.circular(6),
-                                  border: Border.all(
-                                    color: Colors.grey.shade300,
+                            if (data[0]['wmBF_Comme']
+                                    ?.toString()
+                                    .trim()
+                                    .isNotEmpty ??
+                                false)
+                              Expanded(
+                                child: Container(
+                                  height: 62,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 5,
                                   ),
-                                ),
-                                child: Scrollbar(
-                                  thumbVisibility: true,
-                                  thickness: 4,
-                                  radius: const Radius.circular(10),
-                                  child: SingleChildScrollView(
-                                    scrollDirection: Axis.vertical,
-                                    child: Text(
-                                      data[0]['wmBF_Comme']?.toString() ?? "",
-                                      style: const TextStyle(
-                                        fontWeight: FontWeight.normal,
-                                        color: Colors.black,
-                                        height: 1.3,
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                  child: Scrollbar(
+                                    thumbVisibility: true,
+                                    thickness: 4,
+                                    radius: const Radius.circular(10),
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.vertical,
+                                      child: Text(
+                                        data[0]['wmBF_Comme']?.toString() ?? "",
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black,
+                                          height: 1.3,
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
                           ],
                         ),
                         const SizedBox(height: 8),

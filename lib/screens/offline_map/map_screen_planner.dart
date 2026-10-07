@@ -131,7 +131,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
   List<Marker> chatMarkers = [];
   List<Marker> completedMarkers = [];
-    List<Marker> noSprayMarkers = [];
+  List<Marker> noSprayMarkers = [];
   final ScrollController chatScrollController = ScrollController();
   final ScrollController _layerScrollController = ScrollController();
   Color polylineColor = Colors.grey;
@@ -623,20 +623,22 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                               //   }
                               // },
                               onPositionChanged: (position, hasGesture) {
-                                final zoom = position.zoom.clamp(1.0, 22.0).toDouble();
-                            //to hide poles and consumers when extream zoom in
+                                final zoom = position.zoom
+                                    .clamp(1.0, 22.0)
+                                    .toDouble();
+                                //to hide poles and consumers when extream zoom in
 
-                                final bool wasStreetLevel = _currentZoom >= 15.0;
+                                final bool wasStreetLevel =
+                                    _currentZoom >= 15.0;
                                 final bool isStreetLevel = zoom >= 15.0;
 
-                                  if (wasStreetLevel != isStreetLevel) {
-    setState(() {
-      _currentZoom = zoom;
-    });
-  } else {
-    _currentZoom = zoom;
-  }
-
+                                if (wasStreetLevel != isStreetLevel) {
+                                  setState(() {
+                                    _currentZoom = zoom;
+                                  });
+                                } else {
+                                  _currentZoom = zoom;
+                                }
 
                                 // if (_currentZoom != zoom) {
                                 //   setState(() {
@@ -646,6 +648,14 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
 
                                 if (showPopup) {
                                   _updatePopupPosition();
+                                }
+                                if (_currentZoom < 15.0) {
+                                  showPoleLayer = false;
+                                  showConsumerLayer = false;
+                                }
+                                if (_currentZoom >= 15.0) {
+                                  showPoleLayer = true;
+                                  showConsumerLayer = true;
                                 }
                               },
                               ////////--------------
@@ -876,7 +886,11 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                               status == "rework completed" ||
                                               status == "final completed"
                                           ? Colors.grey
-                                          : getColorFromName(type,noSprayColor: polyline.originalColor);
+                                          : getColorFromName(
+                                              type,
+                                              noSprayColor:
+                                                  polyline.originalColor,
+                                            );
 
                                       return [
                                         Polyline(
@@ -906,7 +920,11 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                         visibleColors.add(Colors.grey);
                                       } else {
                                         visibleColors.add(
-                                          getColorFromName(type,noSprayColor: polyline.originalColor),
+                                          getColorFromName(
+                                            type,
+                                            noSprayColor:
+                                                polyline.originalColor,
+                                          ),
                                         );
                                       }
                                     }
@@ -942,13 +960,13 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                               //-------------------------
                               if (showUnderGroundLayer)
                                 PolylineLayer(polylines: underGroundPolylines),
-  if (showOverHeadLayer &&
-                              (workLayerVisibility["NO SPRAY"] ?? false))
-                            MarkerLayer(markers: noSprayMarkers),
+                              if (showOverHeadLayer &&
+                                  (workLayerVisibility["NO SPRAY"] ?? false))
+                                MarkerLayer(markers: noSprayMarkers),
                               // if (showConsumerLayer)
-                              if (showConsumerLayer && _currentZoom >= 15.0)
+                              if (showConsumerLayer)
                                 MarkerLayer(markers: consumerMarkers),
-                              if (showPoleLayer && _currentZoom >= 15.0)
+                              if (showPoleLayer)
                                 MarkerLayer(markers: poleMarkers),
                               MarkerLayer(markers: _markers),
                               MarkerLayer(markers: completedMarkers),
@@ -1360,7 +1378,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                                     showOverHeadLayer = v!;
                                                     showMaintLayer = v!;
                                                     // Update all work layer checkboxes
-                                                 
+
                                                     workLayerVisibility
                                                         .updateAll(
                                                           (key, value) =>
@@ -1915,7 +1933,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
         ),
       );
     }
-       // ================= NO SPRAY MARKERS =================
+    // ================= NO SPRAY MARKERS =================
     noSprayMarkers.clear();
 
     for (int i = 0; i < overHeadPolylines.length; i++) {
@@ -5398,7 +5416,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
       case "MINI JARRAFF":
         return const Color.fromARGB(255, 247, 19, 2);
       case "NO SPRAY":
-       ///////no spray label fix
+        ///////no spray label fix
         if (noSprayColor != null) {
           return lightenColor(noSprayColor);
         }
@@ -6966,39 +6984,43 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                             ),
 
                             const SizedBox(width: 4),
-
-                            Expanded(
-  child: Container(
-    height: 62,
-    padding: const EdgeInsets.symmetric(
-      horizontal: 8,
-      vertical: 5,
-    ),
-    decoration: BoxDecoration(
-      color: Colors.grey.shade50,
-      borderRadius: BorderRadius.circular(6),
-      border: Border.all(
-        color: Colors.grey.shade300,
-      ),
-    ),
-    child: Scrollbar(
-      thumbVisibility: true,
-      thickness: 4,
-      radius: const Radius.circular(10),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.vertical,
-        child: Text(
-          data[0]['wmBF_Comme']?.toString() ?? "",
-          style: const TextStyle(
-            fontWeight: FontWeight.normal,
-            color: Colors.black,
-            height: 1.3,
-          ),
-        ),
-      ),
-    ),
-  ),
-),
+                            if (data[0]['wmBF_Comme']
+                                    ?.toString()
+                                    .trim()
+                                    .isNotEmpty ??
+                                false)
+                              Expanded(
+                                child: Container(
+                                  height: 62,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                  child: Scrollbar(
+                                    thumbVisibility: true,
+                                    thickness: 4,
+                                    radius: const Radius.circular(10),
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.vertical,
+                                      child: Text(
+                                        data[0]['wmBF_Comme']?.toString() ?? "",
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black,
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                           ],
                         ),
                         const SizedBox(height: 8),

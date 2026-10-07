@@ -554,6 +554,14 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                             if (showPopup) {
                               _updatePopupPosition();
                             }
+                            if (_currentZoom < 15.0) {
+                                  showPoleLayer = false;
+                                  showConsumerLayer = false;
+                                }
+                                if (_currentZoom >= 15.0) {
+                                  showPoleLayer = true;
+                                  showConsumerLayer = true;
+                                }
                           },
                           ////////--------------
                         ),
@@ -735,9 +743,9 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                           if (showOverHeadLayer &&
                               (workLayerVisibility["NO SPRAY"] ?? false))
                             MarkerLayer(markers: noSprayMarkers),
-                          if (showConsumerLayer && _currentZoom >= 15.0)
+                          if (showConsumerLayer)
                             MarkerLayer(markers: consumerMarkers),
-                          if (showPoleLayer && _currentZoom >= 15.0) MarkerLayer(markers: poleMarkers),
+                          if (showPoleLayer) MarkerLayer(markers: poleMarkers),
                           MarkerLayer(markers: _markers),
                           //current position marker
                           MarkerLayer(markers: completedMarkers),
@@ -7407,6 +7415,7 @@ availableLines = lines
                             ),
 
                             const SizedBox(width: 4),
+                            if (data[0]['wmBF_Comme']?.toString().trim().isNotEmpty ?? false)
                             Expanded(
                               child: Container(
                                 height: 62,
