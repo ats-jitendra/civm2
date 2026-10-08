@@ -461,18 +461,18 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
             icon: const Icon(Icons.refresh),
             onPressed: () {
               loadApiData();
-                 showLayerPanel = false;
-                 expandWorkLayers = true;
-                 showSubstationLayer = true;
-                 showPrimaryLayer = true;
-                 showPrimaryOverHeadLayer = true;
-                 showPrimaryUnderGroundLayer = true;
-                 showSecondaryLayer = true;
-                 showSecondaryOverHeadLayer = true;
-                 showSecondaryUnderGroundLayer = true;
-                 showConsumerLayer = true;
-                 showPoleLayer = true;
-                 showMaintLayer = true;
+              showLayerPanel = false;
+              expandWorkLayers = true;
+              showSubstationLayer = true;
+              showPrimaryLayer = true;
+              showPrimaryOverHeadLayer = true;
+              showPrimaryUnderGroundLayer = true;
+              showSecondaryLayer = true;
+              showSecondaryOverHeadLayer = true;
+              showSecondaryUnderGroundLayer = true;
+              showConsumerLayer = true;
+              showPoleLayer = true;
+              showMaintLayer = true;
             },
           ),
         ],
@@ -630,53 +630,32 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                               onTap: (tapPosition, latLng) {
                                 _onPolylineTap(latLng);
                               },
-                              // onPositionChanged: (position, hasGesture) {
-                              //   if (showPopup) {
-                              //     _updatePopupPosition();
-                              //   }
-                              //   final zoom = position.zoom;
 
-                              //   if (zoom > _maxMapZoom) {
-                              //     _mapController.move(
-                              //       position.center,
-                              //       _maxMapZoom,
-                              //     );
-                              //   }
-                              // },
                               onPositionChanged: (position, hasGesture) {
                                 final zoom = position.zoom
                                     .clamp(1.0, 22.0)
                                     .toDouble();
                                 //to hide poles and consumers when extream zoom in
+                                final bool wasZoomLevel = _currentZoom >= 15.0;
+                                final bool isZoomLevel = zoom >= 15.0;
 
-                                final bool wasStreetLevel =
-                                    _currentZoom >= 15.0;
-                                final bool isStreetLevel = zoom >= 15.0;
-
-                                if (wasStreetLevel != isStreetLevel) {
-                                  setState(() {
-                                    _currentZoom = zoom;
-                                  });
-                                } else {
-                                  _currentZoom = zoom;
-                                }
-
-                                // if (_currentZoom != zoom) {
-                                //   setState(() {
-                                //     _currentZoom = zoom;
-                                //   });
-                                // }
+                                _currentZoom = zoom;
 
                                 if (showPopup) {
                                   _updatePopupPosition();
                                 }
-                                if (_currentZoom < 15.0) {
-                                  showPoleLayer = false;
-                                  showConsumerLayer = false;
-                                }
-                                if (_currentZoom >= 15.0) {
-                                  showPoleLayer = true;
-                                  showConsumerLayer = true;
+
+                                // Only change layer visibility when zoom crosses 15
+                                if (wasZoomLevel != isZoomLevel) {
+                                  setState(() {
+                                    if (_currentZoom < 15.0) {
+                                      showPoleLayer = false;
+                                      showConsumerLayer = false;
+                                    } else {
+                                      showPoleLayer = true;
+                                      showConsumerLayer = true;
+                                    }
+                                  });
                                 }
                               },
                               ////////--------------
@@ -1695,10 +1674,16 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                                         panelState(() {
                                                           workLayerVisibility[name] =
                                                               !workLayerVisibility[name]!;
-                                                               //////for atleast one work type selected///////
-                                                               showMaintLayer = workLayerVisibility.values.any(
-                                                                (isSelected) => isSelected,
-                                                               );
+                                                          //////for atleast one work type selected///////
+                                                          showMaintLayer =
+                                                              workLayerVisibility
+                                                                  .values
+                                                                  .any(
+                                                                    (
+                                                                      isSelected,
+                                                                    ) =>
+                                                                        isSelected,
+                                                                  );
                                                         });
                                                         setState(() {
                                                           _buildStatusMarkers();
@@ -1734,10 +1719,16 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                                                 panelState(() {
                                                                   workLayerVisibility[name] =
                                                                       value!;
-                                                                                                                                            //////for atleast one work type selected///////
-                                                                showMaintLayer = workLayerVisibility.values.any(
-                                                                (isSelected) => isSelected,
-                                                                );
+                                                                  //////for atleast one work type selected///////
+                                                                  showMaintLayer =
+                                                                      workLayerVisibility
+                                                                          .values
+                                                                          .any(
+                                                                            (
+                                                                              isSelected,
+                                                                            ) =>
+                                                                                isSelected,
+                                                                          );
                                                                 });
                                                                 setState(() {
                                                                   _buildStatusMarkers();
@@ -2581,9 +2572,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
       return availableWorkTypes.contains(key.toUpperCase());
     });
     // atleast one child work layer is selected.
-  showMaintLayer = workLayerVisibility.values.any(
-    (isSelected) => isSelected,
-  );
+    showMaintLayer = workLayerVisibility.values.any((isSelected) => isSelected);
 
     print('availableWorkTypes: $availableWorkTypes');
     print('workLayerVisibility: $workLayerVisibility');

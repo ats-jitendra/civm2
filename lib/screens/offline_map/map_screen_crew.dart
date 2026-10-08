@@ -209,7 +209,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     _initializeMap();
     WakelockPlus.enable();
     /////
-    ensureCameraInitialized();
+     ensureCameraInitialized();
     _startListeningToCompass();
   }
 
@@ -384,18 +384,18 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
             icon: const Icon(Icons.refresh),
             onPressed: () {
               loadApiData();
-               showLayerPanel = false;
-                 expandWorkLayers = true;
-                 showSubstationLayer = true;
-                 showPrimaryLayer = true;
-                 showPrimaryOverHeadLayer = true;
-                 showPrimaryUnderGroundLayer = true;
-                 showSecondaryLayer = true;
-                 showSecondaryOverHeadLayer = true;
-                 showSecondaryUnderGroundLayer = true;
-                 showConsumerLayer = true;
-                 showPoleLayer = true;
-                 showMaintLayer = true;
+              showLayerPanel = false;
+              expandWorkLayers = true;
+              showSubstationLayer = true;
+              showPrimaryLayer = true;
+              showPrimaryOverHeadLayer = true;
+              showPrimaryUnderGroundLayer = true;
+              showSecondaryLayer = true;
+              showSecondaryOverHeadLayer = true;
+              showSecondaryUnderGroundLayer = true;
+              showConsumerLayer = true;
+              showPoleLayer = true;
+              showMaintLayer = true;
             },
           ),
         ],
@@ -557,35 +557,62 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                 .clamp(1.0, 22.0)
                                 .toDouble();
                             //to hide poles and consumers when extream zoom in
-                            final bool wasStreetLevel = _currentZoom >= 15.0;
-                            final bool isStreetLevel = zoom >= 15.0;
+                            final bool wasZoomLevel = _currentZoom >= 15.0;
+                            final bool isZoomLevel = zoom >= 15.0;
 
-                            if (wasStreetLevel != isStreetLevel) {
-                              setState(() {
-                                _currentZoom = zoom;
-                              });
-                            } else {
-                              _currentZoom = zoom;
-                            }
-
-                            // if (_currentZoom != zoom) {
-                            //   setState(() {
-                            //     _currentZoom = zoom;
-                            //   });
-                            // }
+                            _currentZoom = zoom;
 
                             if (showPopup) {
                               _updatePopupPosition();
                             }
-                            if (_currentZoom < 15.0) {
-                              showPoleLayer = false;
-                              showConsumerLayer = false;
-                            }
-                            if (_currentZoom >= 15.0) {
-                              showPoleLayer = true;
-                              showConsumerLayer = true;
+
+                            // Only change layer visibility when zoom crosses 15
+                            if (wasZoomLevel != isZoomLevel) {
+                              setState(() {
+                                if (_currentZoom < 15.0) {
+                                  showPoleLayer = false;
+                                  showConsumerLayer = false;
+                                } else {
+                                  showPoleLayer = true;
+                                  showConsumerLayer = true;
+                                }
+                              });
                             }
                           },
+                          // onPositionChanged: (position, hasGesture) {
+                          //   final zoom = position.zoom
+                          //       .clamp(1.0, 22.0)
+                          //       .toDouble();
+                          //   //to hide poles and consumers when extream zoom in
+                          //   final bool wasStreetLevel = _currentZoom >= 15.0;
+                          //   final bool isStreetLevel = zoom >= 15.0;
+
+                          //   if (wasStreetLevel != isStreetLevel) {
+                          //     setState(() {
+                          //       _currentZoom = zoom;
+                          //     });
+                          //   } else {
+                          //     _currentZoom = zoom;
+                          //   }
+
+                          //   // if (_currentZoom != zoom) {
+                          //   //   setState(() {
+                          //   //     _currentZoom = zoom;
+                          //   //   });
+                          //   // }
+
+                          //   if (showPopup) {
+                          //     _updatePopupPosition();
+                          //   }
+                          //   if (_currentZoom < 15.0) {
+                          //     showPoleLayer = false;
+                          //     showConsumerLayer = false;
+                          //   }
+                          //   if (_currentZoom >= 15.0) {
+                          //     showPoleLayer = true;
+                          //     showConsumerLayer = true;
+                          //   }
+                          // },
                           ////////--------------
                         ),
                         children: [
@@ -1459,10 +1486,16 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                                         panelState(() {
                                                           workLayerVisibility[name] =
                                                               !workLayerVisibility[name]!;
-                                                               //////for atleast one work type selected///////
-                                                               showMaintLayer = workLayerVisibility.values.any(
-                                                                (isSelected) => isSelected,
-                                                               );
+                                                          //////for atleast one work type selected///////
+                                                          showMaintLayer =
+                                                              workLayerVisibility
+                                                                  .values
+                                                                  .any(
+                                                                    (
+                                                                      isSelected,
+                                                                    ) =>
+                                                                        isSelected,
+                                                                  );
                                                         });
                                                         setState(() {
                                                           _buildStatusMarkers();
@@ -1498,10 +1531,16 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                                                 panelState(() {
                                                                   workLayerVisibility[name] =
                                                                       value!;
-                                                                                                                                            //////for atleast one work type selected///////
-                                                                showMaintLayer = workLayerVisibility.values.any(
-                                                                (isSelected) => isSelected,
-                                                                );
+                                                                  //////for atleast one work type selected///////
+                                                                  showMaintLayer =
+                                                                      workLayerVisibility
+                                                                          .values
+                                                                          .any(
+                                                                            (
+                                                                              isSelected,
+                                                                            ) =>
+                                                                                isSelected,
+                                                                          );
                                                                 });
                                                                 setState(() {
                                                                   _buildStatusMarkers();
@@ -2361,9 +2400,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
       return availableWorkTypes.contains(key.toUpperCase());
     });
     // atleast one child work layer is selected.
-  showMaintLayer = workLayerVisibility.values.any(
-    (isSelected) => isSelected,
-  );
+    showMaintLayer = workLayerVisibility.values.any((isSelected) => isSelected);
 
     print('availableWorkTypes: $availableWorkTypes');
     print('workLayerVisibility: $workLayerVisibility');
@@ -5529,12 +5566,13 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
       return addedTypes.add(item["maintTypes"].toString());
     }).toList();
     // Clear current selection
-    lines.clear();
+    // lines.clear();
     // Initially everything is unchecked
     List<String> tempSelectedTypes = [];
     showDialog(
       context: context,
       builder: (dialogContext) {
+        String? selectionError;
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return Dialog(
@@ -5633,6 +5671,9 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                               print("Available : $availableLines");
                               print("Selected : $tempSelectedTypes");
                               print("Lines : $lines");
+                              if (tempSelectedTypes.isNotEmpty) {
+                                selectionError = null;
+                              }
                             });
                           },
 
@@ -5691,7 +5732,24 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                         );
                       }).toList(),
                     ),
-                    SizedBox(height: 24),
+
+                    // Your maintenance type UI here
+                    if (selectionError != null) ...[
+                      const SizedBox(height: 8),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          selectionError!,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+
+                    const SizedBox(height: 24),
 
                     Row(
                       children: [
@@ -5722,17 +5780,23 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                               ),
                             ),
                             onPressed: () {
+                              // if (tempSelectedTypes.isEmpty) {
+                              //   ScaffoldMessenger.of(context).showSnackBar(
+                              //     const SnackBar(
+                              //       content: Text(
+                              //         "Please select at least one maintenance type.",
+                              //       ),
+                              //     ),
+                              //   );
+                              //   return;
+                              // }
                               if (tempSelectedTypes.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      "Please select at least one maintenance type.",
-                                    ),
-                                  ),
-                                );
+                                setDialogState(() {
+                                  selectionError =
+                                      "Please select at least one maintenance type.";
+                                });
                                 return;
                               }
-
                               setState(() {
                                 selectedWorkTypesUpdate = List<String>.from(
                                   tempSelectedTypes,
@@ -5769,12 +5833,29 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
       );
       return;
     }
+    /////////newly added code for bug fix
+    final List<Map<String, dynamic>> selectedLines = lines
+        .where(
+          (line) => tempSelectedTypes.contains(line["maintTypes"]?.toString()),
+        )
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
+
+    // if (selectedLines.isEmpty) {
+    //   ScaffoldMessenger.of(context).showSnackBar(
+    //     const SnackBar(
+    //       content: Text("Please select at least one maintenance type."),
+    //     ),
+    //   );
+    //   return;
+    // }
+    //..................
 
     final connectivity = await Connectivity().checkConnectivity();
 
     if (!connectivity.contains(ConnectivityResult.none)) {
       try {
-        final body = {"lines": lines};
+        final body = {"lines": selectedLines};
 
         print("========== Mark As Read Request ==========");
         print(jsonEncode(body));

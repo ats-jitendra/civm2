@@ -534,35 +534,27 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                             final zoom = position.zoom
                                 .clamp(1.0, 22.0)
                                 .toDouble();
-                            //to hide poles and consumers when extream zoom in
+                          //to hide poles and consumers when extream zoom in
+                            final bool wasZoomLevel = _currentZoom >= 15.0;
+                            final bool isZoomLevel = zoom >= 15.0;
 
-                            final bool wasStreetLevel = _currentZoom >= 15.0;
-                            final bool isStreetLevel = zoom >= 15.0;
-
-                            if (wasStreetLevel != isStreetLevel) {
-                              setState(() {
-                                _currentZoom = zoom;
-                              });
-                            } else {
-                              _currentZoom = zoom;
-                            }
-
-                            // if (_currentZoom != zoom) {
-                            //   setState(() {
-                            //     _currentZoom = zoom;
-                            //   });
-                            // }
+                            _currentZoom = zoom;
 
                             if (showPopup) {
                               _updatePopupPosition();
                             }
-                            if (_currentZoom < 15.0) {
-                              showPoleLayer = false;
-                              showConsumerLayer = false;
-                            }
-                            if (_currentZoom >= 15.0) {
-                              showPoleLayer = true;
-                              showConsumerLayer = true;
+
+                            // Only change layer visibility when zoom crosses 15
+                            if (wasZoomLevel != isZoomLevel) {
+                              setState(() {
+                                if (_currentZoom < 15.0) {
+                                  showPoleLayer = false;
+                                  showConsumerLayer = false;
+                                } else {
+                                  showPoleLayer = true;
+                                  showConsumerLayer = true;
+                                }
+                              });
                             }
                           },
 

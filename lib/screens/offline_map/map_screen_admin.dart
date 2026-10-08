@@ -82,7 +82,7 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
   List<Marker> poleMarkers = [];
   List<Marker> consumerMarkers = [];
   // List<Polyline> underGroundPolylines = [];
-   List<Polyline> primaryUnderGroundPolylines = [];
+  List<Polyline> primaryUnderGroundPolylines = [];
   List<Polyline> secondaryUnderGroundPolylines = [];
   ////
   LatLng? selectedPopupLatLng;
@@ -402,18 +402,18 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
             icon: const Icon(Icons.refresh),
             onPressed: () {
               loadApiData();
-               showLayerPanel = false;
-                 expandWorkLayers = true;
-                 showSubstationLayer = true;
-                 showPrimaryLayer = true;
-                 showPrimaryOverHeadLayer = true;
-                 showPrimaryUnderGroundLayer = true;
-                 showSecondaryLayer = true;
-                 showSecondaryOverHeadLayer = true;
-                 showSecondaryUnderGroundLayer = true;
-                 showConsumerLayer = true;
-                 showPoleLayer = true;
-                 showMaintLayer = true;
+              showLayerPanel = false;
+              expandWorkLayers = true;
+              showSubstationLayer = true;
+              showPrimaryLayer = true;
+              showPrimaryOverHeadLayer = true;
+              showPrimaryUnderGroundLayer = true;
+              showSecondaryLayer = true;
+              showSecondaryOverHeadLayer = true;
+              showSecondaryUnderGroundLayer = true;
+              showConsumerLayer = true;
+              showPoleLayer = true;
+              showMaintLayer = true;
             },
           ),
         ],
@@ -535,34 +535,27 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                 .clamp(1.0, 22.0)
                                 .toDouble();
                             //to hide poles and consumers when extream zoom in
-                            final bool wasStreetLevel = _currentZoom >= 15.0;
-                            final bool isStreetLevel = zoom >= 15.0;
+                            final bool wasZoomLevel = _currentZoom >= 15.0;
+                            final bool isZoomLevel = zoom >= 15.0;
 
-                            if (wasStreetLevel != isStreetLevel) {
-                              setState(() {
-                                _currentZoom = zoom;
-                              });
-                            } else {
-                              _currentZoom = zoom;
-                            }
-
-                            // if (_currentZoom != zoom) {
-                            //   setState(() {
-                            //     _currentZoom = zoom;
-                            //   });
-                            // }
+                            _currentZoom = zoom;
 
                             if (showPopup) {
                               _updatePopupPosition();
                             }
-                            if (_currentZoom < 15.0) {
+
+                            // Only change layer visibility when zoom crosses 15
+                            if (wasZoomLevel != isZoomLevel) {
+                              setState(() {
+                                if (_currentZoom < 15.0) {
                                   showPoleLayer = false;
                                   showConsumerLayer = false;
-                                }
-                                if (_currentZoom >= 15.0) {
+                                } else {
                                   showPoleLayer = true;
                                   showConsumerLayer = true;
                                 }
+                              });
+                            }
                           },
                           ////////--------------
                         ),
@@ -695,29 +688,27 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                           //         })
                           //         .toList(),
                           //   ),
-                         // if (showOverHeadLayer)
+                          // if (showOverHeadLayer)
                           if (showPrimaryOverHeadLayer ||
-                                  showSecondaryOverHeadLayer)
+                              showSecondaryOverHeadLayer)
                             PolylineLayer(
                               polylines: overHeadPolylines.asMap().entries.expand((
                                 entry,
                               ) {
                                 // final index = entry.key;
                                 final polyline = entry.value;
-   final bool isPrimary =
-                                        polyline.service == "0";
-                                    final bool isSecondary =
-                                        polyline.service == "1";
+                                final bool isPrimary = polyline.service == "0";
+                                final bool isSecondary =
+                                    polyline.service == "1";
 
-                                    if (isPrimary &&
-                                        !showPrimaryOverHeadLayer) {
-                                      return <Polyline>[];
-                                    }
+                                if (isPrimary && !showPrimaryOverHeadLayer) {
+                                  return <Polyline>[];
+                                }
 
-                                    if (isSecondary &&
-                                        !showSecondaryOverHeadLayer) {
-                                      return <Polyline>[];
-                                    }
+                                if (isSecondary &&
+                                    !showSecondaryOverHeadLayer) {
+                                  return <Polyline>[];
+                                }
                                 final maintTypes = polyline.maintType
                                     .split(",")
                                     .map((e) => e.trim().toUpperCase())
@@ -862,22 +853,21 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                           // if (showUnderGroundLayer)
                           //   PolylineLayer(polylines: underGroundPolylines),
                           if (showPrimaryUnderGroundLayer)
-  PolylineLayer(
-    polylines: primaryUnderGroundPolylines,
-  ),
+                            PolylineLayer(
+                              polylines: primaryUnderGroundPolylines,
+                            ),
 
-if (showSecondaryUnderGroundLayer)
-  PolylineLayer(
-    polylines: secondaryUnderGroundPolylines,
-  ),
-                         if ((showPrimaryOverHeadLayer ||
-                                      showSecondaryOverHeadLayer) &&
+                          if (showSecondaryUnderGroundLayer)
+                            PolylineLayer(
+                              polylines: secondaryUnderGroundPolylines,
+                            ),
+                          if ((showPrimaryOverHeadLayer ||
+                                  showSecondaryOverHeadLayer) &&
                               (workLayerVisibility["NO SPRAY"] ?? false))
                             MarkerLayer(markers: noSprayMarkers),
                           if (showConsumerLayer)
                             MarkerLayer(markers: consumerMarkers),
-                          if (showPoleLayer)
-                            MarkerLayer(markers: poleMarkers),
+                          if (showPoleLayer) MarkerLayer(markers: poleMarkers),
                           MarkerLayer(markers: _markers),
                           MarkerLayer(markers: completedMarkers),
                           MarkerLayer(markers: chatMarkers),
@@ -1260,7 +1250,7 @@ if (showSecondaryUnderGroundLayer)
                                               //     setState(() {});
                                               //   },
                                               // ),
-   _layerTile(
+                                              _layerTile(
                                                 "Primary",
                                                 showPrimaryLayer,
                                                 (v) {
@@ -1270,19 +1260,19 @@ if (showSecondaryUnderGroundLayer)
                                                         v;
                                                     showPrimaryUnderGroundLayer =
                                                         v;
-                                                         showMaintLayer = v!;
-                                                      // Update all work layer checkboxes
-                                                      if (showMaintLayer) {
-                                                        updateWorkLayerVisibilityFromMaintType(
-                                                          overHeadPolylines,
-                                                        );
-                                                      } else {
-                                                        workLayerVisibility
-                                                            .updateAll(
-                                                              (key, value) =>
-                                                                  false,
-                                                            );
-                                                      }
+                                                    showMaintLayer = v!;
+                                                    // Update all work layer checkboxes
+                                                    if (showMaintLayer) {
+                                                      updateWorkLayerVisibilityFromMaintType(
+                                                        overHeadPolylines,
+                                                      );
+                                                    } else {
+                                                      workLayerVisibility
+                                                          .updateAll(
+                                                            (key, value) =>
+                                                                false,
+                                                          );
+                                                    }
                                                   });
                                                   setState(() {});
                                                 },
@@ -1401,7 +1391,7 @@ if (showSecondaryUnderGroundLayer)
                                                   },
                                                 ),
                                               ),
-                                            
+
                                               _layerTile(
                                                 "Consumer",
                                                 showConsumerLayer,
@@ -1507,10 +1497,16 @@ if (showSecondaryUnderGroundLayer)
                                                         panelState(() {
                                                           workLayerVisibility[name] =
                                                               !workLayerVisibility[name]!;
-                                                               //////for atleast one work type selected///////
-                                                               showMaintLayer = workLayerVisibility.values.any(
-                                                                (isSelected) => isSelected,
-                                                               );
+                                                          //////for atleast one work type selected///////
+                                                          showMaintLayer =
+                                                              workLayerVisibility
+                                                                  .values
+                                                                  .any(
+                                                                    (
+                                                                      isSelected,
+                                                                    ) =>
+                                                                        isSelected,
+                                                                  );
                                                         });
                                                         setState(() {
                                                           _buildStatusMarkers();
@@ -1546,10 +1542,16 @@ if (showSecondaryUnderGroundLayer)
                                                                 panelState(() {
                                                                   workLayerVisibility[name] =
                                                                       value!;
-                                                                                                                                            //////for atleast one work type selected///////
-                                                                showMaintLayer = workLayerVisibility.values.any(
-                                                                (isSelected) => isSelected,
-                                                                );
+                                                                  //////for atleast one work type selected///////
+                                                                  showMaintLayer =
+                                                                      workLayerVisibility
+                                                                          .values
+                                                                          .any(
+                                                                            (
+                                                                              isSelected,
+                                                                            ) =>
+                                                                                isSelected,
+                                                                          );
                                                                 });
                                                                 setState(() {
                                                                   _buildStatusMarkers();
@@ -1907,7 +1909,7 @@ if (showSecondaryUnderGroundLayer)
             coordinateIds: row["coordinateIds"]?.toString() ?? "",
             rework: row["rework"]?.toString() ?? "",
             completionFlag: row["completionFlag"]?.toString() ?? "",
-              service: row["service"]?.toString() ?? "",
+            service: row["service"]?.toString() ?? "",
           ),
           /////-------
         );
@@ -2038,7 +2040,7 @@ if (showSecondaryUnderGroundLayer)
 
     print("Underground rows: ${undergroundData.length}");
 
-  //  underGroundPolylines.clear();
+    //  underGroundPolylines.clear();
     primaryUnderGroundPolylines.clear();
     secondaryUnderGroundPolylines.clear();
     Color undergroundColor = Colors.orange;
@@ -2072,7 +2074,7 @@ if (showSecondaryUnderGroundLayer)
     //     );
     //   }
     // }
-     for (var row in undergroundData) {
+    for (var row in undergroundData) {
       final wkt = row["wkt"];
 
       if (wkt != null && wkt.toString().isNotEmpty) {
@@ -2297,7 +2299,7 @@ if (showSecondaryUnderGroundLayer)
     // for (final polyline in underGroundPolylines) {
     //   allPoints.addAll(polyline.points);
     // }
-// Underground points
+    // Underground points
     for (final polyline in primaryUnderGroundPolylines) {
       allPoints.addAll(polyline.points);
     }
@@ -2393,9 +2395,7 @@ if (showSecondaryUnderGroundLayer)
       return availableWorkTypes.contains(key.toUpperCase());
     });
     // atleast one child work layer is selected.
-  showMaintLayer = workLayerVisibility.values.any(
-    (isSelected) => isSelected,
-  );
+    showMaintLayer = workLayerVisibility.values.any((isSelected) => isSelected);
 
     print('availableWorkTypes: $availableWorkTypes');
     print('workLayerVisibility: $workLayerVisibility');
@@ -8710,7 +8710,7 @@ class OverHeadPolylineData {
   final String assignedCrewId;
   final String rework;
   final String completionFlag;
-    final String service;
+  final String service;
 
   OverHeadPolylineData({
     required this.phase,
