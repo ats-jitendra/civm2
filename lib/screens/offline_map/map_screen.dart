@@ -1427,6 +1427,7 @@ class _MapScreenState extends State<MapScreen> {
                                                                 false,
                                                           );
                                                     }
+                                                     _buildStatusMarkers();
                                                   });
                                                   setState(() {});
                                                 },
@@ -1466,6 +1467,7 @@ class _MapScreenState extends State<MapScreen> {
                                                       //       (key, value) =>
                                                       //           showPrimaryOverHeadLayer,
                                                       //     );
+                                                       _buildStatusMarkers();
                                                     });
                                                   },
                                                 ),

@@ -1273,6 +1273,7 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                                                 false,
                                                           );
                                                     }
+                                                     _buildStatusMarkers();
                                                   });
                                                   setState(() {});
                                                 },
@@ -1312,6 +1313,7 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                                       //       (key, value) =>
                                                       //           showPrimaryOverHeadLayer,
                                                       //     );
+                                                       _buildStatusMarkers();
                                                     });
                                                   },
                                                 ),

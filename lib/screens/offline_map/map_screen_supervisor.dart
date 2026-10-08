@@ -1274,6 +1274,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                                                 false,
                                                           );
                                                     }
+                                                     _buildStatusMarkers();
                                                   });
                                                   setState(() {});
                                                 },
@@ -1313,6 +1314,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                                       //       (key, value) =>
                                                       //           showPrimaryOverHeadLayer,
                                                       //     );
+                                                       _buildStatusMarkers();
                                                     });
                                                   },
                                                 ),

@@ -1450,6 +1450,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                                                 false,
                                                           );
                                                     }
+                                                     _buildStatusMarkers();
                                                   });
                                                   setState(() {});
                                                 },
@@ -1489,6 +1490,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                                       //       (key, value) =>
                                                       //           showPrimaryOverHeadLayer,
                                                       //     );
+                                                       _buildStatusMarkers();
                                                     });
                                                   },
                                                 ),

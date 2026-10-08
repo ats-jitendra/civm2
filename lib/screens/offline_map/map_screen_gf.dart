@@ -1458,6 +1458,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                                                 false,
                                                           );
                                                     }
+                                                     _buildStatusMarkers();
                                                   });
                                                   setState(() {});
                                                 },
@@ -1497,6 +1498,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                                       //       (key, value) =>
                                                       //           showPrimaryOverHeadLayer,
                                                       //     );
+                                                       _buildStatusMarkers();
                                                     });
                                                   },
                                                 ),

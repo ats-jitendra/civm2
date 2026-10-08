@@ -1263,6 +1263,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                                                 false,
                                                           );
                                                     }
+                                                     _buildStatusMarkers();
                                                   });
                                                   setState(() {});
                                                 },
@@ -1302,6 +1303,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                                       //       (key, value) =>
                                                       //           showPrimaryOverHeadLayer,
                                                       //     );
+                                                      _buildStatusMarkers();
                                                     });
                                                   },
                                                 ),
