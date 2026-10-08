@@ -198,7 +198,7 @@ class _MapScreenState extends State<MapScreen> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-    // ensureCameraInitialized();
+    ensureCameraInitialized();
     _startListeningToCompass();
     /////
   }
@@ -403,6 +403,18 @@ class _MapScreenState extends State<MapScreen> {
             icon: const Icon(Icons.refresh),
             onPressed: () {
               loadApiData();
+               showLayerPanel = false;
+                 expandWorkLayers = true;
+                 showSubstationLayer = true;
+                 showPrimaryLayer = true;
+                 showPrimaryOverHeadLayer = true;
+                 showPrimaryUnderGroundLayer = true;
+                 showSecondaryLayer = true;
+                 showSecondaryOverHeadLayer = true;
+                 showSecondaryUnderGroundLayer = true;
+                 showConsumerLayer = true;
+                 showPoleLayer = true;
+                 showMaintLayer = true;
             },
           ),
         ],

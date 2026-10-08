@@ -402,6 +402,18 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
             icon: const Icon(Icons.refresh),
             onPressed: () {
               loadApiData();
+               showLayerPanel = false;
+                 expandWorkLayers = true;
+                 showSubstationLayer = true;
+                 showPrimaryLayer = true;
+                 showPrimaryOverHeadLayer = true;
+                 showPrimaryUnderGroundLayer = true;
+                 showSecondaryLayer = true;
+                 showSecondaryOverHeadLayer = true;
+                 showSecondaryUnderGroundLayer = true;
+                 showConsumerLayer = true;
+                 showPoleLayer = true;
+                 showMaintLayer = true;
             },
           ),
         ],
