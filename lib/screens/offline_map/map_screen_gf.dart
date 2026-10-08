@@ -1678,6 +1678,10 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                                         panelState(() {
                                                           workLayerVisibility[name] =
                                                               !workLayerVisibility[name]!;
+                                                               //////for atleast one work type selected///////
+                                                               showMaintLayer = workLayerVisibility.values.any(
+                                                                (isSelected) => isSelected,
+                                                               );
                                                         });
                                                         setState(() {
                                                           _buildStatusMarkers();
@@ -1713,6 +1717,10 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                                                 panelState(() {
                                                                   workLayerVisibility[name] =
                                                                       value!;
+                                                                                                                                            //////for atleast one work type selected///////
+                                                                showMaintLayer = workLayerVisibility.values.any(
+                                                                (isSelected) => isSelected,
+                                                                );
                                                                 });
                                                                 setState(() {
                                                                   _buildStatusMarkers();
@@ -2555,6 +2563,10 @@ class _MapScreenGFState extends State<MapScreenGF> {
     workLayerVisibility.updateAll((key, value) {
       return availableWorkTypes.contains(key.toUpperCase());
     });
+    // atleast one child work layer is selected.
+  showMaintLayer = workLayerVisibility.values.any(
+    (isSelected) => isSelected,
+  );
 
     print('availableWorkTypes: $availableWorkTypes');
     print('workLayerVisibility: $workLayerVisibility');

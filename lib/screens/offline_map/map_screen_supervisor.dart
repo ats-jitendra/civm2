@@ -1494,6 +1494,10 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                                         panelState(() {
                                                           workLayerVisibility[name] =
                                                               !workLayerVisibility[name]!;
+                                                               //////for atleast one work type selected///////
+                                                               showMaintLayer = workLayerVisibility.values.any(
+                                                                (isSelected) => isSelected,
+                                                               );
                                                         });
                                                         setState(() {
                                                           _buildStatusMarkers();
@@ -1529,6 +1533,10 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                                                 panelState(() {
                                                                   workLayerVisibility[name] =
                                                                       value!;
+                                                                                                                                            //////for atleast one work type selected///////
+                                                                showMaintLayer = workLayerVisibility.values.any(
+                                                                (isSelected) => isSelected,
+                                                                );
                                                                 });
                                                                 setState(() {
                                                                   _buildStatusMarkers();
@@ -2371,6 +2379,10 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     workLayerVisibility.updateAll((key, value) {
       return availableWorkTypes.contains(key.toUpperCase());
     });
+    // atleast one child work layer is selected.
+  showMaintLayer = workLayerVisibility.values.any(
+    (isSelected) => isSelected,
+  );
 
     print('availableWorkTypes: $availableWorkTypes');
     print('workLayerVisibility: $workLayerVisibility');
