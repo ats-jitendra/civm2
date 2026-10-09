@@ -198,7 +198,7 @@ class _MapScreenState extends State<MapScreen> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-    ensureCameraInitialized();
+      ensureCameraInitialized();
     _startListeningToCompass();
     /////
   }
@@ -1427,7 +1427,7 @@ class _MapScreenState extends State<MapScreen> {
                                                                 false,
                                                           );
                                                     }
-                                                     _buildStatusMarkers();
+                                                    _buildStatusMarkers();
                                                   });
                                                   setState(() {});
                                                 },
@@ -1467,7 +1467,7 @@ class _MapScreenState extends State<MapScreen> {
                                                       //       (key, value) =>
                                                       //           showPrimaryOverHeadLayer,
                                                       //     );
-                                                       _buildStatusMarkers();
+                                                      _buildStatusMarkers();
                                                     });
                                                   },
                                                 ),
@@ -3394,6 +3394,7 @@ class _MapScreenState extends State<MapScreen> {
       context: context,
       barrierDismissible: true,
       builder: (context) {
+        String? workTypeError;
         return StatefulBuilder(
           builder: (context, setDialogState) {
             return Dialog(
@@ -3521,6 +3522,9 @@ class _MapScreenState extends State<MapScreen> {
                                       } else {
                                         selectedWorkTypes.add(entry.key);
                                       }
+                                      if (selectedWorkTypes.isNotEmpty) {
+                                        workTypeError = null;
+                                      }
 
                                       await saveWorkTypes(selectedWorkTypes);
                                       ////////////
@@ -3615,6 +3619,19 @@ class _MapScreenState extends State<MapScreen> {
                       //   "WKT",
                       //   selectedWkt,
                       // ),
+                      if (workTypeError != null) ...[
+                        const SizedBox(height: 6),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            workTypeError!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
                       const SizedBox(height: 15),
                       TextFormField(
                         controller: commentsController,
@@ -3736,7 +3753,15 @@ class _MapScreenState extends State<MapScreen> {
                               onTap: isSavingMapData
                                   ? null
                                   : () async {
+                                      if (selectedWorkTypes.isEmpty) {
+                                        setDialogState(() {
+                                          workTypeError =
+                                              "Please select at least one work type.";
+                                        });
+                                        return;
+                                      }
                                       setDialogState(() {
+                                        workTypeError = null;
                                         isSavingMapData = true;
                                       });
 
@@ -4698,7 +4723,7 @@ class _MapScreenState extends State<MapScreen> {
           },
           body: jsonEncode(mapData),
         );
-        print('jsonEncode(mapData) ${jsonEncode(mapData)}');
+        print('jsonEncode(mapData)-------- ${jsonEncode(mapData)}');
         print("response code ${response.statusCode}");
         if (response.statusCode == 200) {
           print("response code ${response.statusCode}");
@@ -5964,17 +5989,7 @@ class _MapScreenState extends State<MapScreen> {
                                 }
                               },
                               child: isUploadLoading
-                                  ? const SizedBox(
-                                      width: 20,
-                                      height: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                              Colors.white,
-                                            ),
-                                      ),
-                                    )
+                                  ? progressBar()
                                   : const Text(
                                       "Create",
                                       style: TextStyle(color: Colors.white),

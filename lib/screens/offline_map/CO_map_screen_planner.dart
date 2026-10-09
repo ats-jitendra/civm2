@@ -56,7 +56,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
   late StreamSubscription<Position> _positionStreamSubscription;
   var position; //position variable while moving marker
 
-  bool showFilters = false;
+  bool showFilters = true;
   String? selectedType = "IVM";
   // String? selectedYear = "2024";
   String? selectedYear = DateTime.now().year.toString();
@@ -82,7 +82,9 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
   //---------
   List<Marker> poleMarkers = [];
   List<Marker> consumerMarkers = [];
-  List<Polyline> underGroundPolylines = [];
+  // List<Polyline> underGroundPolylines = [];
+  List<Polyline> primaryUnderGroundPolylines = [];
+  List<Polyline> secondaryUnderGroundPolylines = [];
   ////
   LatLng? selectedPopupLatLng;
   Offset? popupOffset;
@@ -125,8 +127,15 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
   bool showLayerPanel = false;
   bool expandWorkLayers = true;
   bool showSubstationLayer = true;
-  bool showOverHeadLayer = true;
-  bool showUnderGroundLayer = true;
+  // bool showOverHeadLayer = true;
+  // bool showUnderGroundLayer = true;
+  bool showPrimaryLayer = true;
+  bool showPrimaryOverHeadLayer = true;
+  bool showPrimaryUnderGroundLayer = true;
+
+  bool showSecondaryLayer = true;
+  bool showSecondaryOverHeadLayer = true;
+  bool showSecondaryUnderGroundLayer = true;
   bool showChangeOrderLayer = true;
   bool showConsumerLayer = true;
   bool showPoleLayer = true;
@@ -195,7 +204,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-    ensureCameraInitialized();
+    // ensureCameraInitialized();
     _startListeningToCompass();
 
     /////
@@ -395,6 +404,22 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
               setState(() {
                 showFilters = !showFilters;
               });
+            },
+          ),
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: () {
+              loadApiData();
+              showLayerPanel = false;
+              showSubstationLayer = true;
+              showPrimaryLayer = true;
+              showPrimaryOverHeadLayer = true;
+              showPrimaryUnderGroundLayer = true;
+              showSecondaryLayer = true;
+              showSecondaryOverHeadLayer = true;
+              showSecondaryUnderGroundLayer = true;
+              showConsumerLayer = true;
+              showPoleLayer = true;
             },
           ),
         ],
@@ -650,13 +675,33 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                               onTap: (tapPosition, latLng) {
                                 _onPolylineTap(latLng);
 
-                                ///
-
                                 // showPopup = false;
                               },
                               onPositionChanged: (position, hasGesture) {
+                                final zoom = position.zoom
+                                    .clamp(1.0, 22.0)
+                                    .toDouble();
+                                //to hide poles and consumers when extream zoom in
+                                final bool wasZoomLevel = _currentZoom >= 15.0;
+                                final bool isZoomLevel = zoom >= 15.0;
+
+                                _currentZoom = zoom;
+
                                 if (showPopup) {
                                   _updatePopupPosition();
+                                }
+
+                                // Only change layer visibility when zoom crosses 15
+                                if (wasZoomLevel != isZoomLevel) {
+                                  setState(() {
+                                    if (_currentZoom < 15.0) {
+                                      showPoleLayer = false;
+                                      showConsumerLayer = false;
+                                    } else {
+                                      showPoleLayer = true;
+                                      showConsumerLayer = true;
+                                    }
+                                  });
                                 }
                               },
                               ////////--------------
@@ -664,46 +709,20 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                             children: [
                               TileLayer(
                                 urlTemplate: mapStyle == "street"
-                                    ? "https://tile.openstreetmap.de/{z}/{x}/{y}.png"
+                                    ? "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                    // "https://tile.openstreetmap.de/{z}/{x}/{y}.png"
                                     : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-                                // urlTemplate:
-                                //     //"https://tile.openstreetmap.de/{z}/{x}/{y}.png",
-                                //     "https://a.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png",
-                                userAgentPackageName:
-                                    "com.example.flutter_offline",
+
+                                userAgentPackageName: "com.ariespro.civm2",
                               ),
                               if (showSubstationLayer)
                                 PolygonLayer(
                                   polygons: substationBoundaryPolygons,
                                 ),
 
-                              /////
-                              //  PolylineLayer(
-                              //   polylines: overHeadPolylines,
-                              // ),
-
-                              ///plylin ontap--------
-                              // PolylineLayer(
-                              //   polylines: List.generate(overHeadPolylines.length, (
-                              //     index,
-                              //   ) {
-                              //     return Polyline(
-                              //       points: overHeadPolylines[index].points,
-                              //       strokeWidth:
-                              //           // selectedPolylineIndexes.contains(index)
-                              //           //     ? 18
-                              //           //     :
-                              //           12,
-                              //       color: selectedPolylineIndexes.contains(index)
-                              //           ? lightenColor(
-                              //               overHeadPolylines[index].originalColor,
-                              //             )
-                              //           // Colors.red
-                              //           : overHeadPolylines[index].originalColor,
-                              //     );
-                              //   }),
-                              // ),
-                              if (showOverHeadLayer)
+                              //if (showOverHeadLayer)
+                              if (showPrimaryOverHeadLayer ||
+                                  showSecondaryOverHeadLayer)
                                 PolylineLayer(
                                   polylines: overHeadPolylines.asMap().entries.expand((
                                     entry,
@@ -711,11 +730,20 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                                     final index = entry.key;
                                     final polyline = entry.value;
 
-                                    // final colors = polyline.maintType
-                                    //     .split(",")
-                                    //     .where((e) => e.trim().isNotEmpty)
-                                    //     .map(getColorFromName)
-                                    //     .toList();
+                                    final bool isPrimary =
+                                        polyline.service == "0";
+                                    final bool isSecondary =
+                                        polyline.service == "1";
+
+                                    if (isPrimary &&
+                                        !showPrimaryOverHeadLayer) {
+                                      return <Polyline>[];
+                                    }
+
+                                    if (isSecondary &&
+                                        !showSecondaryOverHeadLayer) {
+                                      return <Polyline>[];
+                                    }
                                     final visibleMaintTypes = polyline.maintType
                                         .split(",")
                                         .map((e) => e.trim())
@@ -774,7 +802,12 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                                           Polyline(
                                             points: polyline.points,
                                             strokeWidth: 16,
-                                            color: Colors.amber,
+                                            color: const Color.fromRGBO(
+                                              200,
+                                              184,
+                                              22,
+                                              1,
+                                            ),
                                           ),
                                         if (!showChangeOrderLayer)
                                           Polyline(
@@ -814,8 +847,17 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                                   }).toList(),
                                 ),
                               //-------------------------
-                              if (showUnderGroundLayer)
-                                PolylineLayer(polylines: underGroundPolylines),
+                              // if (showUnderGroundLayer)
+                              //   PolylineLayer(polylines: underGroundPolylines),
+                              if (showPrimaryUnderGroundLayer)
+                                PolylineLayer(
+                                  polylines: primaryUnderGroundPolylines,
+                                ),
+
+                              if (showSecondaryUnderGroundLayer)
+                                PolylineLayer(
+                                  polylines: secondaryUnderGroundPolylines,
+                                ),
                               if (showPoleLayer)
                                 MarkerLayer(markers: poleMarkers),
                               if (showConsumerLayer)
@@ -1188,37 +1230,158 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                                                 },
                                               ),
 
+                                              // _layerTile(
+                                              //   "Overhead",
+                                              //   showOverHeadLayer,
+                                              //   (v) {
+                                              //     panelState(() {
+                                              //       showOverHeadLayer = v!;
+                                              //       showMaintLayer = v!;
+                                              //       // Update all work layer checkboxes
+                                              //       workLayerVisibility
+                                              //           .updateAll(
+                                              //             (key, value) =>
+                                              //                 showOverHeadLayer,
+                                              //           );
+                                              //     });
+                                              //     setState(() {
+                                              //       _buildStatusMarkers();
+                                              //     });
+                                              //   },
+                                              // ),
+
+                                              // _layerTile(
+                                              //   "Underground",
+                                              //   showUnderGroundLayer,
+                                              //   (v) {
+                                              //     panelState(
+                                              //       () => showUnderGroundLayer =
+                                              //           v!,
+                                              //     );
+                                              //     setState(() {});
+                                              //   },
+                                              // ),
                                               _layerTile(
-                                                "Overhead",
-                                                showOverHeadLayer,
+                                                "Primary",
+                                                showPrimaryLayer,
                                                 (v) {
                                                   panelState(() {
-                                                    showOverHeadLayer = v!;
-                                                    showMaintLayer = v!;
-                                                    // Update all work layer checkboxes
-                                                    workLayerVisibility
-                                                        .updateAll(
-                                                          (key, value) =>
-                                                              showOverHeadLayer,
-                                                        );
+                                                    showPrimaryLayer = v!;
+                                                    showPrimaryOverHeadLayer =
+                                                        v;
+                                                    showPrimaryUnderGroundLayer =
+                                                        v;
                                                   });
-                                                  setState(() {
-                                                    _buildStatusMarkers();
-                                                  });
-                                                },
-                                              ),
-
-                                              _layerTile(
-                                                "Underground",
-                                                showUnderGroundLayer,
-                                                (v) {
-                                                  panelState(
-                                                    () => showUnderGroundLayer =
-                                                        v!,
-                                                  );
                                                   setState(() {});
                                                 },
                                               ),
+
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  left: 25,
+                                                ),
+                                                child: _layerTile(
+                                                  "Overhead",
+                                                  showPrimaryOverHeadLayer,
+                                                  (v) {
+                                                    panelState(() {
+                                                      showPrimaryOverHeadLayer =
+                                                          v!;
+
+                                                      showPrimaryLayer =
+                                                          showPrimaryOverHeadLayer ||
+                                                          showPrimaryUnderGroundLayer;
+
+                                                      updateChangeOrderLayerVisibility(
+                                                        overHeadPolylines,
+                                                      );
+
+                                                      ///////////////////
+                                                      // workLayerVisibility
+                                                      //     .updateAll(
+                                                      //       (key, value) =>
+                                                      //           showPrimaryOverHeadLayer,
+                                                      //     );
+                                                    });
+                                                  },
+                                                ),
+                                              ),
+
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  left: 25,
+                                                ),
+                                                child: _layerTile(
+                                                  "Underground",
+                                                  showPrimaryUnderGroundLayer,
+                                                  (v) {
+                                                    panelState(() {
+                                                      showPrimaryUnderGroundLayer =
+                                                          v!;
+
+                                                      showPrimaryLayer =
+                                                          showPrimaryOverHeadLayer ||
+                                                          showPrimaryUnderGroundLayer;
+                                                    });
+                                                  },
+                                                ),
+                                              ),
+
+                                              _layerTile(
+                                                "Secondary",
+                                                showSecondaryLayer,
+                                                (v) {
+                                                  panelState(() {
+                                                    showSecondaryLayer = v!;
+                                                    showSecondaryOverHeadLayer =
+                                                        v;
+                                                    showSecondaryUnderGroundLayer =
+                                                        v;
+                                                  });
+                                                  setState(() {});
+                                                },
+                                              ),
+
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  left: 25,
+                                                ),
+                                                child: _layerTile(
+                                                  "Overhead",
+                                                  showSecondaryOverHeadLayer,
+                                                  (v) {
+                                                    panelState(() {
+                                                      showSecondaryOverHeadLayer =
+                                                          v!;
+
+                                                      showSecondaryLayer =
+                                                          showSecondaryOverHeadLayer ||
+                                                          showSecondaryUnderGroundLayer;
+                                                    });
+                                                  },
+                                                ),
+                                              ),
+
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                  left: 25,
+                                                ),
+                                                child: _layerTile(
+                                                  "Underground",
+                                                  showSecondaryUnderGroundLayer,
+                                                  (v) {
+                                                    panelState(() {
+                                                      showSecondaryUnderGroundLayer =
+                                                          v!;
+
+                                                      showSecondaryLayer =
+                                                          showSecondaryOverHeadLayer ||
+                                                          showSecondaryUnderGroundLayer;
+                                                    });
+                                                  },
+                                                ),
+                                              ),
+
                                               _layerTile(
                                                 "Change Order",
                                                 showChangeOrderLayer,
@@ -1253,148 +1416,18 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                                                 },
                                               ),
 
-                                              _layerTile(
-                                                "Danger Tree Removal",
-                                                showDangerTreeRemovalLayer,
-                                                (v) {
-                                                  panelState(
-                                                    () =>
-                                                        showDangerTreeRemovalLayer =
-                                                            v!,
-                                                  );
-                                                  setState(() {});
-                                                },
-                                              ),
-
-                                              //  const Divider(),
-
-                                              // /// Expand / Collapse
-                                              // InkWell(
-                                              //   onTap: () {
-                                              //     panelState(() {
-                                              //       expandWorkLayers =
-                                              //           !expandWorkLayers;
-                                              //     });
-                                              //   },
-                                              //   child: Row(
-                                              //     children: [
-                                              //       //
-                                              //       _layerTile(
-                                              //         "IVM Work Plan",
-                                              //         showMaintLayer,
-                                              //         (v) {
-                                              //           panelState(() {
-                                              //             showMaintLayer = v!;
-                                              //             // showOverHeadLayer =
-                                              //             //     v!;
-                                              //             // Update all work layer checkboxes
-                                              //             workLayerVisibility
-                                              //                 .updateAll(
-                                              //                   (key, value) =>
-                                              //                       showMaintLayer,
-                                              //                 );
-                                              //           });
-                                              //           setState(() {
-                                              //             _buildStatusMarkers();
-                                              //           });
-                                              //         },
-                                              //       ),
-                                              //       const SizedBox(width: 10),
-                                              //       Icon(
-                                              //         expandWorkLayers
-                                              //             ? Icons
-                                              //                   .keyboard_arrow_down
-                                              //             : Icons
-                                              //                   .keyboard_arrow_right,
-                                              //       ),
-                                              //       // const Text(
-                                              //       //   "IVM Work Plan",
-                                              //       //   style: TextStyle(
-                                              //       //     fontWeight:
-                                              //       //         FontWeight.bold,
-                                              //       //     color: Colors.green,
-                                              //       //   ),
-                                              //       // ),
-                                              //     ],
-                                              //   ),
-                                              // ),
-                                              // if (expandWorkLayers) ...[
-                                              //   const SizedBox(height: 5),
-
-                                              //   ...workLayerVisibility.keys.map((
-                                              //     name,
-                                              //   ) {
-                                              //     return Padding(
-                                              //       padding:
-                                              //           const EdgeInsets.only(
-                                              //             left: 18,
-                                              //           ),
-                                              //       child: InkWell(
-                                              //         onTap: () {
-                                              //           panelState(() {
-                                              //             workLayerVisibility[name] =
-                                              //                 !workLayerVisibility[name]!;
-                                              //           });
-                                              //           setState(() {
-                                              //             _buildStatusMarkers();
-                                              //           });
-                                              //         },
-                                              //         child: Padding(
-                                              //           padding:
-                                              //               const EdgeInsets.symmetric(
-                                              //                 vertical: 2,
-                                              //               ),
-                                              //           child: Row(
-                                              //             children: [
-                                              //               Checkbox(
-                                              //                 value:
-                                              //                     workLayerVisibility[name],
-                                              //                 visualDensity:
-                                              //                     VisualDensity
-                                              //                         .compact,
-                                              //                 materialTapTargetSize:
-                                              //                     MaterialTapTargetSize
-                                              //                         .shrinkWrap,
-                                              //                 activeColor:
-                                              //                     getColorFromName(
-                                              //                       name,
-                                              //                     ),
-                                              //                 // const Color.fromARGB(
-                                              //                 //   255,
-                                              //                 //   7,
-                                              //                 //   59,
-                                              //                 //   120,
-                                              //                 // ),
-                                              //                 onChanged: (value) {
-                                              //                   panelState(() {
-                                              //                     workLayerVisibility[name] =
-                                              //                         value!;
-                                              //                   });
-                                              //                   setState(() {
-                                              //                     _buildStatusMarkers();
-                                              //                   });
-                                              //                 },
-                                              //               ),
-                                              //               const SizedBox(
-                                              //                 width: 2,
-                                              //               ),
-                                              //               Expanded(
-                                              //                 child: Text(
-                                              //                   name,
-                                              //                   style:
-                                              //                       const TextStyle(
-                                              //                         fontSize:
-                                              //                             13,
-                                              //                       ),
-                                              //                 ),
-                                              //               ),
-                                              //             ],
-                                              //           ),
-                                              //         ),
-                                              //       ),
+                                              // _layerTile(
+                                              //   "Danger Tree Removal",
+                                              //   showDangerTreeRemovalLayer,
+                                              //   (v) {
+                                              //     panelState(
+                                              //       () =>
+                                              //           showDangerTreeRemovalLayer =
+                                              //               v!,
                                               //     );
-                                              //   }).toList(),
-                                              // ],
+                                              //     setState(() {});
+                                              //   },
+                                              // ),
                                             ],
                                           ),
                                         ),
@@ -1678,12 +1711,17 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
 
       if (wkt != null && wkt.toString().isNotEmpty) {
         final points = parseLineString(row["wkt"]);
-        final maintType = (row["maintType"] ?? "").toString().trim();
+        // final maintType = (row["maintType"] ?? "").toString().trim();
 
-        // If maintType has any value, use a lighter feeder color.
-        // Otherwise use the normal feeder color.
-        final Color lineColor = maintType.isNotEmpty
-            ? lightenColor(polylineColor)
+        // // If maintType has any value, use a lighter feeder color.
+        // // Otherwise use the normal feeder color.
+        // final Color lineColor = maintType.isNotEmpty
+        //     ? lightenColor(polylineColor)
+        //     : polylineColor;
+        // service = 1 -> Black
+        // service = 0 -> Feeder color
+        final Color lineColor = row["service"] == "1"
+            ? Colors.black
             : polylineColor;
         overHeadPolylines.add(
           //       Polyline(
@@ -1718,12 +1756,14 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
             rework: row["rework"]?.toString() ?? "",
             completionFlag: row["completionFlag"]?.toString() ?? "",
             coordinateIds: row["coordinateIds"]?.toString() ?? "",
+            service: row["service"]?.toString() ?? "",
           ),
           /////-------
         );
       }
     }
     await saveSelectedLocation();
+    updateChangeOrderLayerVisibility(overHeadPolylines);
     ////
     chatMarkers.clear();
     _buildStatusMarkers();
@@ -1828,8 +1868,9 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
 
     print("Underground rows: ${undergroundData.length}");
 
-    underGroundPolylines.clear();
-
+    // underGroundPolylines.clear();
+    primaryUnderGroundPolylines.clear();
+    secondaryUnderGroundPolylines.clear();
     Color undergroundColor = Colors.orange;
 
     // Optional: use feeder color
@@ -1847,18 +1888,38 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
       undergroundColor = const Color.fromARGB(255, 113, 68, 1);
     }
 
+    // for (var row in undergroundData) {
+    //   final wkt = row["wkt"];
+
+    //   if (wkt != null && wkt.toString().isNotEmpty) {
+    //     underGroundPolylines.add(
+    //       Polyline(
+    //         points: parseLineString(wkt),
+    //         strokeWidth: 8,
+    //         color: undergroundColor,
+    //         pattern: StrokePattern.dashed(segments: [5, 10]),
+    //       ),
+    //     );
+    //   }
+    // }
     for (var row in undergroundData) {
       final wkt = row["wkt"];
 
       if (wkt != null && wkt.toString().isNotEmpty) {
-        underGroundPolylines.add(
-          Polyline(
-            points: parseLineString(wkt),
-            strokeWidth: 8,
-            color: undergroundColor,
-            pattern: StrokePattern.dashed(segments: [5, 10]),
-          ),
+        final polyline = Polyline(
+          points: parseLineString(wkt),
+          strokeWidth: 8,
+          color: row["service"]?.toString() == "1"
+              ? Colors.black
+              : undergroundColor,
+          pattern: StrokePattern.dashed(segments: [5, 10]),
         );
+
+        if (row["service"]?.toString() == "0") {
+          primaryUnderGroundPolylines.add(polyline);
+        } else if (row["service"]?.toString() == "1") {
+          secondaryUnderGroundPolylines.add(polyline);
+        }
       }
     }
     ////////////////////poles////////////
@@ -2063,7 +2124,15 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
       allPoints.addAll(polyline.points);
     }
     //umder ground
-    for (final polyline in underGroundPolylines) {
+    // for (final polyline in underGroundPolylines) {
+    //   allPoints.addAll(polyline.points);
+    // }
+    // Underground points
+    for (final polyline in primaryUnderGroundPolylines) {
+      allPoints.addAll(polyline.points);
+    }
+
+    for (final polyline in secondaryUnderGroundPolylines) {
       allPoints.addAll(polyline.points);
     }
 
@@ -3568,6 +3637,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
   // }
 
   void _showDetailsPopupUpdate(int index) async {
+    bool isSendButton = false;
     chatController.clear();
     final screenHeight = MediaQuery.of(context).size.height;
     final maxChatHeight = screenHeight * 0.30;
@@ -3634,7 +3704,38 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                           ),
                         ],
                       ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          "Select Vegetation Type",
+                          style: TextStyle(
+                            // fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Container(
+                          width: 28,
+                          height: 28,
+                          decoration: BoxDecoration(
+                            color: const Color.fromRGBO(200, 184, 22, 1),
 
+                            borderRadius: BorderRadius.circular(5),
+                            border: Border.all(color: Colors.black, width: 1),
+
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(.20),
+                                blurRadius: 2,
+                              ),
+                            ],
+                          ),
+                   
+                        ),
+                      ),
                       const SizedBox(height: 10),
                       //  if (showUpdateCardView)
                       LayoutBuilder(
@@ -3669,6 +3770,10 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                             _detailRow(
                               "Span Name",
                               overHeadPolylines[index].elementName,
+                            ),
+                            _detailRow(
+                              "Status",
+                              overHeadPolylines[index].maintStatus,
                             ),
                           ];
 
@@ -3814,30 +3919,50 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                                     child: SizedBox(
                                       height: 42,
                                       child: ElevatedButton(
-                                        onPressed: () async {
-                                          if (chatController.text
-                                              .trim()
-                                              .isEmpty) {
-                                            return;
-                                          }
+                                        onPressed: isSendButton
+                                            ? null
+                                            : () async {
+                                                setDialogState(() {
+                                                  isSendButton = true;
+                                                });
+                                                try {
+                                                  if (chatController.text
+                                                      .trim()
+                                                      .isEmpty) {
+                                                    return;
+                                                  }
 
-                                          final data = {
-                                            "lineId": overHeadPolylines[index]
-                                                .coordinateIds,
-                                            "description": chatController.text
-                                                .trim(),
-                                            "userId": id.toString(),
-                                          };
-                                          // showLoader(context);
-                                          await updateMessageData(data, () {
-                                            setDialogState(() {});
-                                          });
-                                        },
+                                                  final data = {
+                                                    "lineId":
+                                                        overHeadPolylines[index]
+                                                            .coordinateIds,
+                                                    "description":
+                                                        chatController.text
+                                                            .trim(),
+                                                    "userId": id.toString(),
+                                                  };
+                                                  // showLoader(context);
+                                                  await updateMessageData(
+                                                    data,
+                                                    () {
+                                                      setDialogState(() {});
+                                                    },
+                                                  );
+                                                } finally {
+                                                  if (mounted) {
+                                                    setDialogState(() {
+                                                      isSendButton = false;
+                                                    });
+                                                  }
+                                                }
+                                              },
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor: Colors.teal,
                                           foregroundColor: Colors.white,
                                         ),
-                                        child: const Text("Send"),
+                                        child: isSendButton
+                                            ? progressBar()
+                                            : const Text("Send"),
                                       ),
                                     ),
                                   ),
@@ -4165,7 +4290,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 80,
+            width: 130,
             child: Text(
               title,
               style: const TextStyle(fontWeight: FontWeight.bold),
@@ -4367,9 +4492,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
     if (!connectivity.contains(ConnectivityResult.none)) {
       try {
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/createMap",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/createMap"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
@@ -4586,9 +4709,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
     if (!connectivity.contains(ConnectivityResult.none)) {
       try {
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/addComment",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/addComment"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
@@ -5546,30 +5667,48 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                                 ),
                               ),
                               onPressed: () async {
+                                if (isUploadLoading) return;
+
                                 print(
                                   "Estimated Hours : ${estimatedHoursController.text}",
                                 );
 
-                                await submitChangeOrder(
-                                  oid: overHeadPolylines[index].oid.toString(),
-                                  userId: id,
-                                  substation:
-                                      overHeadPolylines[index].substation,
-                                  feeder: overHeadPolylines[index].feederName,
-                                  assignCrewType: "",
-                                  spanName:
-                                      overHeadPolylines[index].elementName,
-                                  distance: currentSelectedDistanceMiles
-                                      .toStringAsFixed(2),
-                                  estTime: estimatedHoursController.text,
-                                  year: "",
-                                  chatMsg: _commentsCOController.text,
-                                );
+                                setDialogState(() {
+                                  isUploadLoading = true;
+                                });
+
+                                try {
+                                  await submitChangeOrder(
+                                    oid: overHeadPolylines[index].oid
+                                        .toString(),
+                                    userId: id,
+                                    substation:
+                                        overHeadPolylines[index].substation,
+                                    feeder: overHeadPolylines[index].feederName,
+                                    assignCrewType: "",
+                                    spanName:
+                                        overHeadPolylines[index].elementName,
+                                    distance: currentSelectedDistanceMiles
+                                        .toStringAsFixed(2),
+                                    estTime: estimatedHoursController.text,
+                                    year: "",
+                                    chatMsg: _commentsCOController.text,
+                                  );
+                                } catch (e) {
+                                  if (context.mounted) {
+                                    setDialogState(() {
+                                      isUploadLoading = false;
+                                    });
+                                  }
+                                }
                               },
-                              child: const Text(
-                                "Create",
-                                style: TextStyle(color: Colors.white),
-                              ),
+
+                              child: isUploadLoading
+                                  ? progressBar()
+                                  : const Text(
+                                      "Create",
+                                      style: TextStyle(color: Colors.white),
+                                    ),
                             ),
                           ],
                         ),
@@ -5620,9 +5759,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
         print(jsonEncode(body));
 
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/createChangeOrder",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/createChangeOrder"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
@@ -6141,22 +6278,56 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        RichText(
-                          text: TextSpan(
-                            text: 'Comment : ',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'LCP Comment : ',
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                             ),
-                            children: [
-                              TextSpan(
-                                text: data[0]['comment'] ?? "",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.normal,
+
+                            const SizedBox(width: 4),
+                            if (data[0]['wmBF_Comme']
+                                    ?.toString()
+                                    .trim()
+                                    .isNotEmpty ??
+                                false)
+                              Expanded(
+                                child: Container(
+                                  height: 62,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 5,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.grey.shade50,
+                                    borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                  child: Scrollbar(
+                                    thumbVisibility: true,
+                                    thickness: 4,
+                                    radius: const Radius.circular(10),
+                                    child: SingleChildScrollView(
+                                      scrollDirection: Axis.vertical,
+                                      child: Text(
+                                        data[0]['wmBF_Comme']?.toString() ?? "",
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.black,
+                                          height: 1.3,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ),
-                            ],
-                          ),
+                          ],
                         ),
                         const SizedBox(height: 8),
                         Container(
@@ -7358,6 +7529,18 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
     }
   }
 
+  void updateChangeOrderLayerVisibility(List<OverHeadPolylineData> objects) {
+    final bool hasJobNo = objects.any((object) {
+      final jobNo = object.jobNo;
+      return jobNo != null && jobNo.trim().isNotEmpty;
+    });
+
+    showChangeOrderLayer = hasJobNo;
+
+    print('hasJobNo: $hasJobNo');
+    print('showChangeOrderLayer: $showChangeOrderLayer');
+  }
+
   //////////
 }
 
@@ -7397,6 +7580,7 @@ class OverHeadPolylineData {
   final String rework;
   final String completionFlag;
   final String coordinateIds;
+  final String service;
 
   OverHeadPolylineData({
     required this.phase,
@@ -7424,6 +7608,7 @@ class OverHeadPolylineData {
     required this.rework,
     required this.completionFlag,
     required this.coordinateIds,
+    required this.service,
   });
 }
 

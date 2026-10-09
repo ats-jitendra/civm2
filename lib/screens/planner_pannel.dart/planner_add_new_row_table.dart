@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:CIVM/screens/offline_map/CO_map_screen_planner.dart';
 import 'package:CIVM/screens/offline_map/map_screen.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:CIVM/repository/map_url.dart';
@@ -1623,6 +1624,20 @@ class _DrawerManuState extends State<DrawerManu> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => const MapScreen(),
+                        ),
+                      );
+                    },
+                  ),
+                   ListTile(
+                    leading: const Icon(Icons.location_searching),
+                    title: const Text('Change Order System Map'),
+                    textColor: const Color.fromARGB(255, 7, 59, 120),
+                    iconColor: const Color.fromARGB(255, 7, 59, 120),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const COMapScreenPlanner(),
                         ),
                       );
                     },

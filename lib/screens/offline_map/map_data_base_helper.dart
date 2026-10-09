@@ -282,12 +282,11 @@ class DatabaseHelper {
             "ALTER TABLE underGroundTable ADD COLUMN service TEXT",
           );
         }
-          if (oldVersion < 21) {
+        if (oldVersion < 21) {
           await db.execute(
             "ALTER TABLE commentHistoryTable ADD COLUMN flag TEXT",
           );
         }
-         
       },
     );
   }
@@ -923,6 +922,15 @@ CREATE TABLE inspectionListTable(
 
       final List<dynamic> years = dropdownData["year"] ?? [];
       final List<dynamic> substations = dropdownData["substation"] ?? [];
+      // final List<dynamic> substations = (dropdownData["substation"] ?? []).map((
+      //   item,
+      // ) {
+      //   return {
+      //     ...item,
+      //     "subName": (item["subName"] ?? "").toString().trim(),
+      //     "year": (item["year"] ?? "").toString().trim(),
+      //   };
+      // }).toList();
       final List<dynamic> feeders = dropdownData["feeder"] ?? [];
 
       Batch batch = db.batch();
@@ -1010,8 +1018,7 @@ CREATE TABLE inspectionListTable(
   Future<void> fetchAndSaveContractors() async {
     final db = await database;
 
-    final url =
-        "${AppUrl.baseUrl}login_user/getAllContractors";
+    final url = "${AppUrl.baseUrl}login_user/getAllContractors";
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
     final response = await http.get(
@@ -1053,8 +1060,7 @@ CREATE TABLE inspectionListTable(
   Future<void> fetchAndSaveMessages(String lineId) async {
     final db = await database;
 
-    final url =
-        "${AppUrl.baseUrl}login_user/getChatHistory?oId=$lineId";
+    final url = "${AppUrl.baseUrl}login_user/getChatHistory?oId=$lineId";
     print('chat url $url');
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token') ?? '';
@@ -1259,8 +1265,7 @@ CREATE TABLE inspectionListTable(
   Future<void> fetchAndSaveReworkDetails(String token, String jobNo) async {
     final db = await database;
 
-    final url =
-        "${AppUrl.baseUrl}login_user/getReworkList?token=$jobNo";
+    final url = "${AppUrl.baseUrl}login_user/getReworkList?token=$jobNo";
 
     final response = await http.get(
       Uri.parse(url),
@@ -1747,9 +1752,7 @@ CREATE TABLE inspectionListTable(
 
       try {
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/addComment",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/addComment"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
@@ -1785,45 +1788,38 @@ CREATE TABLE inspectionListTable(
 
     return syncedCount;
   }
-Future<int> updateCommentHistoryFlag(
-  String mapLocation,
-  String flag,
-) async {
-  final db = await database;
 
-  // 1. Update flag in commentHistoryTable
-  final result = await db.update(
-    'commentHistoryTable',
-    {
-      'flag': flag,
-    },
-    where: 'mapLocation = ?',
-    whereArgs: [mapLocation],
-  );
+  Future<int> updateCommentHistoryFlag(String mapLocation, String flag) async {
+    final db = await database;
 
-  // 2. Convert flag to hasComment value
-  final String hasComment = flag == "1" ? "true" : "false";
+    // 1. Update flag in commentHistoryTable
+    final result = await db.update(
+      'commentHistoryTable',
+      {'flag': flag},
+      where: 'mapLocation = ?',
+      whereArgs: [mapLocation],
+    );
 
-  // 3. Update hasComment in consumerTable
-  await db.update(
-    'consumerTable',
-    {
-      'hasComment': hasComment,
-    },
-    where: 'mapLocation = ?',
-    whereArgs: [mapLocation],
-  );
+    // 2. Convert flag to hasComment value
+    final String hasComment = flag == "1" ? "true" : "false";
 
-  print(
-    "Comment flag updated: mapLocation=$mapLocation, flag=$flag",
-  );
+    // 3. Update hasComment in consumerTable
+    await db.update(
+      'consumerTable',
+      {'hasComment': hasComment},
+      where: 'mapLocation = ?',
+      whereArgs: [mapLocation],
+    );
 
-  print(
-    "Consumer hasComment updated: mapLocation=$mapLocation, hasComment=$hasComment",
-  );
+    print("Comment flag updated: mapLocation=$mapLocation, flag=$flag");
 
-  return result;
-}
+    print(
+      "Consumer hasComment updated: mapLocation=$mapLocation, hasComment=$hasComment",
+    );
+
+    return result;
+  }
+
   ///////////////////////////////////////////
   Future<void> saveOfflineMarkAsRead(List<Map<String, dynamic>> lines) async {
     final db = await database;
@@ -1916,9 +1912,7 @@ Future<int> updateCommentHistoryFlag(
     print("offline requestBody ${jsonEncode(requestBody)}");
 
     final response = await http.post(
-      Uri.parse(
-        "${AppUrl.baseUrl}login_user/updateCompletionFlag",
-      ),
+      Uri.parse("${AppUrl.baseUrl}login_user/updateCompletionFlag"),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",
@@ -2061,9 +2055,7 @@ Future<int> updateCommentHistoryFlag(
         print("sync pending change Order Body ${jsonEncode(body)}");
 
         final response = await http.post(
-          Uri.parse(
-            "${AppUrl.baseUrl}login_user/createChangeOrder",
-          ),
+          Uri.parse("${AppUrl.baseUrl}login_user/createChangeOrder"),
           headers: {
             "Content-Type": "application/json",
             "Authorization": "Bearer $token",
@@ -2164,9 +2156,7 @@ Future<int> updateCommentHistoryFlag(
     print("sync reworkcompleted ${jsonEncode(requestBody)}");
 
     final response = await http.post(
-      Uri.parse(
-        "${AppUrl.baseUrl}login_user/updateJobStatus",
-      ),
+      Uri.parse("${AppUrl.baseUrl}login_user/updateJobStatus"),
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Bearer $token",

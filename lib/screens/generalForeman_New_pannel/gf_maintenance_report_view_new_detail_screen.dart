@@ -1000,27 +1000,29 @@ class _GFMaintenanceReportViewDetailsScreenState
                                                     //         true,
                                                     //   ),
                                                     // );
+
                                                     Navigator.push(
                                                       context,
                                                       MaterialPageRoute(
-                                                        builder: (context) =>
-                                                            MapScreenGF(
-                                                              jobNo: widget
-                                                                  .tokenNo,
-                                                              substation:
-                                                                  "${reportList[0]["subStateName"]}",
-                                                              feeder:
-                                                                  reportList[0]["feederName"]
-                                                                      .split(
-                                                                        '(',
-                                                                      )
-                                                                      .first
-                                                                      .trim(),
-                                                              visibilityFlag:  "1",
-                                                              type:  "${reportList[0]["type"]}",
-                                                              sourcePage: "maintenanceReportView",
-                                                              crew: item!.crew.toString(),
-                                                            ),
+                                                        builder: (context) => MapScreenGF(
+                                                          jobNo: widget.tokenNo,
+                                                          substation:
+                                                              "${reportList[0]["subStateName"] ?? ''}",
+                                                          feeder:
+                                                              reportList[0]["feederName"]
+                                                                  .split('(')
+                                                                  .first
+                                                                  .trim() ??
+                                                              '',
+                                                          visibilityFlag: "1",
+                                                          type:
+                                                              "${reportList[0]["type"] ?? ''}",
+                                                          sourcePage:
+                                                              "maintenanceReportView",
+                                                          crew: "",
+                                                          // crew: item!.crew
+                                                          //     .toString(),
+                                                        ),
                                                       ),
                                                     );
                                                   },
@@ -1423,10 +1425,7 @@ class _GFMaintenanceReportViewDetailsScreenState
 
     if (length == 0) {
       return const Center(
-        child: Text(
-          "",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        child: Text("", style: TextStyle(fontWeight: FontWeight.bold)),
       );
     }
 
@@ -3829,5 +3828,4 @@ class _GFMaintenanceReportViewDetailsScreenState
     if (!mounted) return;
     await checkCurrentUser();
   }
-
 }
