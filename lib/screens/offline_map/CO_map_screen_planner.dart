@@ -23,10 +23,6 @@ import 'package:intl/intl.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:mailer/mailer.dart';
 import 'package:mailer/smtp_server/gmail.dart';
-import 'package:multi_select_flutter/chip_display/multi_select_chip_display.dart';
-import 'package:multi_select_flutter/dialog/multi_select_dialog_field.dart';
-import 'package:multi_select_flutter/util/multi_select_item.dart';
-import 'package:multi_select_flutter/util/multi_select_list_type.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -35,8 +31,23 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:path/path.dart' as path;
 
+// ignore: must_be_immutable
 class COMapScreenPlanner extends StatefulWidget {
-  const COMapScreenPlanner({super.key});
+  String jobNo;
+  String substation;
+  String feeder;
+  String visibilityFlag;
+  String type;
+  String status;
+  COMapScreenPlanner({
+    super.key,
+    required this.jobNo,
+    required this.substation,
+    required this.feeder,
+    required this.visibilityFlag,
+    required this.type,
+    required this.status,
+  });
 
   @override
   State<COMapScreenPlanner> createState() => _COMapScreenPlannerState();
@@ -171,12 +182,12 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
   Future<void>? _launched;
   final TextEditingController _searchController = TextEditingController();
   List<Marker> _markerSearch = [];
-  bool _showedLocationpin = false;
+  // bool _showedLocationpin = false;
   String userTypeText = '';
   String primaryRoleText = '';
-  final TextEditingController _workOrder = TextEditingController();
+
   bool isLoadingIVM = false;
-  bool _isVisibleCrewList = false;
+
   final select_crewOrGF = ['Crew', 'General Foreman'];
   var crewOrGF = 'General Foreman';
   String selectedCrewLoginID = '';
@@ -193,10 +204,16 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
 
   StateSetter? dialogSetState;
   String coTokenNo = "";
+  bool showDetails = true;
+  bool isLoading = false;
+  String? selectedCrew;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    selectedFeeder = widget.feeder;
+    selectedSubstation = widget.substation;
+    coTokenNo = widget.jobNo;
     /////////
     _listenToConnectivity();
     ////////
@@ -204,7 +221,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-    // ensureCameraInitialized();
+     ensureCameraInitialized();
     _startListeningToCompass();
 
     /////
@@ -275,9 +292,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
   Future<void> _initializeMap() async {
     await _getCurrentLocation();
     _listenToLocationUpdates();
-    // Restore previous selection FIRST
-    await restoreSelectedLocation();
-    // _loadGeoJSONBoundary();
+
     loadApiData();
   }
 
@@ -378,18 +393,51 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
         ),
         backgroundColor: const Color.fromARGB(255, 7, 59, 120),
         actions: [
-          // IconButton(
-          //   icon: Icon(Icons.share, color: colorValue),
-          //   onPressed: () {
-          //     showCrewDialogIVM(
-          //       context,
-          //       "",
-          //       "",
-          //       // widget.jobNo.toString(),
-          //       // widget.type.toString(),
-          //     );
-          //   },
-          // ),
+          (widget.status.toString().trim().toUpperCase() ==
+                      "PENDING ZIELIES ASSIGNMENT" ||
+                  widget.status.toString().trim().toUpperCase() == "ASSIGNED")
+              ? (widget.type.toString() == 'Change Order' ||
+                        widget.type.toString() == 'Exception Maintenance' ||
+                        widget.type.toString() == 'No Exception Maintenance')
+                    ? (widget.visibilityFlag.toString() == '2')
+                          ? IconButton(
+                              icon: const Icon(
+                                Icons.share,
+                                color: Colors.green,
+                              ),
+                              onPressed: () async {
+                                showCrewDialog(
+                                  context,
+                                  widget.jobNo.toString(),
+                                );
+                              },
+                            )
+                          : IconButton(
+                              icon: const Icon(Icons.share, color: Colors.blue),
+                              onPressed: () {
+                                showCrewDialog(
+                                  context,
+                                  widget.jobNo.toString(),
+                                );
+                              },
+                            )
+                    : const Text(
+                        "",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 10,
+                        ),
+                      )
+              : Container(),
+          IconButton(
+            icon: const Icon(Icons.visibility),
+            onPressed: () {
+              setState(() {
+                showDetails = !showDetails;
+              });
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
@@ -429,224 +477,89 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
           : Column(
               children: [
                 Visibility(
-                  visible: showFilters,
+                  visible: showDetails,
                   child: Container(
-                    // margin: const EdgeInsets.all(12),
-                    padding: const EdgeInsets.all(12),
+                    padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color.fromARGB(255, 7, 59, 120),
-                      //  borderRadius: BorderRadius.circular(12),
+                      color: const Color(0xFF073B78),
                       boxShadow: [
-                        BoxShadow(color: Colors.grey.shade300, blurRadius: 6),
+                        BoxShadow(color: Colors.black12, blurRadius: 5),
                       ],
                     ),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            // Expanded(
-                            //   child:
-                            //   // _buildDropdown(
-                            //   //   "Select Type",
-                            //   //   selectedType,
-                            //   //   typeList,
-                            //   //   (value) {
-                            //   //     setState(() => selectedType = value);
-                            //   //   },
-                            //   // ),
-                            // ),
-                            // const SizedBox(width: 8),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              // flex: 2,
-                              child: _buildDropdown("Select Year", selectedYear, yearList, (
-                                value,
-                              ) async {
-                                setState(() {
-                                  selectedYear = value;
-                                });
-
-                                //  loadApiData();
-                                showLoader(context);
-                                final connectivityResult = await Connectivity()
-                                    .checkConnectivity();
-
-                                if (!connectivityResult.contains(
-                                  ConnectivityResult.none,
-                                )) {
-                                  // Internet available
-                                  await DatabaseHelper.instance
-                                      .fetchAndSaveDropdownData(
-                                        selectedYear.toString(),
-                                        selectedSubstationId.toString(),
-                                      );
-
-                                  print(
-                                    "Fetched dropdown data from API and saved to SQLite",
-                                  );
-                                } else {
-                                  print(
-                                    "Offline - Loading dropdown data from SQLite",
-                                  );
-                                }
-                                // Load dropdown values from SQLite
-                                await loadDropdownData();
-                                setState(() {
-                                  // Reset substation if it is no longer available
-                                  if (!substationList.any(
-                                    (e) => e.subName == selectedSubstation,
-                                  )) {
-                                    selectedSubstation = null;
-                                    selectedSubstationId = null;
-                                  }
-
-                                  // Reset feeder if it is no longer available
-                                  if (!feederList.contains(selectedFeeder)) {
-                                    selectedFeeder = null;
-                                  }
-
-                                  // Reset year if it is no longer available
-                                  if (!yearList.contains(selectedYear)) {
-                                    selectedYear = null;
-                                  }
-                                });
-                                Navigator.pop(context);
-                                //////////////////////////////////
-                                // setState(() {
-                                //   if (!substationList.any(
-                                //       (e) => e.subName == selectedSubstation)) {
-                                //     selectedSubstation = substationList.isNotEmpty
-                                //         ? substationList.first.subName
-                                //         : null;
-
-                                //     selectedSubstationId = substationList.isNotEmpty
-                                //         ? substationList.first.subId
-                                //         : null;
-                                //   }
-
-                                //   if (!feederList.contains(selectedFeeder)) {
-                                //     selectedFeeder = feederList.isNotEmpty
-                                //         ? feederList.first
-                                //         : null;
-                                //   }
-
-                                //   if (!yearList.contains(selectedYear)) {
-                                //     selectedYear =
-                                //         yearList.isNotEmpty ? yearList.first : null;
-                                //   }
-                                // });
-                              }),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          /// Job No
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 8,
                             ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              // flex: 3,
-                              child: _buildDropdown(
-                                "Select Substation",
-                                selectedSubstation,
-                                substationList.map((e) => e.subName).toList(),
-                                (value) {
-                                  final selected = substationList.firstWhere(
-                                    (e) => e.subName == value,
-                                  );
+                            decoration: BoxDecoration(
+                              color: Colors.orange.shade100,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.orange.shade700),
+                            ),
+                            child: Row(
+                              children: [
+                                const Icon(
+                                  Icons.badge,
+                                  color: Colors.deepOrange,
+                                  size: 18,
+                                ),
+                                const SizedBox(width: 8),
+                                const Text(
+                                  "Job No : ",
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Text(
+                                    widget.jobNo,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Colors.deepOrange,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
 
-                                  setState(() {
-                                    selectedSubstation = value;
-                                    selectedSubstationId = selected.subId;
-                                  });
+                          const SizedBox(height: 8),
 
-                                  loadApiData();
-                                },
+                          /// Substation & Feeder
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _infoTile(
+                                  Icons.location_city,
+                                  "Substation",
+                                  selectedSubstation ?? "-",
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-
-                            // Expanded(
-                            //   flex: 2,
-                            //   child: _buildDropdown(
-                            //     "Select Feeder",
-                            //     selectedFeeder,
-                            //     feederList,
-                            //     (value) {
-                            //       setState(() {
-                            //         selectedFeeder = value;
-                            //       });
-                            //       loadApiData();
-                            //     },
-                            //   ),
-                            // ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        //  Row(
-                        //       children: [
-                        //                   Expanded(
-                        //         //  flex: 2,
-                        //           child: _buildDropdown(
-                        //             "Select Feeder",
-                        //             selectedFeeder,
-                        //             feederList,
-                        //             (value) {
-                        //               setState(() {
-                        //                 selectedFeeder = value;
-                        //               });
-                        //               loadApiData();
-                        //             },
-                        //           ),
-                        //         ),
-                        //      const SizedBox(width: 8),
-                        //         Expanded(
-                        //           child:
-                        //           _buildDropdown(
-                        //             "Select Job No",
-                        //             selectedType,
-                        //             typeList,
-                        //             (value) {
-                        //               setState(() => selectedType = value);
-                        //             },
-                        //           ),
-                        //         ),
-                        //         const SizedBox(width: 8),
-                        //       ],
-                        //     ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _buildDropdown(
-                                "Select Feeder",
-                                selectedFeeder,
-                                feederList,
-                                (value) {
-                                  setState(() {
-                                    selectedFeeder = value;
-                                  });
-                                  loadApiData();
-                                },
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: _infoTile(
+                                  Icons.alt_route,
+                                  "Feeder",
+                                  selectedFeeder ?? "-",
+                                ),
                               ),
-                            ),
-
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: _buildMultiSelectDropdown(
-                                "Select Work Order",
-                                selectedTokenNos,
-                                workOrderList,
-                                (values) {
-                                  setState(() {
-                                    selectedTokenNos = values;
-                                    coTokenNo = values.join(', ');
-                                  });
-
-                                  print("Selected Token Nos: $coTokenNo");
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -786,13 +699,14 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                                           points: polyline.points,
                                           strokeWidth: 12,
                                           color:
-                                              selectedPolylineIndexes.contains(
-                                                index,
-                                              )
-                                              ? lightenColor(
-                                                  polyline.originalColor,
-                                                )
-                                              : polyline.originalColor,
+                                              // selectedPolylineIndexes.contains(
+                                              //   index,
+                                              // )
+                                              // ? lightenColor(
+                                              //     polyline.originalColor,
+                                              //   )
+                                              // :
+                                              polyline.originalColor,
                                         ),
                                       ];
                                     }
@@ -931,7 +845,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                                           onPressed: () {
                                             controller.clear();
                                             setState(() {
-                                              _showedLocationpin = false;
+                                              //   _showedLocationpin = false;
                                             });
                                           },
                                         )
@@ -977,7 +891,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                                 suggestion['geometry'],
                               );
                               setState(() {
-                                _showedLocationpin = true;
+                                //   _showedLocationpin = true;
                               });
                             },
                           ),
@@ -1762,7 +1676,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
         );
       }
     }
-    await saveSelectedLocation();
+
     updateChangeOrderLayerVisibility(overHeadPolylines);
     ////
     chatMarkers.clear();
@@ -2150,22 +2064,6 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
       allPoints.addAll(polygon.points);
     }
 
-    // if (allPoints.isNotEmpty) {
-    //   final bounds = LatLngBounds.fromPoints(allPoints);
-
-    //   _mapController.fitCamera(
-    //     CameraFit.bounds(bounds: bounds, padding: const EdgeInsets.all(40)),
-    //   );
-    //   print('data loaded---------------');
-    //   Navigator.pop(context);
-    // } else {
-    //   print('No data found---------------');
-    //   Navigator.pop(context);
-    // }
-    // ///////////////////////
-    // if (mounted) {
-    //   setState(() {});
-    // }
     bool latestObjectFound = false;
 
     if (overHeadData.isNotEmpty) {
@@ -2321,48 +2219,6 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
       print("Error moving map to latest object: $e");
       return false;
     }
-  }
-
-  Future<void> saveSelectedLocation() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    if (selectedSubstation != null) {
-      await prefs.setString("lastSelectedSubstation", selectedSubstation!);
-    }
-
-    if (selectedSubstationId != null) {
-      await prefs.setInt("lastSelectedSubstationId", selectedSubstationId!);
-    }
-
-    if (selectedFeeder != null) {
-      await prefs.setString("lastSelectedFeeder", selectedFeeder!);
-    }
-
-    print("Saved Substation: $selectedSubstation");
-    print("Saved Substation ID: $selectedSubstationId");
-    print("Saved Feeder: $selectedFeeder");
-  }
-
-  Future<void> restoreSelectedLocation() async {
-    final prefs = await SharedPreferences.getInstance();
-
-    final savedSubstation = prefs.getString("lastSelectedSubstation");
-
-    final savedSubstationId = prefs.getInt("lastSelectedSubstationId");
-
-    final savedFeeder = prefs.getString("lastSelectedFeeder");
-
-    if (!mounted) return;
-
-    setState(() {
-      selectedSubstation = savedSubstation;
-      selectedSubstationId = savedSubstationId;
-      selectedFeeder = savedFeeder;
-    });
-
-    print("Restored Substation: $selectedSubstation");
-    print("Restored Substation ID: $selectedSubstationId");
-    print("Restored Feeder: $selectedFeeder");
   }
 
   //////////////////////
@@ -3218,424 +3074,6 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
     );
   }
 
-  // void _showDetailsPopup(int index) async {
-  //   final Map<String, Color> workTypeColors = {
-  //     "JARRAFF": const Color.fromARGB(255, 96, 0, 113),
-  //     "MOWING": const Color.fromARGB(255, 113, 68, 1),
-  //     "MINI JARRAFF": const Color.fromARGB(255, 247, 19, 2),
-  //     "BYL": const Color.fromARGB(255, 2, 212, 249),
-  //     "BUCKET": Colors.orange,
-  //     "GROUND": Colors.yellow,
-  //     "CROSS-COUNTRY SPRAY": const Color.fromARGB(255, 38, 1, 247),
-  //     "ROADSIDE SPRAY": const Color.fromARGB(255, 1, 127, 5),
-  //     "NO SPRAY": const Color.fromARGB(255, 252, 199, 249),
-  //   };
-
-  //   // List<String> selectedWorkTypes = [];
-  //   //-----
-  //   //  List<String> selectedWorkTypes = await getWorkTypes();
-  //   //   print("MaintType from DB: $selectedWorkTypes");
-  //   List<String> selectedWorkTypes = [];
-
-  //   final polyline = overHeadPolylines[selectedPolylineIndex!];
-
-  //   if (polyline.maintType != null && polyline.maintType.trim().isNotEmpty) {
-  //     selectedWorkTypes = polyline.maintType.split(",");
-  //   } else {
-  //     selectedWorkTypes = await getWorkTypes();
-  //     // or selectedWorkTypes = [];
-  //   }
-
-  //   print("MaintType: $selectedWorkTypes");
-  //   final mapObjectIndex = selectedMapObjects.indexWhere(
-  //     (e) => e["oId"] == polyline.oid,
-  //   );
-
-  //   commentsController.text = mapObjectIndex != -1
-  //       ? (selectedMapObjects[mapObjectIndex]["comments"] ?? "")
-  //       : "";
-  //   showDialog(
-  //     context: context,
-  //     barrierDismissible: true,
-  //     builder: (context) {
-  //       return StatefulBuilder(
-  //         builder: (context, setDialogState) {
-  //           return Dialog(
-  //             shape: RoundedRectangleBorder(
-  //               borderRadius: BorderRadius.circular(15),
-  //             ),
-  //             child: Container(
-  //               width: 450,
-  //               padding: const EdgeInsets.all(10),
-  //               child: SingleChildScrollView(
-  //                 child: Column(
-  //                   mainAxisSize: MainAxisSize.min,
-  //                   children: [
-  //                     Row(
-  //                       children: [
-  //                         const Expanded(
-  //                           child: Text(
-  //                             "",
-  //                             style: TextStyle(
-  //                               fontWeight: FontWeight.bold,
-  //                               fontSize: 17,
-  //                             ),
-  //                           ),
-  //                         ),
-
-  //                         // Delete Icon
-  //                         InkWell(
-  //                           onTap: () {
-  //                             setState(() {
-  //                               popUp = "max";
-  //                             });
-  //                             deleteSelectedPolyline();
-  //                           },
-  //                           borderRadius: BorderRadius.circular(20),
-  //                           child: const Padding(
-  //                             padding: EdgeInsets.all(4),
-  //                             child: Icon(
-  //                               Icons.delete,
-  //                               color: Colors.red,
-  //                               size: 22,
-  //                             ),
-  //                           ),
-  //                         ),
-
-  //                         const SizedBox(
-  //                           width: 4,
-  //                         ), // <-- Change this value to adjust spacing
-  //                         // Details Icon
-  //                         InkWell(
-  //                           onTap: () {
-  //                             Navigator.pop(context);
-  //                           },
-  //                           borderRadius: BorderRadius.circular(20),
-  //                           child: const Padding(
-  //                             padding: EdgeInsets.all(4),
-  //                             child: Icon(
-  //                               Icons.fullscreen_exit,
-  //                               color: Colors.blue,
-  //                               size: 22,
-  //                             ),
-  //                           ),
-  //                         ),
-
-  //                         const SizedBox(width: 4), // <-- Change this value
-  //                         // Close Icon
-  //                         InkWell(
-  //                           onTap: () {
-  //                             Navigator.pop(context);
-  //                           },
-  //                           borderRadius: BorderRadius.circular(20),
-  //                           child: const Padding(
-  //                             padding: EdgeInsets.all(4),
-  //                             child: Icon(
-  //                               Icons.cancel_presentation_sharp,
-  //                               color: Colors.red,
-  //                               size: 22,
-  //                             ),
-  //                           ),
-  //                         ),
-  //                       ],
-  //                     ),
-
-  //                     //  const Divider(),
-  //                     _detailRow(
-  //                       "Distance",
-  //                       "${totalSelectedDistanceMiles.toStringAsFixed(2)} miles",
-  //                     ),
-  //                     _detailRow("Span Name", selectedSpanName),
-  //                     _detailRow("Work Type", selectedWorkTypes.join(", ")),
-  //                     const SizedBox(height: 10),
-
-  //                     Align(
-  //                       alignment: Alignment.centerLeft,
-  //                       child: Wrap(
-  //                         spacing: 8,
-  //                         runSpacing: 8,
-  //                         children: workTypeColors.entries.map((entry) {
-  //                           final isSelected = selectedWorkTypes.contains(
-  //                             entry.key,
-  //                           );
-
-  //                           return GestureDetector(
-  //                             onTap: () async {
-  //                               if (isSelected) {
-  //                                 selectedWorkTypes.remove(entry.key);
-  //                               } else {
-  //                                 selectedWorkTypes.add(entry.key);
-  //                               }
-
-  //                               await saveWorkTypes(selectedWorkTypes);
-  //                               ////////////
-  //                               final polyline =
-  //                                   overHeadPolylines[selectedPolylineIndex!];
-
-  //                               // final index = selectedMapObjects.indexWhere(
-  //                               //   (e) => e["oId"] == polyline.oid,
-  //                               // );
-
-  //                               // if (index != -1) {
-  //                               //   selectedMapObjects[index]["maintType"] =
-  //                               //       selectedWorkTypes.join(",");
-  //                               // }
-  //                               if (mapObjectIndex != -1) {
-  //                                 selectedMapObjects[mapObjectIndex]["maintType"] =
-  //                                     selectedWorkTypes.join(",");
-  //                               } else {
-  //                                 selectedMapObjects.add({
-  //                                   "createdById": id,
-  //                                   "contractorId": selectedForemanId,
-  //                                   "substationId": selectedSubstationId,
-  //                                   "feederName": polyline.feederName,
-  //                                   "totalMiles": totalSelectedDistanceMiles
-  //                                       .toStringAsFixed(2),
-  //                                   "maintType": selectedWorkTypes.join(","),
-  //                                   "wkt": polyline.wkt,
-  //                                   "elementName": polyline.elementName,
-  //                                   "opacity": "0.7",
-  //                                   "spanDistance": currentSelectedDistanceMiles
-  //                                       .toStringAsFixed(2),
-  //                                   "oId": polyline.oid,
-  //                                   "jobNo": polyline.jobNo,
-  //                                   "comments": commentsController.text,
-  //                                 });
-  //                               }
-  //                               print(
-  //                                 "222222 ${jsonEncode(selectedMapObjects)}",
-  //                               );
-  //                               ///////////
-  //                               setDialogState(() {});
-  //                             },
-  //                             // onTap: () {
-
-  //                             //   // setDialogState(() {
-  //                             //   //   if (isSelected) {
-  //                             //   //     selectedWorkTypes.remove(entry.key);
-  //                             //   //   } else {
-  //                             //   //     selectedWorkTypes.add(entry.key);
-  //                             //   //   }
-  //                             //   // });
-  //                             // },
-  //                             child: Container(
-  //                               width: 28,
-  //                               height: 28,
-  //                               decoration: BoxDecoration(
-  //                                 color: entry.value,
-  //                                 border: Border.all(
-  //                                   color: isSelected
-  //                                       ? Colors.black
-  //                                       : Colors.grey,
-  //                                   width: isSelected ? 3 : 1,
-  //                                 ),
-  //                                 borderRadius: BorderRadius.circular(4),
-  //                               ),
-  //                               child: isSelected
-  //                                   ? const Icon(
-  //                                       Icons.check,
-  //                                       color: Colors.white,
-  //                                       size: 18,
-  //                                     )
-  //                                   : null,
-  //                             ),
-  //                           );
-  //                         }).toList(),
-  //                       ),
-  //                     ),
-  //                     // _detailRow(
-  //                     //   "WKT",
-  //                     //   selectedWkt,
-  //                     // ),
-  //                     const SizedBox(height: 15),
-  //                     TextFormField(
-  //                       controller: commentsController,
-  //                       maxLines: null,
-  //                       textInputAction: TextInputAction.done,
-  //                       onChanged: (value) {
-  //                         if (mapObjectIndex != -1) {
-  //                           selectedMapObjects[mapObjectIndex]["comments"] =
-  //                               value;
-  //                         }
-
-  //                         print(jsonEncode(selectedMapObjects));
-  //                       },
-  //                       decoration: InputDecoration(
-  //                         labelText: "Comments",
-  //                         hintText: "Write Your comments Here",
-  //                         border: OutlineInputBorder(
-  //                           borderRadius: BorderRadius.circular(8),
-  //                         ),
-  //                         contentPadding: const EdgeInsets.all(12),
-  //                       ),
-  //                     ),
-  //                     const Divider(),
-  //                     const SizedBox(height: 10),
-
-  //                     _buildDropdownField(
-  //                       hint: "Plan Type",
-  //                       value: selectedPlanType,
-  //                       items: planTypeList,
-  //                       onChanged: (value) {
-  //                         setDialogState(() {
-  //                           selectedPlanType = value;
-  //                         });
-  //                       },
-  //                     ),
-
-  //                     const SizedBox(height: 10),
-
-  //                     _buildDropdownField(
-  //                       hint: "Type",
-  //                       value: selectedType2,
-  //                       items: typeList2,
-  //                       onChanged: (value) {
-  //                         setDialogState(() {
-  //                           selectedType2 = value;
-  //                         });
-  //                       },
-  //                     ),
-
-  //                     const SizedBox(height: 10),
-
-  //                     _buildDropdownField(
-  //                       hint: "Contractor Company",
-  //                       value: selectedContractor,
-  //                       items: contractorList,
-  //                       onChanged: (value) {
-  //                         setDialogState(() {
-  //                           selectedContractor = value;
-  //                         });
-  //                       },
-  //                     ),
-
-  //                     const SizedBox(height: 10),
-
-  //                     // _buildDropdownField(
-  //                     //   hint: "Assign Foreman",
-  //                     //   value: selectedForeman,
-  //                     //   items: foremanList,
-  //                     //   onChanged: (value) {
-  //                     //     setDialogState(() {
-  //                     //       selectedForeman = value;
-  //                     //     });
-  //                     //   },
-  //                     // ),
-  //                     DropdownButtonFormField<int>(
-  //                       initialValue: selectedForemanId,
-  //                       decoration: InputDecoration(
-  //                         labelText: "Assign Foreman",
-  //                         border: OutlineInputBorder(
-  //                           borderRadius: BorderRadius.circular(8),
-  //                         ),
-  //                         contentPadding: const EdgeInsets.symmetric(
-  //                           horizontal: 12,
-  //                           vertical: 10,
-  //                         ),
-  //                       ),
-  //                       items: foremanList.map((item) {
-  //                         return DropdownMenuItem<int>(
-  //                           value: item["contractorId"],
-  //                           child: Text("${item["fName"]}"),
-  //                         );
-  //                       }).toList(),
-  //                       onChanged: (value) {
-  //                         setDialogState(() {
-  //                           selectedForemanId = value;
-
-  //                           final selectedItem = foremanList.firstWhere(
-  //                             (e) => e["contractorId"] == value,
-  //                           );
-
-  //                           selectedForeman = "${selectedItem["fName"]}}";
-  //                           // Update all selected map objects
-  //                           for (var item in selectedMapObjects) {
-  //                             item["contractorId"] = selectedForemanId;
-  //                           }
-
-  //                           print("selectedForemanId: $selectedForemanId");
-  //                           print(jsonEncode(selectedMapObjects));
-  //                         });
-  //                       },
-  //                     ),
-
-  //                     const SizedBox(height: 20),
-
-  //                     Row(
-  //                       children: [
-  //                         SizedBox(
-  //                           //width: double.infinity,
-  //                           child: InkWell(
-  //                             onTap: () async {
-  //                               await submitMapData(selectedMapObjects);
-  //                               // Navigator.pop(context);
-  //                             },
-  //                             borderRadius: BorderRadius.circular(8),
-  //                             child: Container(
-  //                               height: 40,
-  //                               width: 90,
-  //                               alignment: Alignment.center,
-  //                               decoration: BoxDecoration(
-  //                                 color: Colors.green,
-  //                                 borderRadius: BorderRadius.circular(8),
-  //                               ),
-  //                               child: const Text(
-  //                                 "Save",
-  //                                 style: TextStyle(
-  //                                   color: Colors.white,
-  //                                   fontSize: 16,
-  //                                   fontWeight: FontWeight.bold,
-  //                                 ),
-  //                               ),
-  //                             ),
-  //                           ),
-  //                         ),
-  //                         const SizedBox(width: 10),
-
-  //                         Align(
-  //                           alignment: Alignment.center,
-  //                           child: InkWell(
-  //                             onTap: () async {
-  //                               showCreateChangeOrderDialog(index);
-  //                             },
-  //                             borderRadius: BorderRadius.circular(8),
-  //                             child: Container(
-  //                               height: 40,
-  //                               width: 180,
-  //                               alignment: Alignment.center,
-  //                               decoration: BoxDecoration(
-  //                                 color: const Color.fromARGB(
-  //                                   255,
-  //                                   34,
-  //                                   113,
-  //                                   249,
-  //                                 ),
-  //                                 borderRadius: BorderRadius.circular(8),
-  //                               ),
-  //                               child: const Text(
-  //                                 "Create Change Order",
-  //                                 style: TextStyle(
-  //                                   color: Colors.white,
-  //                                   fontSize: 16,
-  //                                   fontWeight: FontWeight.bold,
-  //                                 ),
-  //                               ),
-  //                             ),
-  //                           ),
-  //                         ),
-  //                       ],
-  //                     ),
-  //                   ],
-  //                 ),
-  //               ),
-  //             ),
-  //           );
-  //         },
-  //       );
-  //     },
-  //   );
-  // }
-
   void _showDetailsPopupUpdate(int index) async {
     bool isSendButton = false;
     chatController.clear();
@@ -3686,7 +3124,47 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                               ),
                             ),
                           ),
+                          InkWell(
+                            onTap: () async {
+                              showConfirmDialog(
+                                status: "",
+                                message:
+                                    "Are you sure you want to remove this line?",
+                                context: context,
+                                yesButtonColor: Colors.orange,
+                                icon: Icons.warning_amber_rounded,
+                                onTapYes: () async {
+                                  await deleteChangeOrder(
+                                    workOrder: widget.jobNo,
+                                    userId: id,
+                                  );
+                                },
+                              );
+                              // setDialogState(() {
+                              //   isLoadingDelete = true;
+                              // });
 
+                              // await deleteChangeOrder(
+                              //   workOrder: widget.jobNo,
+                              //   userId: id,
+                              // );
+
+                              // setDialogState(() {
+                              //   isLoadingDelete = false;
+                              // });
+                            },
+                            borderRadius: BorderRadius.circular(20),
+                            child: Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: const Icon(
+                                Icons.delete,
+                                color: Colors.red,
+                                size: 22,
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 4),
                           // Close Button
                           InkWell(
                             onTap: () {
@@ -3733,7 +3211,6 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                               ),
                             ],
                           ),
-                   
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -3744,29 +3221,21 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
 
                           final details = [
                             _detailRow(
-                              "Estimated Time",
-                              overHeadPolylines[index].estTime,
+                              "Maint Type",
+                              overHeadPolylines[index].type,
                             ),
                             _detailRow(
                               "Job No",
                               overHeadPolylines[index].jobNo,
                             ),
                             _detailRow(
-                              "Maintenance Type",
-                              overHeadPolylines[index].type,
+                              "Estimated Time",
+                              overHeadPolylines[index].estTime,
                             ),
-                            // _detailRow(
-                            //   "Distance",
-                            //   "${overHeadPolylines[index].spanDistanceApi} miles",
-                            // ),
-                            // _detailRow(
-                            //   "Total Distance",
-                            //   "${overHeadPolylines[index].totalMilesApi} miles",
-                            // ),
-                            // _detailRow(
-                            //   "Create Date",
-                            //   formatDate(overHeadPolylines[index].createDate),
-                            // ),
+                            _detailRow(
+                              "Create Date",
+                              formatDate(overHeadPolylines[index].createDate),
+                            ),
                             _detailRow(
                               "Span Name",
                               overHeadPolylines[index].elementName,
@@ -6718,409 +6187,6 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
         });
   }
 
-  bool isSubmitting = false; // loader state for YES button
-  List<String> selectedCrewList = [];
-  void showCrewDialogIVM(
-    BuildContext context,
-    String tokenNo,
-    String type,
-  ) async {
-    await getWorkOrderList();
-    await fetchCrewListShare(); // Fetch crew list before showing the dialog
-
-    // String? selectedCrew; // Local state for dropdown selection
-    String? errorMessage; // To show validation error message
-    _workOrder.text = '${tokenNo} - ${type}';
-    print('_workOrder.text ${_workOrder.text}');
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            return AlertDialog(
-              title: const Text(
-                "SELECT CREW",
-                style: TextStyle(
-                  fontSize: 20.0,
-                  color: Color.fromARGB(255, 7, 59, 120),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              content: isLoadingIVM
-                  ? const Center(child: CircularProgressIndicator())
-                  : Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "WORK ORDER",
-                            style: TextStyle(
-                              fontSize: 16.0,
-                              color: Color.fromARGB(255, 7, 59, 120),
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: MultiSelectDialogField<String>(
-                              items: workOrderList.map((item) {
-                                final tokenNo = item["tokenNo"].toString();
-                                final type = item["type"].toString();
-
-                                return MultiSelectItem<String>(
-                                  tokenNo,
-                                  "$tokenNo -- $type",
-                                );
-                              }).toList(),
-
-                              title: const Text(
-                                "Select Work Order",
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 7, 59, 120),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-
-                              searchable: true,
-
-                              // Reduce the dialog height
-                              dialogHeight: workOrderList.length == 1
-                                  ? 230
-                                  : workOrderList.length <= 3
-                                  ? 300
-                                  : 450,
-
-                              dialogWidth:
-                                  MediaQuery.of(context).size.width * 0.90,
-
-                              buttonText: const Text(
-                                "Select Work Order",
-                                style: TextStyle(
-                                  color: Color.fromARGB(255, 7, 59, 120),
-                                  fontSize: 16,
-                                ),
-                              ),
-
-                              buttonIcon: const Icon(
-                                Icons.arrow_drop_down,
-                                size: 40,
-                                color: Color.fromARGB(255, 7, 59, 120),
-                              ),
-
-                              decoration: BoxDecoration(
-                                border: Border.all(
-                                  color: const Color.fromARGB(255, 7, 59, 120),
-                                ),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-
-                              itemsTextStyle: const TextStyle(
-                                color: Color.fromARGB(255, 7, 59, 120),
-                                fontSize: 13,
-                              ),
-
-                              selectedItemsTextStyle: const TextStyle(
-                                color: Color.fromARGB(255, 7, 59, 120),
-                                fontSize: 13,
-                              ),
-
-                              onConfirm: (values) {
-                                setState(() {
-                                  selectedWorkOrders = values;
-                                  // Save selected tokenNo values
-                                  selectedTokenNos = values;
-                                  // Display selected token numbers in the field
-                                  tokenNo = selectedTokenNos.join(', ');
-                                });
-
-                                print("Selected Token Nos-----:  $tokenNo");
-                              },
-                            ),
-                          ),
-                        ),
-
-                        const Padding(
-                          padding: EdgeInsets.only(top: 8.0),
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: Text(
-                              // "BUDGET TYPE*",
-                              "SHARE WITH*",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Color.fromARGB(255, 7, 59, 120),
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Padding(
-                            padding: const EdgeInsets.all(2.0),
-                            child: DropdownButtonFormField<String>(
-                              hint: const Text('-Select-'),
-                              dropdownColor: Colors.white,
-                              value: crewOrGF,
-                              style: const TextStyle(
-                                color: Color.fromARGB(255, 7, 59, 120),
-                                fontSize: 16,
-                              ),
-                              icon: const Icon(
-                                Icons.arrow_drop_down,
-                                color: Color.fromARGB(255, 7, 59, 120),
-                                size: 40,
-                              ),
-                              decoration: const InputDecoration(
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Color.fromARGB(255, 7, 59, 120),
-                                  ),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Color.fromARGB(255, 7, 59, 120),
-                                  ),
-                                ),
-                              ),
-                              isExpanded: true,
-                              items: select_crewOrGF
-                                  .map(buildMenuItem)
-                                  .toList(),
-                              onChanged: (value) {
-                                setStateDialog(() {
-                                  crewOrGF = value!;
-                                  _isVisibleCrewList =
-                                      (crewOrGF ==
-                                      'Crew'); // Correct way to update visibility
-                                });
-                              },
-                              validator: (value) =>
-                                  value == null ? 'field required' : null,
-                            ),
-                          ),
-                        ),
-                        Visibility(
-                          visible: _isVisibleCrewList,
-                          child: Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Column(
-                              children: [
-                                const Align(
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    "CREW NAME",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Color.fromARGB(255, 7, 59, 120),
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                MultiSelectDialogField(
-                                  items: crewList.map((crew) {
-                                    return MultiSelectItem<String>(
-                                      crew["loginId"].toString(),
-                                      crew["name"],
-                                    );
-                                  }).toList(),
-                                  listType: MultiSelectListType.CHIP,
-                                  title: const Text("Select Crew"),
-                                  // selectedColor: Colors.blue,
-                                  decoration: BoxDecoration(
-                                    // color: Colors.white,
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(
-                                      color: Color.fromARGB(255, 7, 59, 120),
-                                      width: 1,
-                                    ),
-                                  ),
-                                  buttonIcon: const Icon(
-                                    Icons.arrow_drop_down,
-                                    size: 40,
-                                    color: Color.fromARGB(255, 7, 59, 120),
-                                  ),
-                                  buttonText: const Text(
-                                    "Select Crew",
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-
-                                  onConfirm: (values) {
-                                    setStateDialog(() {
-                                      selectedCrewList = values.cast<String>();
-
-                                      errorMessage = null; // Clear error
-                                    });
-                                    selectedCrewLoginID = selectedCrewList.join(
-                                      ",",
-                                    );
-                                    crewNames = crewList
-                                        .where(
-                                          (crew) => selectedCrewList.contains(
-                                            crew["loginId"].toString(),
-                                          ),
-                                        )
-                                        .map((crew) => crew["name"].toString())
-                                        .join(", ");
-
-                                    print(selectedCrewList);
-                                    print(
-                                      'selectedCrewLoginID ${selectedCrewLoginID}',
-                                    );
-                                  },
-                                ),
-
-                                if (errorMessage !=
-                                    null) // Show error if exists
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 8.0),
-                                    child: Text(
-                                      errorMessage!,
-                                      style: const TextStyle(
-                                        color: Colors.red,
-                                        fontSize: 14,
-                                      ),
-                                    ),
-                                  ),
-                              ],
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-              actions: [
-                Align(
-                  alignment: Alignment.center,
-                  child: Row(
-                    children: [
-                      // NO Button
-                      _buildDialogButtonIVM(
-                        context,
-                        text: "NO",
-                        color: Colors.red,
-                        onTap: () => Navigator.pop(dialogContext),
-                      ),
-
-                      // YES Button (with validation)
-                      _buildDialogButtonIVM(
-                        context,
-                        text: "YES",
-                        color: Colors.green,
-                        isLoading: isSubmitting,
-                        onTap: () async {
-                          if (crewOrGF == 'Crew' && selectedCrewLoginID == "") {
-                            print('22222222');
-                            setStateDialog(() {
-                              print('3333333');
-                              errorMessage = "Please select a crew.";
-                            });
-                            print('44444');
-                            return;
-                          }
-                          setStateDialog(() {
-                            isSubmitting = true; // START LOADER
-                          });
-                          print('55555');
-
-                          try {
-                            if (crewOrGF == 'Crew') {
-                              await updateFlagValueIVM(tokenNo, 2, "ASSIGNED");
-                            } else {
-                              await updateFlagValueIVM(
-                                tokenNo,
-                                1,
-                                "PENDING ZIELIES ASSIGNMENT",
-                              );
-                            }
-
-                            Navigator.pop(
-                              dialogContext,
-                            ); // close dialog after success
-                          } catch (e) {
-                            print(e);
-                          } finally {
-                            setStateDialog(() {
-                              isSubmitting = false; // STOP LOADER
-                            });
-                          }
-                          //
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Future<void> fetchCrewListShare() async {
-    setState(() {
-      isLoadingIVM = true;
-    });
-
-    final userPreferences = Provider.of<UserPref>(context, listen: false);
-    UserModel data = await userPreferences.getUser();
-    // String contractorId = "";
-    // data.user!.id.toString();
-
-    String url = AppUrl.crewList;
-    // "${AppUrl.baseUrl}login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
-
-    try {
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          "Authorization": 'Bearer ${data.token!}',
-          "Content-Type": "application/json",
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-
-        if (jsonResponse.containsKey("AllCrewListOfCrewMASTER") &&
-            jsonResponse["AllCrewListOfCrewMASTER"] is List) {
-          final List<dynamic> crewData =
-              jsonResponse["AllCrewListOfCrewMASTER"];
-
-          print('dataCrewList $crewData');
-
-          setState(() {
-            crewList = crewData
-                .map((e) => {"loginId": e["loginId"], "name": e["name"]})
-                .toList();
-            // Optionally set a default value for selectedCrew (e.g., the first crew in the list)
-            if (crewList.isNotEmpty) {
-              selectedCrewShare = crewList[0]["loginId"].toString();
-            }
-          });
-        } else {
-          print("Unexpected response format: $jsonResponse");
-        }
-      } else {
-        print("Error fetching crew: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Error: $e");
-    } finally {
-      setState(() {
-        isLoadingIVM = false;
-      });
-    }
-  }
-
   DropdownMenuItem<String> buildMenuItem(String item) => DropdownMenuItem(
     value: item,
     child: Text(
@@ -7194,180 +6260,6 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
           isLoadingWorkOrders = false;
         });
       }
-    }
-  }
-
-  Future<void> updateFlagValueIVM(String token, int flag, String status) async {
-    String url =
-        "${AppUrl.baseUrl}vma_row_custom_main_plan/updateFlagValueNew?token=$token&flag=$flag&crewId=$selectedCrewLoginID&status=$status";
-    print(" updateFlagValueIVM ${updateFlagValueIVM}");
-    final userPreferences = Provider.of<UserPref>(context, listen: false);
-    UserModel data = await userPreferences.getUser();
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer ${data.token}',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: {},
-      );
-      print(
-        "map data ${{'token': token, 'flag': flag.toString(), 'crewId': selectedCrewLoginID}}",
-      );
-      if (response.statusCode == 200) {
-        var responseBody = json.decode(response.body);
-        print('responseBody $responseBody');
-        String generalForemanEmailId = responseBody['generalForemanEmailId'];
-        print('generalForemanEmailId $generalForemanEmailId');
-        print('API call successful');
-        if (crewOrGF == 'Crew') {
-          CustomToastSnackBarProgressDialog.flushBarSuccessMessage(
-            '$token IVM Maintenance Successfully Shared with Crew',
-            context,
-          );
-        } else {
-          CustomToastSnackBarProgressDialog.flushBarSuccessMessage(
-            '$token IVM Maintenance Successfully Shared with General Foreman',
-            context,
-          );
-        }
-
-        DateTime now = DateTime.now();
-        var formatter = DateFormat('MM-dd-yyyy HH:mm:ss');
-        String formattedDate = formatter.format(now);
-        var subject = 'CIVM ROW';
-        // var msg =
-        //     'Job No. $token Row Maintenance Successfully Shared with you on $formattedDate.';
-        var msg =
-            'Job No. $token IVM Maintenance Successfully Shared with you on $formattedDate.';
-        //temp commented
-        //  _sendMail(subject, msg, generalForemanEmailId);
-        String id = '';
-        final userPreferences1 = Provider.of<UserPref>(context, listen: false);
-        UserModel data = await userPreferences1.getUser();
-        id = data.user!.id.toString();
-        if (crewOrGF == 'Crew') {
-          await addLog(
-            context,
-            "Shared",
-            "IVM Maintenance Successfully Shared with $crewNames",
-            int.parse(id.toString()),
-            int.parse(token.toString()),
-          );
-        } else {
-          await addLog(
-            context,
-            "Shared",
-            "IVM Maintenance Successfully Shared with General Foreman.",
-            int.parse(id.toString()),
-            int.parse(token.toString()),
-          );
-        }
-
-        // myFuture = fetchDetails(context);
-        await Future.delayed(Duration(seconds: 3));
-        Navigator.pop(context);
-      } else {
-        print('Failed to update flag: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error occurred: $e');
-    }
-  }
-
-  Widget _buildDialogButtonIVM(
-    BuildContext context, {
-    required String text,
-    required Color color,
-    required VoidCallback onTap,
-    bool isLoading = false,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(left: 6, top: 6.0, bottom: 10),
-      child: InkWell(
-        onTap: isLoading ? null : onTap, // disable while loading
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 10.0),
-          alignment: Alignment.center,
-          width: MediaQuery.of(context).size.width * 0.25,
-          height: 40,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: color.withOpacity(0.8),
-                blurRadius: 5,
-                offset: const Offset(2.0, 5.0),
-              ),
-            ],
-            gradient: LinearGradient(colors: [color, color]),
-          ),
-          child: Center(
-            child: isLoading
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : Text(
-                    text,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20,
-                    ),
-                  ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Future<bool> addLog(
-    BuildContext context,
-    String action,
-    String description,
-    int performedBy,
-    int tokenNo,
-  ) async {
-    try {
-      final userPreferences = Provider.of<UserPref>(context, listen: false);
-
-      UserModel user = await userPreferences.getUser();
-
-      final Map<String, dynamic> mappedData = {
-        "action": action,
-        "description": description,
-        "performedBy": performedBy,
-        "tokenNo": tokenNo,
-      };
-
-      print("Log Request: ${jsonEncode(mappedData)}");
-
-      final response = await http.post(
-        Uri.parse(AppUrl.logs),
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": "Bearer ${user.token}",
-        },
-        body: jsonEncode(mappedData),
-      );
-
-      print("Log Status Code: ${response.statusCode}");
-      print("Log Response: ${response.body}");
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        return true;
-      }
-
-      return false;
-    } catch (e) {
-      print("Add Log Error: $e");
-      return false;
     }
   }
 
@@ -7539,6 +6431,352 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
 
     print('hasJobNo: $hasJobNo');
     print('showChangeOrderLayer: $showChangeOrderLayer');
+  }
+
+  Widget _infoTile(IconData icon, String title, String value) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.blueGrey.shade100),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.grey.withOpacity(0.08),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 28,
+            height: 28,
+            decoration: BoxDecoration(
+              color: const Color(0xFF073B78).withOpacity(0.1),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Icon(icon, size: 16, color: const Color(0xFF073B78)),
+          ),
+          const SizedBox(width: 8),
+
+          Text(
+            "$title : ",
+            style: TextStyle(
+              fontSize: 13,
+              color: Colors.grey.shade700,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+
+          Expanded(
+            child: Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF073B78),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showCrewDialog(BuildContext context, String tokenNo) async {
+    await fetchCrewList(); // Fetch crew list before showing the dialog
+
+    String? selectedCrew; // Local state for dropdown selection
+    String? errorMessage; // To show validation error message
+
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text("Select Crew"),
+              content: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        DropdownButton<String>(
+                          value: selectedCrew,
+                          hint: const Text("Select Crew"),
+                          isExpanded: true,
+                          items: crewList.map((crew) {
+                            return DropdownMenuItem(
+                              value: crew["loginId"].toString(),
+                              child: Text(crew["name"]),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setStateDialog(() {
+                              selectedCrew = value;
+                              errorMessage = null; // Clear error when selected
+                            });
+                            selectedCrewLoginID = value.toString();
+                          },
+                        ),
+                        if (errorMessage != null) // Show error if exists
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child: Text(
+                              errorMessage!,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+              actions: [
+                Align(
+                  alignment: Alignment.center,
+                  child: Row(
+                    children: [
+                      // NO Button
+                      _buildDialogButton(
+                        context,
+                        text: "NO",
+                        color: Colors.red,
+                        onTap: () => Navigator.pop(dialogContext),
+                      ),
+
+                      // YES Button (with validation)
+                      _buildDialogButton(
+                        context,
+                        text: "YES",
+                        color: Colors.green,
+                        onTap: () {
+                          if (selectedCrew == null) {
+                            setStateDialog(() {
+                              errorMessage = "Please select a crew.";
+                            });
+                            return;
+                          }
+                          updateFlagValue(tokenNo, 2);
+                          Navigator.pop(dialogContext);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> updateFlagValue(String token, int flag) async {
+    String url = "${AppUrl.baseUrl}vma_row_custom_main_plan/updateFlagValue";
+    // 'https://civm2.ariespro.com/civm2/vma_row_custom_main_plan/updateFlagValue';
+    final userPreferences = Provider.of<UserPref>(context, listen: false);
+    UserModel data = await userPreferences.getUser();
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer ${data.token}',
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: {
+          'token': token,
+          'flag': flag.toString(),
+          'crewId': selectedCrewLoginID,
+          'status': 'ASSIGNED',
+        },
+      );
+      print(
+        "token testing $token, crewId $selectedCrewLoginID, flag ${flag.toString()}",
+      );
+      print("url testing $url");
+      if (response.statusCode == 200) {
+        var responseBody = json.decode(response.body);
+        print('responseBody $responseBody');
+        String crewEmailId = responseBody['crewEmailId'];
+        print('API call successful');
+        String message = '';
+        // if (widget.heading == 'Total Order Pending (IVM Maintenance)') {
+        //   message = 'IVM Maintenance';
+        // } else if (widget.heading ==
+        //     'Total Order Pending (Mid cycle Herbicide)') {
+        //   message = 'Mid cycle Herbicide';
+        // }
+        CustomToastSnackBarProgressDialog.flushBarSuccessMessage(
+          'Job no: $token $message Successfully Shared with Crew',
+          context,
+        );
+        print('testing $token $message Successfully Shared with Crew');
+        DateTime now = DateTime.now();
+        var formatter = DateFormat('MM-dd-yyyy HH:mm:ss');
+        String formattedDate = formatter.format(now);
+        var subject = 'CIVM ROW';
+        var msg =
+            'Job No. $token $message Successfully Shared with you on $formattedDate.';
+        _sendMail(subject, msg, crewEmailId);
+        // fetchDetails(context);
+        await Future.delayed(const Duration(seconds: 3));
+        // Navigator.pop(context);
+        // Navigator.pop(context);
+        // Navigator.pop(context);
+      } else {
+        print('Failed to update flag: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error occurred: $e');
+    }
+  }
+
+  Future<void> fetchCrewList() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    final userPreferences = Provider.of<UserPref>(context, listen: false);
+    UserModel data = await userPreferences.getUser();
+    // String contractorId = data.user!.id.toString();
+
+    String url = AppUrl.crewList;
+    // "https://civm2.ariespro.com/civm2/login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
+    print('urlCrewList gf pannel:: $url');
+    try {
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          "Authorization": 'Bearer ${data.token!}',
+          "Content-Type": "application/json",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> jsonResponse = json.decode(response.body);
+
+        if (jsonResponse.containsKey("AllCrewListOfCrewMASTER") &&
+            jsonResponse["AllCrewListOfCrewMASTER"] is List) {
+          final List<dynamic> crewData =
+              jsonResponse["AllCrewListOfCrewMASTER"];
+
+          print('dataCrewList $crewData');
+
+          setState(() {
+            crewList = crewData
+                .map((e) => {"loginId": e["loginId"], "name": e["name"]})
+                .toList();
+            // Optionally set a default value for selectedCrew (e.g., the first crew in the list)
+            if (crewList.isNotEmpty) {
+              selectedCrew = crewList[0]["loginId"].toString();
+            }
+          });
+        } else {
+          print("Unexpected response format: $jsonResponse");
+        }
+      } else {
+        print("Error fetching crew: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("Error: $e");
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
+
+  Widget _buildDialogButton(
+    BuildContext context, {
+    required String text,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(left: 6, top: 6.0, bottom: 10),
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 10.0),
+          alignment: Alignment.center,
+          width: MediaQuery.of(context).size.width * 0.25,
+          height: 40,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            boxShadow: [
+              BoxShadow(
+                color: color.withOpacity(0.8),
+                blurRadius: 5,
+                offset: const Offset(2.0, 5.0),
+              ),
+            ],
+            gradient: LinearGradient(colors: [color, color]),
+          ),
+          child: Align(
+            alignment: Alignment.center,
+            child: Text(
+              text,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 20,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  bool isLoadingDelete = false;
+  Future<void> deleteChangeOrder({
+    required String workOrder,
+    required String userId,
+  }) async {
+    try {
+      final url = Uri.parse(
+        '${AppUrl.baseUrl}login_user/deleteChangeOrder',
+      ).replace(queryParameters: {'work_order': workOrder, 'user_id': userId});
+
+      print("Delete Change Order API URL: $url");
+
+      final response = await http.delete(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      print("Delete Change Order Status: ${response.statusCode}");
+      print("Delete Change Order Response: ${response.body}");
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && responseData["success"] == true) {
+        print("Change Order deleted successfully");
+        print("Message: ${responseData["message"]}");
+        Navigator.pop(context);
+
+        await loadApiData();
+      } else {
+        print("Failed to delete Change Order");
+        print("Message: ${responseData["message"] ?? response.body}");
+      }
+    } catch (e) {
+      print("Error deleting Change Order: $e");
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoadingDelete = false;
+        });
+      }
+    }
   }
 
   //////////

@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:CIVM/screens/offline_map/CO_map_screen_planner.dart';
+import 'package:CIVM/screens/offline_map/CO_map_screen.dart';
 import 'package:CIVM/screens/offline_map/map_screen.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:CIVM/repository/map_url.dart';
@@ -79,7 +79,6 @@ class _PlannerAddNewRowTableState extends State<PlannerAddNewRowTable> {
   final browser = MyChromeSafariBrowser();
   int currentYear = DateTime.now().year;
   final TextEditingController _workOrder = TextEditingController();
-
 
   String selectedCrewLoginID = '';
   List<Map<String, dynamic>> crewList = [];
@@ -252,7 +251,7 @@ class _PlannerAddNewRowTableState extends State<PlannerAddNewRowTable> {
                               selectedYear,
                               '',
                             );
-                            _initializeScreen();
+                        _initializeScreen();
                       },
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -1613,7 +1612,6 @@ class _DrawerManuState extends State<DrawerManu> {
                   //     );
                   //   },
                   // ),
-
                   ListTile(
                     leading: const Icon(Icons.location_searching),
                     title: const Text('Add Row Maintenance Map'),
@@ -1628,7 +1626,7 @@ class _DrawerManuState extends State<DrawerManu> {
                       );
                     },
                   ),
-                   ListTile(
+                  ListTile(
                     leading: const Icon(Icons.location_searching),
                     title: const Text('Change Order System Map'),
                     textColor: const Color.fromARGB(255, 7, 59, 120),
@@ -1637,7 +1635,7 @@ class _DrawerManuState extends State<DrawerManu> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const COMapScreenPlanner(),
+                          builder: (context) => const COMapScreen(),
                         ),
                       );
                     },

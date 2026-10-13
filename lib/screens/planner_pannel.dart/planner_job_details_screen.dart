@@ -7,6 +7,7 @@ import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/screens/chat_history.dart';
 import 'package:CIVM/screens/login_page.dart';
 import 'package:CIVM/screens/my_chrome_safari_map_recording.dart';
+import 'package:CIVM/screens/offline_map/CO_map_screen_planner.dart';
 import 'package:CIVM/utils/common_functions.dart';
 import 'package:CIVM/utils/custom_toast_snackbar_progressdialog.dart';
 import 'package:CIVM/utils/user_pref.dart';
@@ -316,32 +317,52 @@ class _PlannerJobDetailsScreenState extends State<PlannerJobDetailsScreen> {
                                   /// VIEW MAP BUTTON
                                   InkWell(
                                     onTap: () async {
-                                      String id = '';
-                                      final userPreferences1 =
-                                          Provider.of<UserPref>(
-                                            context,
-                                            listen: false,
-                                          );
-                                      UserModel data = await userPreferences1
-                                          .getUser();
-                                      id = data.user!.id.toString();
-                                      print(
-                                        'planner map url: ${MapUrl.getPlannerWithTokenEndPoint(item!.tokenNo.toString(), id)}',
-                                      );
-                                      await browser.open(
-                                        url: WebUri(
-                                          // "https://mapapi.ariespro.com/main/contractor/CIVM_Map/${lCPWorkOrderPendingViewModel.lcpWorkOrderPendingGetTabularData.data!.findAllTableData![index].tokenNo.toString()}/USRQWXH589Z"),
-                                          MapUrl.getPlannerWithTokenEndPoint(
-                                            item!.tokenNo.toString(),
-                                            id,
-                                          ),
+                                      // String id = '';
+                                      // final userPreferences1 =
+                                      //     Provider.of<UserPref>(
+                                      //       context,
+                                      //       listen: false,
+                                      //     );
+                                      // UserModel data = await userPreferences1
+                                      //     .getUser();
+                                      // id = data.user!.id.toString();
+                                      // print(
+                                      //   'planner map url: ${MapUrl.getPlannerWithTokenEndPoint(item!.tokenNo.toString(), id)}',
+                                      // );
+                                      // await browser.open(
+                                      //   url: WebUri(
+                                      //     // "https://mapapi.ariespro.com/main/contractor/CIVM_Map/${lCPWorkOrderPendingViewModel.lcpWorkOrderPendingGetTabularData.data!.findAllTableData![index].tokenNo.toString()}/USRQWXH589Z"),
+                                      //     MapUrl.getPlannerWithTokenEndPoint(
+                                      //       item!.tokenNo.toString(),
+                                      //       id,
+                                      //     ),
+                                      //   ),
+                                      //   settings: ChromeSafariBrowserSettings(
+                                      //     shareState: CustomTabsShareState
+                                      //         .SHARE_STATE_OFF,
+                                      //     barCollapsingEnabled: true,
+                                      //   ),
+                                      // );
+                                        print('maint Type ${item!.maintType
+                                                            .toString()}');
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                               COMapScreenPlanner(
+                                                
+                                               jobNo: widget.tokenNo,
+                                                substation: item!.substation.toString(),
+                                                feeder: item!.feeder!.split('(').first.trim(),
+                                                 visibilityFlag: item!.visibilityFlag.toString(),
+                                                 type:item!.maintType
+                                                            .toString(),
+                                                            status:item!.status
+                                                  .toString()
+                                              ),
                                         ),
-                                        settings: ChromeSafariBrowserSettings(
-                                          shareState: CustomTabsShareState
-                                              .SHARE_STATE_OFF,
-                                          barCollapsingEnabled: true,
-                                        ),
                                       );
+                                    
                                     },
                                     child: Container(
                                       margin: const EdgeInsets.only(right: 0),

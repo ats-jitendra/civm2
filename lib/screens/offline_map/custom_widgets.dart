@@ -427,3 +427,85 @@ class NetworkImageGallery extends StatelessWidget {
     );
   }
 }
+////////
+Future<void> showConfirmDialog({
+  required BuildContext context,
+  String status="Submit It!",
+  String title = "Are you sure?",
+  String message =
+      "",
+  required Future<void> Function() onTapYes,
+  Color yesButtonColor = Colors.orange,
+  IconData icon = Icons.error_outline_rounded,
+}) {
+  return showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      bool isLoading = false;
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Column(
+              children: [
+                Icon(icon, color: yesButtonColor, size: 40),
+                // const SizedBox(height: 8),
+                // Text(title),
+              ],
+            ),
+            content: Text(message, textAlign: TextAlign.center,style: TextStyle(fontSize: 16),),
+            actionsAlignment: MainAxisAlignment.center,
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: isLoading
+                    ? null
+                    : () async {
+                        setState(() => isLoading = true);
+
+                        await onTapYes();
+
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                         
+                        }
+                      },
+                child: isLoading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: Colors.white,
+                        ),
+                      )
+                    :  Text("Yes"),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.red,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () {
+                  if (isLoading) return; // block tap, keep style
+                  Navigator.pop(context);
+                },
+                child: const Text("No"),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}

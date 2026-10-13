@@ -2149,7 +2149,9 @@ class _AddCrewMemberState extends State<AddCrewMember> {
   ) async {
     try {
       final response = await http.post(
-        Uri.parse('https://lcpmapapi.ariespro.com/main/create_crew'),
+        Uri.parse("https://civm2.ariespro.com/civm2/login_user/create_crew"
+        //  'https://lcpmapapi.ariespro.com/main/create_crew'
+          ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(mappedData),
       );
