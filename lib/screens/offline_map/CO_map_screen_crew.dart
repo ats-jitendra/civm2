@@ -6,7 +6,7 @@ import 'package:CIVM/models/user_model.dart';
 import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/screens/offline_map/custom_widgets.dart';
 import 'package:CIVM/screens/offline_map/map_data_base_helper.dart';
-import 'package:CIVM/utils/custom_toast_snackbar_progressdialog.dart';
+
 
 import 'package:CIVM/utils/user_pref.dart';
 import 'package:camera/camera.dart';
@@ -36,17 +36,12 @@ class COMapScreenCrew extends StatefulWidget {
   String jobNo;
   String substation;
   String feeder;
-  String visibilityFlag;
-  String type;
-  String status;
+
   COMapScreenCrew({
     super.key,
     required this.jobNo,
     required this.substation,
     required this.feeder,
-    required this.visibilityFlag,
-    required this.type,
-    required this.status,
   });
 
   @override
@@ -182,12 +177,12 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
   Future<void>? _launched;
   final TextEditingController _searchController = TextEditingController();
   List<Marker> _markerSearch = [];
- // bool _showedLocationpin = false;
+  // bool _showedLocationpin = false;
   String userTypeText = '';
   String primaryRoleText = '';
- 
+
   bool isLoadingIVM = false;
-  
+
   final select_crewOrGF = ['Crew', 'General Foreman'];
   var crewOrGF = 'General Foreman';
   String selectedCrewLoginID = '';
@@ -221,7 +216,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-   // ensureCameraInitialized();
+     ensureCameraInitialized();
     _startListeningToCompass();
 
     /////
@@ -393,43 +388,6 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
         ),
         backgroundColor: const Color.fromARGB(255, 7, 59, 120),
         actions: [
-          (widget.status.toString().trim().toUpperCase() ==
-                      "PENDING ZIELIES ASSIGNMENT" ||
-                  widget.status.toString().trim().toUpperCase() == "ASSIGNED")
-              ? (widget.type.toString() == 'Change Order' ||
-                        widget.type.toString() == 'Exception Maintenance' ||
-                        widget.type.toString() == 'No Exception Maintenance')
-                    ? (widget.visibilityFlag.toString() == '2')
-                          ? IconButton(
-                              icon: const Icon(
-                                Icons.share,
-                                color: Colors.green,
-                              ),
-                              onPressed: () async {
-                                showCrewDialog(
-                                  context,
-                                  widget.jobNo.toString(),
-                                );
-                              },
-                            )
-                          : IconButton(
-                              icon: const Icon(Icons.share, color: Colors.blue),
-                              onPressed: () {
-                                showCrewDialog(
-                                  context,
-                                  widget.jobNo.toString(),
-                                );
-                              },
-                            )
-                    : const Text(
-                        "",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                        ),
-                      )
-              : Container(),
           IconButton(
             icon: const Icon(Icons.visibility),
             onPressed: () {
@@ -845,7 +803,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
                                           onPressed: () {
                                             controller.clear();
                                             setState(() {
-                                           //   _showedLocationpin = false;
+                                              //   _showedLocationpin = false;
                                             });
                                           },
                                         )
@@ -891,7 +849,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
                                 suggestion['geometry'],
                               );
                               setState(() {
-                             //   _showedLocationpin = true;
+                                //   _showedLocationpin = true;
                               });
                             },
                           ),
@@ -3124,25 +3082,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
                               ),
                             ),
                           ),
-                          InkWell(
-                            onTap: () {
-                              deleteChangeOrder(
-                                workOrder: widget.jobNo,
-                                userId: id,
-                              );
-                            },
-                            borderRadius: BorderRadius.circular(20),
-                            child: const Padding(
-                              padding: EdgeInsets.all(4),
-                              child: Icon(
-                                Icons.delete,
-                                color: Colors.red,
-                                size: 22,
-                              ),
-                            ),
-                          ),
 
-                          const SizedBox(width: 4),
                           // Close Button
                           InkWell(
                             onTap: () {
@@ -3208,7 +3148,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
                             ),
                             _detailRow(
                               "Estimated Time",
-                              overHeadPolylines[index].estTime,
+                              "${overHeadPolylines[index].estTime} hours",
                             ),
                             _detailRow(
                               "Create Date",
@@ -6464,303 +6404,6 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
       ),
     );
   }
-
-  void showCrewDialog(BuildContext context, String tokenNo) async {
-    await fetchCrewList(); // Fetch crew list before showing the dialog
-
-    String? selectedCrew; // Local state for dropdown selection
-    String? errorMessage; // To show validation error message
-
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            return AlertDialog(
-              title: const Text("Select Crew"),
-              content: isLoading
-                  ? const Center(child: CircularProgressIndicator())
-                  : Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        DropdownButton<String>(
-                          value: selectedCrew,
-                          hint: const Text("Select Crew"),
-                          isExpanded: true,
-                          items: crewList.map((crew) {
-                            return DropdownMenuItem(
-                              value: crew["loginId"].toString(),
-                              child: Text(crew["name"]),
-                            );
-                          }).toList(),
-                          onChanged: (value) {
-                            setStateDialog(() {
-                              selectedCrew = value;
-                              errorMessage = null; // Clear error when selected
-                            });
-                            selectedCrewLoginID = value.toString();
-                          },
-                        ),
-                        if (errorMessage != null) // Show error if exists
-                          Padding(
-                            padding: const EdgeInsets.only(top: 8.0),
-                            child: Text(
-                              errorMessage!,
-                              style: const TextStyle(
-                                color: Colors.red,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-              actions: [
-                Align(
-                  alignment: Alignment.center,
-                  child: Row(
-                    children: [
-                      // NO Button
-                      _buildDialogButton(
-                        context,
-                        text: "NO",
-                        color: Colors.red,
-                        onTap: () => Navigator.pop(dialogContext),
-                      ),
-
-                      // YES Button (with validation)
-                      _buildDialogButton(
-                        context,
-                        text: "YES",
-                        color: Colors.green,
-                        onTap: () {
-                          if (selectedCrew == null) {
-                            setStateDialog(() {
-                              errorMessage = "Please select a crew.";
-                            });
-                            return;
-                          }
-                          updateFlagValue(tokenNo, 2);
-                          Navigator.pop(dialogContext);
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Future<void> updateFlagValue(String token, int flag) async {
-    String url = "${AppUrl.baseUrl}vma_row_custom_main_plan/updateFlagValue";
-    // 'https://civm2.ariespro.com/civm2/vma_row_custom_main_plan/updateFlagValue';
-    final userPreferences = Provider.of<UserPref>(context, listen: false);
-    UserModel data = await userPreferences.getUser();
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Authorization': 'Bearer ${data.token}',
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: {
-          'token': token,
-          'flag': flag.toString(),
-          'crewId': selectedCrewLoginID,
-          'status': 'ASSIGNED',
-        },
-      );
-      print(
-        "token testing $token, crewId $selectedCrewLoginID, flag ${flag.toString()}",
-      );
-      print("url testing $url");
-      if (response.statusCode == 200) {
-        var responseBody = json.decode(response.body);
-        print('responseBody $responseBody');
-        String crewEmailId = responseBody['crewEmailId'];
-        print('API call successful');
-        String message = '';
-        // if (widget.heading == 'Total Order Pending (IVM Maintenance)') {
-        //   message = 'IVM Maintenance';
-        // } else if (widget.heading ==
-        //     'Total Order Pending (Mid cycle Herbicide)') {
-        //   message = 'Mid cycle Herbicide';
-        // }
-        CustomToastSnackBarProgressDialog.flushBarSuccessMessage(
-          'Job no: $token $message Successfully Shared with Crew',
-          context,
-        );
-        print('testing $token $message Successfully Shared with Crew');
-        DateTime now = DateTime.now();
-        var formatter = DateFormat('MM-dd-yyyy HH:mm:ss');
-        String formattedDate = formatter.format(now);
-        var subject = 'CIVM ROW';
-        var msg =
-            'Job No. $token $message Successfully Shared with you on $formattedDate.';
-        _sendMail(subject, msg, crewEmailId);
-        // fetchDetails(context);
-        await Future.delayed(const Duration(seconds: 3));
-        // Navigator.pop(context);
-        // Navigator.pop(context);
-        // Navigator.pop(context);
-      } else {
-        print('Failed to update flag: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error occurred: $e');
-    }
-  }
-
-  Future<void> fetchCrewList() async {
-    setState(() {
-      isLoading = true;
-    });
-
-    final userPreferences = Provider.of<UserPref>(context, listen: false);
-    UserModel data = await userPreferences.getUser();
-    // String contractorId = data.user!.id.toString();
-
-    String url = AppUrl.crewList;
-    // "https://civm2.ariespro.com/civm2/login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
-    print('urlCrewList gf pannel:: $url');
-    try {
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          "Authorization": 'Bearer ${data.token!}',
-          "Content-Type": "application/json",
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> jsonResponse = json.decode(response.body);
-
-        if (jsonResponse.containsKey("AllCrewListOfCrewMASTER") &&
-            jsonResponse["AllCrewListOfCrewMASTER"] is List) {
-          final List<dynamic> crewData =
-              jsonResponse["AllCrewListOfCrewMASTER"];
-
-          print('dataCrewList $crewData');
-
-          setState(() {
-            crewList = crewData
-                .map((e) => {"loginId": e["loginId"], "name": e["name"]})
-                .toList();
-            // Optionally set a default value for selectedCrew (e.g., the first crew in the list)
-            if (crewList.isNotEmpty) {
-              selectedCrew = crewList[0]["loginId"].toString();
-            }
-          });
-        } else {
-          print("Unexpected response format: $jsonResponse");
-        }
-      } else {
-        print("Error fetching crew: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("Error: $e");
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
-    }
-  }
-
-  Widget _buildDialogButton(
-    BuildContext context, {
-    required String text,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return Container(
-      margin: const EdgeInsets.only(left: 6, top: 6.0, bottom: 10),
-      child: InkWell(
-        onTap: onTap,
-        child: Container(
-          margin: const EdgeInsets.only(bottom: 10.0),
-          alignment: Alignment.center,
-          width: MediaQuery.of(context).size.width * 0.25,
-          height: 40,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            boxShadow: [
-              BoxShadow(
-                color: color.withOpacity(0.8),
-                blurRadius: 5,
-                offset: const Offset(2.0, 5.0),
-              ),
-            ],
-            gradient: LinearGradient(colors: [color, color]),
-          ),
-          child: Align(
-            alignment: Alignment.center,
-            child: Text(
-              text,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 20,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  bool isLoadingDelete = false;
-  Future<void> deleteChangeOrder({
-    required String workOrder,
-    required String userId,
-  }) async {
-    try {
-      setState(() {
-        isLoadingDelete = true;
-      });
-
-      final url = Uri.parse(
-        '${AppUrl.baseUrl}login_user/deleteChangeOrder',
-      ).replace(queryParameters: {'work_order': workOrder, 'user_id': userId});
-
-      print("Delete Change Order API URL: $url");
-
-      final response = await http.delete(
-        url,
-        headers: {
-          "Authorization": "Bearer $token",
-          "Content-Type": "application/json",
-        },
-      );
-
-      print("Delete Change Order Status: ${response.statusCode}");
-      print("Delete Change Order Response: ${response.body}");
-
-      final responseData = jsonDecode(response.body);
-
-      if (response.statusCode == 200 && responseData["success"] == true) {
-        print("Change Order deleted successfully");
-        print("Message: ${responseData["message"]}");
-
-       loadApiData();
-      } else {
-        print("Failed to delete Change Order");
-        print("Message: ${responseData["message"] ?? response.body}");
-      }
-    } catch (e) {
-      print("Error deleting Change Order: $e");
-    } finally {
-      if (mounted) {
-        setState(() {
-          isLoadingDelete = false;
-        });
-      }
-    }
-  }
-
-  //////////
 }
 
 class Substation {

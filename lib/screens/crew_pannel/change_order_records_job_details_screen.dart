@@ -8,6 +8,7 @@ import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/screens/chat_history.dart';
 import 'package:CIVM/screens/login_page.dart';
 import 'package:CIVM/screens/my_chrome_safari_map_recording.dart';
+import 'package:CIVM/screens/offline_map/CO_map_screen_crew.dart';
 import 'package:CIVM/utils/common_functions.dart';
 import 'package:CIVM/utils/custom_toast_snackbar_progressdialog.dart';
 import 'package:CIVM/utils/user_pref.dart';
@@ -61,11 +62,11 @@ class _ChangeOrderRecordsJobDetailsScreenState
     // WidgetsBinding.instance.addPostFrameCallback((_) {
     //   imageViewModel.fetchImageApi(context, widget.tokenNo);
     // });
-     myFuture = Future.wait([
-    fetchDetails(context),
-    imageViewModel.fetchImageApi(context, widget.tokenNo),
-  ]);
-  _initializeScreen();
+    myFuture = Future.wait([
+      fetchDetails(context),
+      imageViewModel.fetchImageApi(context, widget.tokenNo),
+    ]);
+    _initializeScreen();
   }
 
   @override
@@ -106,9 +107,9 @@ class _ChangeOrderRecordsJobDetailsScreenState
                 onRefresh: () async {
                   // await fetchDetails(context);
                   myFuture = Future.wait([
-    fetchDetails(context),
-    imageViewModel.fetchImageApi(context, widget.tokenNo),
-  ]);
+                    fetchDetails(context),
+                    imageViewModel.fetchImageApi(context, widget.tokenNo),
+                  ]);
                 },
                 child: Column(
                   children: [
@@ -230,7 +231,7 @@ class _ChangeOrderRecordsJobDetailsScreenState
                                               ? SizedBox()
                                               : const Icon(
                                                   Icons.edit,
-                                                  color:Colors.green,
+                                                  color: Colors.green,
                                                 ),
                                         ),
                                       ),
@@ -241,32 +242,46 @@ class _ChangeOrderRecordsJobDetailsScreenState
                                   /// VIEW MAP BUTTON
                                   InkWell(
                                     onTap: () async {
-                                      String id = '';
-                                      final userPreferences1 =
-                                          Provider.of<UserPref>(
-                                            context,
-                                            listen: false,
-                                          );
-                                      UserModel data = await userPreferences1
-                                          .getUser();
-                                      id = data.user!.id.toString();
-                                      print('Map url crew:: ${MapUrl.getPlannerWithTokenEndPoint(
-                                            widget.tokenNo.toString(),
-                                            id,
-                                          )}');
+                                      // String id = '';
+                                      // final userPreferences1 =
+                                      //     Provider.of<UserPref>(
+                                      //       context,
+                                      //       listen: false,
+                                      //     );
+                                      // UserModel data = await userPreferences1
+                                      //     .getUser();
+                                      // id = data.user!.id.toString();
+                                      // print('Map url crew:: ${MapUrl.getPlannerWithTokenEndPoint(
+                                      //       widget.tokenNo.toString(),
+                                      //       id,
+                                      //     )}');
 
-                                      await browser.open(
-                                        url: WebUri(
-                                          // "https://mapapi.ariespro.com/main/contractor/CIVM_Map/${lCPWorkOrderPendingViewModel.lcpWorkOrderPendingGetTabularData.data!.findAllTableData![index].tokenNo.toString()}/USRQWXH589Z"),
-                                          MapUrl.getCrewEndPoint(
-                                            widget.tokenNo.toString(),
-                                            id,
+                                      // await browser.open(
+                                      //   url: WebUri(
+                                      //     // "https://mapapi.ariespro.com/main/contractor/CIVM_Map/${lCPWorkOrderPendingViewModel.lcpWorkOrderPendingGetTabularData.data!.findAllTableData![index].tokenNo.toString()}/USRQWXH589Z"),
+                                      //     MapUrl.getCrewEndPoint(
+                                      //       widget.tokenNo.toString(),
+                                      //       id,
+                                      //     ),
+                                      //   ),
+                                      //   settings: ChromeSafariBrowserSettings(
+                                      //     shareState: CustomTabsShareState
+                                      //         .SHARE_STATE_OFF,
+                                      //     barCollapsingEnabled: true,
+                                      //   ),
+                                      // );
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => COMapScreenCrew(
+                                            jobNo: widget.tokenNo,
+                                            substation: item!.substation
+                                                .toString(),
+                                            feeder: item!.feeder!
+                                                .split('(')
+                                                .first
+                                                .trim(),
                                           ),
-                                        ),
-                                        settings: ChromeSafariBrowserSettings(
-                                          shareState: CustomTabsShareState
-                                              .SHARE_STATE_OFF,
-                                          barCollapsingEnabled: true,
                                         ),
                                       );
                                     },
@@ -481,7 +496,7 @@ class _ChangeOrderRecordsJobDetailsScreenState
                               title: "Type",
                               value: item?.maintType ?? "",
                             ),
-                             _buildDetailCard(
+                            _buildDetailCard(
                               icon: Icons.build_circle,
                               title: "MAINT Type",
                               value: item?.type ?? "",
@@ -498,7 +513,6 @@ class _ChangeOrderRecordsJobDetailsScreenState
                             //   title: "Service Map Location",
                             //   value: item?.mapLocation ?? "",
                             // ),
-
                             _buildDetailCard(
                               icon: Icons.note,
                               title: "Admin Notes",
@@ -913,10 +927,7 @@ class _ChangeOrderRecordsJobDetailsScreenState
 
     if (length == 0) {
       return const Center(
-        child: Text(
-          "",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        child: Text("", style: TextStyle(fontWeight: FontWeight.bold)),
       );
     }
 
@@ -990,7 +1001,8 @@ class _ChangeOrderRecordsJobDetailsScreenState
                   onTap: () {
                     downloadFile(
                       'https://civm.ariespro.com/assets/clientuploads/$fileLocation',
-                      'File',context
+                      'File',
+                      context,
                     );
                   },
                   child: const Icon(
@@ -1140,13 +1152,15 @@ class _ChangeOrderRecordsJobDetailsScreenState
                             if (!isPDF(fileLocation)) {
                               downloadFile(
                                 'https://civm.ariespro.com/assets/clientuploads/$fileLocation',
-                                'File',context
+                                'File',
+                                context,
                               );
                               Navigator.pop(context);
                             } else {
                               downloadFile(
                                 'https://civm.ariespro.com/assets/clientuploads/$fileLocation',
-                                'PDF',context
+                                'PDF',
+                                context,
                               );
                               Navigator.pop(context);
                             }
@@ -1244,10 +1258,10 @@ class _ChangeOrderRecordsJobDetailsScreenState
     );
   }
 
-  
   Future<void> deleteOnlineImageApi2(String fileName, String tokenNo) async {
-    final apiUrl = "${AppUrl.baseUrl}changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo";
-        // 'https://civm2.ariespro.com/civm2/changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo';
+    final apiUrl =
+        "${AppUrl.baseUrl}changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo";
+    // 'https://civm2.ariespro.com/civm2/changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo';
     print(apiUrl);
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
@@ -1263,15 +1277,17 @@ class _ChangeOrderRecordsJobDetailsScreenState
         setState(() {});
         print('Image deleted successfully');
         CustomToastSnackBarProgressDialog.flushBarSuccessMessage(
-            'Image deleted Successfully', context);
+          'Image deleted Successfully',
+          context,
+        );
         // Navigator.pop(context);
         await Future.delayed(const Duration(seconds: 2));
 
         // fetchDetails(context);
-         myFuture = Future.wait([
-    fetchDetails(context),
-    imageViewModel.fetchImageApi(context, widget.tokenNo),
-  ]);
+        myFuture = Future.wait([
+          fetchDetails(context),
+          imageViewModel.fetchImageApi(context, widget.tokenNo),
+        ]);
       } else {
         print('API request failed with status code: ${response.statusCode}');
         print('Response body: ${response.body}');
@@ -2246,5 +2262,4 @@ class _ChangeOrderRecordsJobDetailsScreenState
     if (!mounted) return;
     await checkCurrentUser();
   }
-
 }

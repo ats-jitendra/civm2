@@ -3730,7 +3730,7 @@ class _COMapScreenState extends State<COMapScreen> {
                           final details = [
                             _detailRow(
                               "Estimated Time",
-                              overHeadPolylines[index].estTime,
+                              "${overHeadPolylines[index].estTime} hours",
                             ),
                             _detailRow(
                               "Job No",

@@ -221,7 +221,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-     ensureCameraInitialized();
+    ensureCameraInitialized();
     _startListeningToCompass();
 
     /////
@@ -3138,6 +3138,9 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                                     workOrder: widget.jobNo,
                                     userId: id,
                                   );
+                                  if (context.mounted) {
+                                    Navigator.pop(context);
+                                  }
                                 },
                               );
                               // setDialogState(() {
@@ -3230,7 +3233,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                             ),
                             _detailRow(
                               "Estimated Time",
-                              overHeadPolylines[index].estTime,
+                              "${overHeadPolylines[index].estTime} hours",
                             ),
                             _detailRow(
                               "Create Date",

@@ -22,10 +22,7 @@ void showLoader(BuildContext context, {String message = "Loading..."}) {
             Text(
               message,
               textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
             ),
           ],
         ),
@@ -43,9 +40,7 @@ SizedBox circularBarWithIcon(BuildContext context) {
       children: [
         CircularProgressIndicator(
           strokeWidth: 4,
-          valueColor: AlwaysStoppedAnimation(
-            Theme.of(context).primaryColor,
-          ),
+          valueColor: AlwaysStoppedAnimation(Theme.of(context).primaryColor),
         ),
         Icon(
           Icons.water_drop_outlined,
@@ -56,6 +51,7 @@ SizedBox circularBarWithIcon(BuildContext context) {
     ),
   );
 }
+
 String formatChatDate(dynamic inputDate) {
   if (inputDate == null || inputDate.toString().trim().isEmpty) {
     return "";
@@ -69,6 +65,7 @@ String formatChatDate(dynamic inputDate) {
     return "";
   }
 }
+
 // String formatChatDate(String inputDate) {
 //   try {
 //     final parsedDate = DateTime.parse(inputDate).toLocal();
@@ -88,10 +85,12 @@ String formatDate(String inputDate) {
     return inputDate;
   }
 }
+
 String formatDateTime(DateTime dateTime) {
   return "${DateFormat('yyyy-MM-dd HH:mm:ss').format(dateTime)}."
       "${dateTime.microsecond.toString().padLeft(6, '0')}";
 }
+
 class MapActionButton extends StatelessWidget {
   final String imagePath;
   final VoidCallback onTap;
@@ -140,6 +139,7 @@ class MapActionButton extends StatelessWidget {
     );
   }
 }
+
 void showModernSuccessDialog(BuildContext context, {required String message}) {
   showDialog(
     context: context,
@@ -242,16 +242,18 @@ void showModernSuccessDialog(BuildContext context, {required String message}) {
   );
 }
 
-  Container progressBar() {
-    return Container(
-      height: 25,
-      width: 25,
-      margin: const EdgeInsets.only(top: 4, bottom: 4),
-      child: const CircularProgressIndicator(
-          valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
-    );
-  }
-  class JobNoPointerPainter extends CustomPainter {
+Container progressBar() {
+  return Container(
+    height: 25,
+    width: 25,
+    margin: const EdgeInsets.only(top: 4, bottom: 4),
+    child: const CircularProgressIndicator(
+      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+    ),
+  );
+}
+
+class JobNoPointerPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
@@ -273,7 +275,6 @@ void showModernSuccessDialog(BuildContext context, {required String message}) {
   }
 }
 ///////
-
 
 class NetworkImageGallery extends StatelessWidget {
   final List<String> imageLocations;
@@ -302,9 +303,7 @@ class NetworkImageGallery extends StatelessWidget {
         child: Center(
           child: Text(
             "No images found",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
       );
@@ -319,14 +318,11 @@ class NetworkImageGallery extends StatelessWidget {
           final fileLocation = images[index];
 
           return Padding(
-            padding: const EdgeInsets.only(right: 10,bottom: 10),
+            padding: const EdgeInsets.only(right: 10, bottom: 10),
             child: InkWell(
               borderRadius: BorderRadius.circular(10),
               onTap: () {
-                _openFullScreenImage(
-                  context,
-                  fileLocation,
-                );
+                _openFullScreenImage(context, fileLocation);
               },
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(10),
@@ -335,11 +331,7 @@ class NetworkImageGallery extends StatelessWidget {
                   width: imageSize,
                   height: imageSize,
                   fit: BoxFit.cover,
-                  loadingBuilder: (
-                    context,
-                    child,
-                    loadingProgress,
-                  ) {
+                  loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) {
                       return child;
                     }
@@ -347,16 +339,10 @@ class NetworkImageGallery extends StatelessWidget {
                     return SizedBox(
                       width: imageSize,
                       height: imageSize,
-                      child: const Center(
-                        child: CircularProgressIndicator(),
-                      ),
+                      child: const Center(child: CircularProgressIndicator()),
                     );
                   },
-                  errorBuilder: (
-                    context,
-                    error,
-                    stackTrace,
-                  ) {
+                  errorBuilder: (context, error, stackTrace) {
                     return Container(
                       width: imageSize,
                       height: imageSize,
@@ -377,10 +363,7 @@ class NetworkImageGallery extends StatelessWidget {
     );
   }
 
-  void _openFullScreenImage(
-    BuildContext context,
-    String fileLocation,
-  ) {
+  void _openFullScreenImage(BuildContext context, String fileLocation) {
     final imageUrl = '$baseUrl$fileLocation';
 
     showDialog(
@@ -413,11 +396,7 @@ class NetworkImageGallery extends StatelessWidget {
                   onPressed: () {
                     Navigator.pop(context);
                   },
-                  icon: const Icon(
-                    Icons.close,
-                    color: Colors.white,
-                    size: 30,
-                  ),
+                  icon: const Icon(Icons.close, color: Colors.white, size: 30),
                 ),
               ),
             ],
@@ -427,13 +406,13 @@ class NetworkImageGallery extends StatelessWidget {
     );
   }
 }
+
 ////////
 Future<void> showConfirmDialog({
   required BuildContext context,
-  String status="Submit It!",
+  String status = "Submit It!",
   String title = "Are you sure?",
-  String message =
-      "",
+  String message = "",
   required Future<void> Function() onTapYes,
   Color yesButtonColor = Colors.orange,
   IconData icon = Icons.error_outline_rounded,
@@ -454,7 +433,11 @@ Future<void> showConfirmDialog({
                 // Text(title),
               ],
             ),
-            content: Text(message, textAlign: TextAlign.center,style: TextStyle(fontSize: 16),),
+            content: Text(
+              message,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 16),
+            ),
             actionsAlignment: MainAxisAlignment.center,
             actions: [
               TextButton(
@@ -465,18 +448,38 @@ Future<void> showConfirmDialog({
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
+
+                // onPressed: isLoading
+                //     ? null
+                //     : () async {
+                //         setState(() => isLoading = true);
+
+                //         await onTapYes();
+
+                //         if (context.mounted) {
+                //           Navigator.pop(context);
+
+                //         }
+                //       },
                 onPressed: isLoading
                     ? null
                     : () async {
                         setState(() => isLoading = true);
 
-                        await onTapYes();
+                        try {
+                          await onTapYes();
 
-                        if (context.mounted) {
-                          Navigator.pop(context);
-                         
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            setState(() => isLoading = false);
+                          }
+                          print("Delete error: $e");
                         }
                       },
+
                 child: isLoading
                     ? const SizedBox(
                         width: 22,
@@ -486,7 +489,7 @@ Future<void> showConfirmDialog({
                           color: Colors.white,
                         ),
                       )
-                    :  Text("Yes"),
+                    : Text("Yes"),
               ),
               TextButton(
                 style: TextButton.styleFrom(
