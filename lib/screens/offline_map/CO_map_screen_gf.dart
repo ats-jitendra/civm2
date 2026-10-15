@@ -221,7 +221,7 @@ class _COMapScreenGfState extends State<COMapScreenGf> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-    ensureCameraInitialized();
+   ensureCameraInitialized();
     _startListeningToCompass();
 
     /////

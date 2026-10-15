@@ -512,3 +512,92 @@ Future<void> showConfirmDialog({
     },
   );
 }
+
+Future<void> showConfirmDialogWithMain({
+  required BuildContext context,
+  String status = "Submit It!",
+  String title = "Confirm Submission",
+  Widget message = const Text(""),
+  required Future<void> Function() onTapYes,
+  Color yesButtonColor = Colors.orange,
+  IconData icon = Icons.error_outline_rounded,
+}) {
+  return showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      bool isLoading = false;
+
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: Column(
+              children: [
+                Icon(icon, color: yesButtonColor, size: 40),
+                // const SizedBox(height: 8),
+                Text(title),
+              ],
+            ),
+            content: message,
+            actionsAlignment: MainAxisAlignment.center,
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.green,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+
+                onPressed: isLoading
+                    ? null
+                    : () async {
+                        setState(() => isLoading = true);
+
+                        try {
+                          await onTapYes();
+
+                          if (context.mounted) {
+                            Navigator.pop(context);
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            setState(() => isLoading = false);
+                          }
+                          print("Delete error: $e");
+                        }
+                      },
+
+                child: isLoading
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text("Yes, $status"),
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.red,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                onPressed: () {
+                  if (isLoading) return; // block tap, keep style
+                  Navigator.pop(context);
+                },
+                child: const Text("Cancel"),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}

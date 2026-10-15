@@ -7,7 +7,6 @@ import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/screens/offline_map/custom_widgets.dart';
 import 'package:CIVM/screens/offline_map/map_data_base_helper.dart';
 
-
 import 'package:CIVM/utils/user_pref.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_compass/flutter_compass.dart';
@@ -95,6 +94,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
   LatLng? selectedPopupLatLng;
   Offset? popupOffset;
   bool showPopup = false;
+  // bool showPolylinePopup2 = false;
 
   String selectedWkt = "";
   double totalSelectedDistanceMiles = 0;
@@ -202,6 +202,8 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
   bool showDetails = true;
   bool isLoading = false;
   String? selectedCrew;
+  bool isMarkAsRead = false;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -674,12 +676,14 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
                                           Polyline(
                                             points: polyline.points,
                                             strokeWidth: 16,
-                                            color: const Color.fromRGBO(
-                                              200,
-                                              184,
-                                              22,
-                                              1,
-                                            ),
+                                            color: isMarkAsRead
+                                                ? Colors.grey
+                                                : const Color.fromRGBO(
+                                                    200,
+                                                    184,
+                                                    22,
+                                                    1,
+                                                  ),
                                           ),
                                         if (!showChangeOrderLayer)
                                           Polyline(
@@ -855,18 +859,25 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
                           ),
                         ),
                       ),
+
                       ////////////////
-                      if (showPopup && popupOffset != null)
+                      if (showPopup &&
+                          popupOffset != null &&
+                          selectedPolylineIndex != null)
                         Positioned(
                           left: popupOffset!.dx - 130,
                           top: popupOffset!.dy - 140,
                           child:
-                              (overHeadPolylines[selectedPolylineIndex!].jobNo
-                                  .trim()
-                                  .isEmpty)
-                              ? _buildPolylinePopup(selectedPolylineIndex!)
-                              : const SizedBox.shrink(), // Don't show inline popup
+                              RegExp(r'\d').hasMatch(
+                                overHeadPolylines[selectedPolylineIndex!].jobNo
+                                    .trim(),
+                              )
+                              ? _buildPolylineMarkAsReadPopup(
+                                  selectedPolylineIndex!,
+                                )
+                              : _buildPolylinePopup(selectedPolylineIndex!),
                         ),
+
                       Positioned(
                         top: 10,
                         right: 5,
@@ -1654,7 +1665,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
           height: 28,
           child: GestureDetector(
             onTap: () {
-              _showDetailsPopupUpdate(i);
+              // _showDetailsPopupUpdate(i);
             },
             child: Image.asset("assets/note_icon_n.png"),
             //const Icon(Icons.chat, color: Colors.white, size: 30),
@@ -1689,7 +1700,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
           alignment: Alignment.topCenter,
           child: GestureDetector(
             onTap: () {
-              _showDetailsPopupUpdate(i);
+              // _showDetailsPopupUpdate(i);
             },
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -2232,17 +2243,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
         final flag = completionFlags[j].trim();
         final rework = reworkArray[j].trim();
 
-        final validStatuses = [
-          // "completed",
-          // "final completed",
-          // "approved",
-          // "rework",
-          // "failed",
-          // "rejected",
-          // "passed",
-          // "pending lcp inspection",
-          "pending",
-        ];
+        final validStatuses = ["completed", "pending"];
 
         if (!validStatuses.contains(status.toLowerCase())) {
           continue;
@@ -2258,32 +2259,20 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
             point: center,
             width: 34,
             height: 34,
-            child:
-                // (status.toLowerCase() == "completed" &&
-                //     flag == "1" &&
-                //     rework.toLowerCase() != "rework completed")
-                // ? Container(
-                //     decoration: BoxDecoration(
-                //       color: getColorFromName(maintType),
-                //       shape: BoxShape.circle,
-                //       border: Border.all(color: Colors.white, width: 2),
-                //     ),
-                //     child: const Icon(
-                //       Icons.check,
-                //       color: Colors.white,
-                //       size: 16,
-                //     ),
-                //   )
-                // :
-                Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
-                  child: Image.asset(
-                    getStatusImage(status, flag, rework, maintType),
-                    width: 34,
-                    height: 34,
-                    fit: BoxFit.contain,
-                  ),
-                ),
+            child: (status.toLowerCase() == "completed")
+                ? Container(
+                    decoration: BoxDecoration(
+                      color: getColorFromName(maintType),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  )
+                : SizedBox()
           ),
         );
       }
@@ -2695,12 +2684,39 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
           print("111111 ${jsonEncode(selectedMapObjects)}");
         }
       } else {
-        // Hide popup and open details dialog
-        setState(() {
-          showPopup = false;
-        });
+        final polyline = overHeadPolylines[nearestIndex];
 
-        _showDetailsPopupUpdate(nearestIndex);
+        final visibleMaintTypes = polyline.maintType
+            .split(',')
+            .map((type) => type.trim())
+            .where(
+              (type) => type.isNotEmpty && (workLayerVisibility[type] ?? true),
+            )
+            .toList();
+
+        final bool isChangeOrderPolyline =
+            showChangeOrderLayer && visibleMaintTypes.length == 1;
+
+        if (isChangeOrderPolyline) {
+          setState(() {
+            selectedPolylineIndex = nearestIndex;
+            selectedPopupLatLng = tapPoint;
+            selectedWkt = polyline.wkt;
+            selectedSubstation = polyline.substation;
+            selectedSpanName = polyline.elementName;
+            popupOffset = screenPoint;
+
+            // showPolylinePopup2 = true;
+            showPopup = true;
+          });
+        } else {
+          setState(() {
+            showPopup = false;
+            // showPolylinePopup2 = false;
+          });
+
+          // _showDetailsPopupUpdate(nearestIndex);
+        }
       }
 
       // }
@@ -3071,16 +3087,145 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Expanded(
-                            child: Text(
-                              "",
-                              style: TextStyle(
-                                // fontWeight: FontWeight.bold,
-                                fontSize: 17,
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Checkbox(
+                                value: isMarkAsRead,
+                                activeColor: Colors.green,
+                                onChanged: (value) {
+                                  setDialogState(() {
+                                    isMarkAsRead = value ?? false;
+
+                                    final polyline = overHeadPolylines[index];
+
+                                    if (isMarkAsRead) {
+                                      final maintTypes = polyline.maintType
+                                          .split(',')
+                                          .map((e) => e.trim())
+                                          .toList();
+
+                                      final maintStatuses = polyline.maintStatus
+                                          .split(',')
+                                          .map((e) => e.trim())
+                                          .toList();
+
+                                      final coordinateIds = polyline
+                                          .coordinateIds
+                                          .split(',')
+                                          .map((e) => e.trim())
+                                          .toList();
+
+                                      for (
+                                        int i = 0;
+                                        i < maintTypes.length;
+                                        i++
+                                      ) {
+                                        final maintType = maintTypes[i];
+
+                                        final maintStatus =
+                                            i < maintStatuses.length
+                                            ? maintStatuses[i]
+                                            : "";
+
+                                        // Skip completed maintenance types
+                                        if (maintStatus.toLowerCase() ==
+                                            "completed") {
+                                          continue;
+                                        }
+
+                                        final parentFeatureId =
+                                            i < coordinateIds.length
+                                            ? coordinateIds[i]
+                                            : "";
+                                      }
+                                    } else {}
+                                  });
+                                },
                               ),
-                            ),
+                              //  const SizedBox(width: 4),
+                              const Text(
+                                "Mark as Completed",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Opacity(
+                                opacity: isMarkAsRead ? 1.0 : 0.4,
+                                child: InkWell(
+                                  onTap: isMarkAsRead
+                                      ? () async {
+                                          print(
+                                            '1---${overHeadPolylines[index].coordinateIds},2--${id},3--${widget.jobNo}',
+                                          );
+                                          showConfirmDialogWithMain(
+                                            message: RichText(
+                                              text: const TextSpan(
+                                                style: TextStyle(
+                                                  color: Colors.black,
+                                                  fontSize: 14,
+                                                ),
+                                                children: [
+                                                  TextSpan(text: 'Submit '),
+                                                  TextSpan(
+                                                    text: '1',
+                                                    style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                  TextSpan(
+                                                    text:
+                                                        ' line(s) as Exception Maintenance?',
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            context: context,
+                                            yesButtonColor: Colors.orange,
+                                            icon: Icons.warning_amber_rounded,
+                                            onTapYes: () async {
+                                              await completeChangeOrderJob(
+                                                coordId:
+                                                    overHeadPolylines[index]
+                                                        .coordinateIds,
+                                                userId: id,
+                                                tokenNo: widget.jobNo,
+                                              );
+
+                                              if (context.mounted) {
+                                                Navigator.pop(context);
+                                              }
+                                            },
+                                          );
+                                        }
+                                      : null,
+
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Container(
+                                    height: 30,
+                                    width: 64,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Text(
+                                      "Submit",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
 
                           // Close Button
@@ -3100,6 +3245,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
                           ),
                         ],
                       ),
+
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -4358,24 +4504,9 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
 
   Color getColorFromName(String color) {
     switch (color.toUpperCase().trim()) {
-      case "JARRAFF":
-        return Colors.purple;
-      case "MINI JARRAFF":
-        return Colors.red;
-      case "NO SPRAY":
-        return Colors.pink;
-      case "MOWING":
-        return Colors.brown;
-      case "BUCKET":
-        return Colors.orange;
-      case "GROUND":
-        return Colors.yellow;
-      case "CROSS-COUNTRY SPRAY":
-        return const Color.fromARGB(255, 59, 2, 248);
-      case "ROADSIDE SPRAY":
+      case "UNDEFINED":
         return Colors.green;
-      case "BYL":
-        return Colors.blue;
+
       default:
         return polylineColor;
     }
@@ -6403,6 +6534,287 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
         ],
       ),
     );
+  }
+
+  Widget _buildPolylineMarkAsReadPopup(int index) {
+    print('open popup');
+    print('jobNo------- ${overHeadPolylines[selectedPolylineIndex!].jobNo}');
+    final polyline = overHeadPolylines[selectedPolylineIndex!];
+    // // Check whether this particular span was marked as completed
+    // isMarkAsRead = lines.any((e) => e["mapId"] == polyline.oid.toString());
+    // If Mark As Read is already checked globally,
+    // automatically add this span's maintTypes.
+    if (isMarkAsRead) {
+      final maintTypes = polyline.maintType
+          .split(',')
+          .map((e) => e.trim())
+          .toList();
+
+      final maintStatuses = polyline.maintStatus
+          .split(',')
+          .map((e) => e.trim())
+          .toList();
+
+      final coordinateIds = polyline.coordinateIds
+          .split(',')
+          .map((e) => e.trim())
+          .toList();
+
+      for (int i = 0; i < maintTypes.length; i++) {
+        final maintType = maintTypes[i];
+
+        final maintStatus = i < maintStatuses.length ? maintStatuses[i] : "";
+
+        // Skip completed maintenance types
+        if (maintStatus.toLowerCase() == "completed") {
+          continue;
+        }
+
+        final parentFeatureId = i < coordinateIds.length
+            ? coordinateIds[i]
+            : "";
+      }
+    }
+    final allStatusesCompleted = overHeadPolylines[selectedPolylineIndex!]
+        .maintStatus
+        .split(',')
+        .map((e) => e.trim().toLowerCase())
+        .where((e) => e.isNotEmpty)
+        .every((e) => e == "completed");
+
+    return Material(
+      color: Colors.transparent,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 280,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(15),
+              boxShadow: const [
+                BoxShadow(blurRadius: 8, color: Colors.black26),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          "",
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                          ),
+                        ),
+                      ),
+
+                      // Delete Icon
+                      // InkWell(
+                      //   onTap: () {
+                      //     deleteSelectedPolyline();
+                      //   },
+                      //   borderRadius: BorderRadius.circular(20),
+                      //   child: const Padding(
+                      //     padding: EdgeInsets.all(4),
+                      //     child: Icon(
+                      //       Icons.delete,
+                      //       color: Colors.red,
+                      //       size: 22,
+                      //     ),
+                      //   ),
+                      // ),
+                      const SizedBox(
+                        width: 4,
+                      ), // <-- Change this value to adjust spacing
+                      // Details Icon
+                      InkWell(
+                        onTap: () {
+                          // Hide the small popup
+                          setState(() {
+                            showPopup = false;
+                          });
+
+                          // Open the update dialog
+                          _showDetailsPopupUpdate(selectedPolylineIndex!);
+                        },
+                        borderRadius: BorderRadius.circular(20),
+                        child: const Padding(
+                          padding: EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.fullscreen,
+                            color: Colors.blue,
+                            size: 22,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 4), // <-- Change this value
+                      // Close Icon
+                      InkWell(
+                        onTap: () {
+                          setState(() {
+                            showPopup = false;
+                          });
+                        },
+                        borderRadius: BorderRadius.circular(20),
+                        child: const Padding(
+                          padding: EdgeInsets.all(4),
+                          child: Icon(
+                            Icons.cancel_presentation_sharp,
+                            color: Colors.red,
+                            size: 22,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+
+                  if (!allStatusesCompleted)
+                    Row(
+                      children: [
+                        Checkbox(
+                          value: isMarkAsRead,
+                          activeColor: Colors.green,
+                          onChanged: (value) {
+                            final polyline =
+                                overHeadPolylines[selectedPolylineIndex!];
+
+                            setState(() {
+                              isMarkAsRead = value ?? false;
+
+                              if (isMarkAsRead) {
+                                isMarkAsRead = true;
+                                final maintTypes = polyline.maintType
+                                    .split(',')
+                                    .map((e) => e.trim())
+                                    .toList();
+
+                                final maintStatuses = polyline.maintStatus
+                                    .split(',')
+                                    .map((e) => e.trim())
+                                    .toList();
+
+                                final coordinateIds = polyline.coordinateIds
+                                    .split(',')
+                                    .map((e) => e.trim())
+                                    .toList();
+
+                                for (int i = 0; i < maintTypes.length; i++) {
+                                  final maintType = maintTypes[i];
+
+                                  final maintStatus = i < maintStatuses.length
+                                      ? maintStatuses[i]
+                                      : "";
+
+                                  // Skip completed maintenance types
+                                  if (maintStatus.toLowerCase() ==
+                                      "completed") {
+                                    continue;
+                                  }
+
+                                  final parentFeatureId =
+                                      i < coordinateIds.length
+                                      ? coordinateIds[i]
+                                      : "";
+                                }
+                              } else {
+                                isMarkAsRead = false;
+                              }
+                            });
+                          },
+                        ),
+                        const SizedBox(width: 4),
+                        const Text(
+                          "Mark as Completed",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                ],
+              ),
+            ),
+          ),
+          Container(
+            width: 20,
+            height: 20,
+            transform: Matrix4.rotationZ(0.785398),
+            decoration: const BoxDecoration(color: Colors.white),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> completeChangeOrderJob({
+    required String coordId,
+    required String userId,
+    required String tokenNo,
+  }) async {
+    try {
+      final url =
+          Uri.parse(
+            '${AppUrl.baseUrl}login_user/completeChangeOrderJob',
+          ).replace(
+            queryParameters: {
+              'coordId': coordId,
+              'userId': userId,
+              'token_no': tokenNo,
+            },
+          );
+
+      print("Complete Change Order Job API URL: $url");
+
+      final response = await http.post(
+        url,
+        headers: {
+          "Authorization": "Bearer $token",
+          "Content-Type": "application/json",
+        },
+      );
+
+      print("Complete Change Order Job Status: ${response.statusCode}");
+      print("Complete Change Order Job Response: ${response.body}");
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200 &&
+          responseData["message"] == "Status updated successfully") {
+        print("Change Order Job completed successfully");
+        print("Token No: ${responseData["token_no"]}");
+        print("Status: ${responseData["status"]}");
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              "Marked 1 Exception/Change order line(s) successfully",
+            ),
+          ),
+        );
+
+        if (!mounted) return;
+
+        Navigator.pop(context);
+
+        await loadApiData();
+      } else {
+        print("Failed to complete Change Order Job");
+        print("Message: ${responseData["message"] ?? response.body}");
+      }
+    } catch (e) {
+      print("Error completing Change Order Job: $e");
+    } finally {
+      if (mounted) {
+        setState(() {});
+      }
+    }
   }
 }
 

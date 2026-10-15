@@ -132,7 +132,7 @@ class _ChangeOrderTableState extends State<ChangeOrderTable> {
                           "0,1,2",
                           selectedYear.toString(),
                         );
-                        _initializeScreen();
+                    _initializeScreen();
                   },
                   child: Container(
                     margin: const EdgeInsets.only(
@@ -255,8 +255,8 @@ class _ChangeOrderTableState extends State<ChangeOrderTable> {
                                   vertical: 6,
                                 ),
                                 child: InkWell(
-                                  onTap: () {
-                                    Navigator.push(
+                                  onTap: () async {
+                                    await Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (_) =>
@@ -265,6 +265,7 @@ class _ChangeOrderTableState extends State<ChangeOrderTable> {
                                             ),
                                       ),
                                     );
+                                    await getData(selectedYear.toString());
                                   },
                                   child: Container(
                                     decoration: BoxDecoration(
@@ -460,47 +461,47 @@ class _ChangeOrderTableState extends State<ChangeOrderTable> {
                 // ) ||
                 item.type.toString().toLowerCase().contains(
                   query.toLowerCase(),
-                ) 
-                //||
-                // item.contractorCompany.toString().toLowerCase().contains(
-                //   query.toLowerCase(),
-                // ) ||
-                // item.adminNotes1.toString().toLowerCase().contains(
-                //   query.toLowerCase(),
-                // ) ||
-                // item.totalMiles.toString().toLowerCase().contains(
-                //   query.toLowerCase(),
-                // ) ||
-                // item.contractYear.toString().toLowerCase().contains(
-                //   query.toLowerCase(),
-                // ) ||
-                // item.cycle.toString().toLowerCase().contains(
-                //   query.toLowerCase(),
-                // ) ||
-                // item.streetAddress.toString().toLowerCase().contains(
-                //   query.toLowerCase(),
-                // ) ||
-                // item.mapLocation.toString().toLowerCase().contains(
-                //   query.toLowerCase(),
-                // ) ||
-                // item.adminNotes1.toString().toLowerCase().contains(
-                //   query.toLowerCase(),
-                // ) ||
-                // item.dateOfInspection.toString().toLowerCase().contains(
-                //   query.toLowerCase(),
-                // ) ||
-                // item.followUpDate.toString().toLowerCase().contains(
-                //   query.toLowerCase(),
-                // ) ||
-                // item.costPerMile.toString().toLowerCase().contains(
-                //   query.toLowerCase(),
-                // ) ||
-                // item.totalCost.toString().toLowerCase().contains(
-                //   query.toLowerCase(),
-                // ) ||
-                // item.nextMaintDue.toString().toLowerCase().contains(
-                //   query.toLowerCase(),
-                //),
+                ),
+            //||
+            // item.contractorCompany.toString().toLowerCase().contains(
+            //   query.toLowerCase(),
+            // ) ||
+            // item.adminNotes1.toString().toLowerCase().contains(
+            //   query.toLowerCase(),
+            // ) ||
+            // item.totalMiles.toString().toLowerCase().contains(
+            //   query.toLowerCase(),
+            // ) ||
+            // item.contractYear.toString().toLowerCase().contains(
+            //   query.toLowerCase(),
+            // ) ||
+            // item.cycle.toString().toLowerCase().contains(
+            //   query.toLowerCase(),
+            // ) ||
+            // item.streetAddress.toString().toLowerCase().contains(
+            //   query.toLowerCase(),
+            // ) ||
+            // item.mapLocation.toString().toLowerCase().contains(
+            //   query.toLowerCase(),
+            // ) ||
+            // item.adminNotes1.toString().toLowerCase().contains(
+            //   query.toLowerCase(),
+            // ) ||
+            // item.dateOfInspection.toString().toLowerCase().contains(
+            //   query.toLowerCase(),
+            // ) ||
+            // item.followUpDate.toString().toLowerCase().contains(
+            //   query.toLowerCase(),
+            // ) ||
+            // item.costPerMile.toString().toLowerCase().contains(
+            //   query.toLowerCase(),
+            // ) ||
+            // item.totalCost.toString().toLowerCase().contains(
+            //   query.toLowerCase(),
+            // ) ||
+            // item.nextMaintDue.toString().toLowerCase().contains(
+            //   query.toLowerCase(),
+            //),
           )
           .toList();
     }
@@ -769,7 +770,7 @@ class _ChangeOrderTableState extends State<ChangeOrderTable> {
       "0,1,2",
       year,
     );
-     _initializeScreen();
+    _initializeScreen();
   }
 
   void showYearFilterDialog() {
@@ -944,7 +945,7 @@ class _ChangeOrderTableState extends State<ChangeOrderTable> {
     await Future.delayed(const Duration(seconds: 2));
     if (!mounted) return;
     await checkCurrentUser();
-  }//----
+  } //----
 }
 
 // ignore: must_be_immutable
