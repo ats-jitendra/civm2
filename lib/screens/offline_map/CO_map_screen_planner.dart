@@ -207,6 +207,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
   bool showDetails = true;
   bool isLoading = false;
   String? selectedCrew;
+  String selectedJobStatus = "";
   @override
   void initState() {
     // TODO: implement initState
@@ -221,7 +222,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-    ensureCameraInitialized();
+    //  ensureCameraInitialized();
     _startListeningToCompass();
 
     /////
@@ -1618,6 +1619,20 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
       selectedFeeder.toString(),
     );
     print("Overhead rows: ${overHeadData.length}");
+    ////job Status--------
+    selectedJobStatus = "";
+
+    for (var row in overHeadData) {
+      if (row["jobNo"]?.toString().trim() == coTokenNo.toString().trim()) {
+        selectedJobStatus = row["jobStatus"]?.toString() ?? "";
+
+        print("Job No: ${row["jobNo"]}");
+        print("Job Status: $selectedJobStatus");
+
+        break;
+      }
+    }
+///---------------------
     overHeadPolylines.clear();
 
     for (var row in overHeadData) {
@@ -1671,6 +1686,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
             completionFlag: row["completionFlag"]?.toString() ?? "",
             coordinateIds: row["coordinateIds"]?.toString() ?? "",
             service: row["service"]?.toString() ?? "",
+            jobStatus: row["jobStatus"]?.toString() ?? "",
           ),
           /////-------
         );
@@ -6822,6 +6838,7 @@ class OverHeadPolylineData {
   final String completionFlag;
   final String coordinateIds;
   final String service;
+  final String jobStatus;
 
   OverHeadPolylineData({
     required this.phase,
@@ -6850,6 +6867,7 @@ class OverHeadPolylineData {
     required this.completionFlag,
     required this.coordinateIds,
     required this.service,
+    required this.jobStatus,
   });
 }
 

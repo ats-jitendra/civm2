@@ -28,7 +28,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 21,
+      version: 22,
       onCreate: _createDB,
       onUpgrade: (db, oldVersion, newVersion) async {
         // Future database migrations go here.
@@ -287,6 +287,10 @@ class DatabaseHelper {
             "ALTER TABLE commentHistoryTable ADD COLUMN flag TEXT",
           );
         }
+          if (oldVersion < 22) {
+          await db.execute("ALTER TABLE overHeadTable ADD COLUMN jobStatus TEXT");
+           await db.execute("ALTER TABLE overHeadChangeOrderTable ADD COLUMN jobStatus TEXT");
+        }
       },
     );
   }
@@ -329,7 +333,8 @@ class DatabaseHelper {
       status INTEGER DEFAULT 1,
       completionStatus INTEGER DEFAULT 1,
       createdAt INTEGER,
-      fetchId INTEGER
+      fetchId INTEGER,
+      jobStatus TEXT
       )
     ''');
     await db.execute('''
@@ -369,7 +374,8 @@ class DatabaseHelper {
       status INTEGER DEFAULT 1,
       completionStatus INTEGER DEFAULT 1,
       createdAt INTEGER,
-      fetchId INTEGER
+      fetchId INTEGER,
+       jobStatus TEXT
       )
     ''');
 
@@ -691,6 +697,7 @@ CREATE TABLE inspectionListTable(
           "completionStatus": 1,
           "createdAt": DateTime.now().millisecondsSinceEpoch,
           "fetchId": fetchId,
+          "jobStatus":item["jobStatus"],
         }, conflictAlgorithm: ConflictAlgorithm.replace);
       }
       //Poles
