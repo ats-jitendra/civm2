@@ -371,7 +371,9 @@ class _MapScreenState extends State<MapScreen> {
         ),
         backgroundColor: const Color.fromARGB(255, 7, 59, 120),
         actions: [
-          IconButton(
+          (mainStatusForShareButton == 'PENDING'
+          ||mainStatusForShareButton == 'ASSIGNED'
+          ||mainStatusForShareButton == 'PENDING ZIELIES ASSIGNMENT')?IconButton(
             icon: Icon(Icons.share, color: colorValue),
             onPressed: () {
               showCrewDialogIVM(
@@ -382,7 +384,7 @@ class _MapScreenState extends State<MapScreen> {
                 // widget.type.toString(),
               );
             },
-          ),
+          ):SizedBox(),
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
@@ -7666,6 +7668,7 @@ class _MapScreenState extends State<MapScreen> {
     ),
   );
   Color colorValue = Colors.blue;
+  String mainStatusForShareButton = '';
   Future<void> getWorkOrderList() async {
     try {
       setState(() {
@@ -7704,13 +7707,17 @@ class _MapScreenState extends State<MapScreen> {
                 },
               )
               .toList();
+              mainStatusForShareButton = workOrderList.isNotEmpty
+      ? workOrderList.first["status"].toString().toUpperCase()
+      : "";
+      print('mainStatusForShareButton:: $mainStatusForShareButton');
 
           // Check if the list contains PENDING
           // final hasPending = workOrderList.any(
           //   (item) => item["status"].toString().toUpperCase() == "PENDING",
           // );
           final hasAssigned = workOrderList.any(
-            (item) => item["status"].toString().toUpperCase() == "ASSIGNED",
+            (item) => (item["status"].toString().toUpperCase() == "ASSIGNED" || item["status"].toString().toUpperCase() == "PENDING ZIELIES ASSIGNMENT"),
           );
           // ASSIGNED = Green
           // Otherwise = Blue
@@ -7802,7 +7809,7 @@ class _MapScreenState extends State<MapScreen> {
             int.parse(token.toString()),
           );
         }
-
+        getWorkOrderList();// new added for share button color change
         // myFuture = fetchDetails(context);
         await Future.delayed(Duration(seconds: 3));
         // Navigator.pop(context);

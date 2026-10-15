@@ -237,6 +237,8 @@ class _MapScreenGFState extends State<MapScreenGF> {
   ImageViewViewModel imageViewModel = ImageViewViewModel();
   String imageSource = '';
 
+  bool _isReworkCompletedLoading = false;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -6531,7 +6533,8 @@ class _MapScreenGFState extends State<MapScreenGF> {
       i < maintTypeList.length && i < maintStatusList.length;
       i++
     ) {
-      if (maintStatusList[i].toUpperCase() == "COMPLETED") {
+      if (maintStatusList[i].toUpperCase() == "COMPLETED" ||
+      maintStatusList[i].toUpperCase() == "REWORK COMPLETED") {
         completedMaintTypes.add(maintTypeList[i]);
       }
     }
@@ -6723,6 +6726,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                 132,
                                 19,
                               ),
+                              disabledBackgroundColor: const Color.fromARGB(255, 207, 132, 19),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(
                                   6,
@@ -6776,7 +6780,9 @@ class _MapScreenGFState extends State<MapScreenGF> {
                             //     );
                             //   }
                             // },
-                            onPressed: () {
+                            onPressed:  _isReworkCompletedLoading
+                                        ? null
+                                        : () async {
                               // Get only the work types that the user selected
                               final selectedTypes = selectedWorkTypes.entries
                                   .where((entry) => entry.value == true)
@@ -6867,15 +6873,41 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                 'selectedMapObjectsReworkOrCompleted:: '
                                 '$selectedMapObjectsReworkOrCompleted',
                               );
-
-                              if (selectedMapObjectsReworkOrCompleted
-                                  .isNotEmpty) {
-                                reworkORCompletedMapData(
-                                  selectedMapObjectsReworkOrCompleted,
-                                );
-                              }
+                              setDialogState(() {
+                              _isReworkCompletedLoading = true;
+                               });              
+                               try {
+                               await reworkORCompletedMapData(
+                               selectedMapObjectsReworkOrCompleted,
+                               );
+                               } catch (e) {
+                               debugPrint("Rework submission failed: $e");
+                               } finally {
+                               if (mounted) {
+                               setDialogState(() {
+                               _isReworkCompletedLoading = false;
+                              });
+                             }
+                           }
+                              // if (selectedMapObjectsReworkOrCompleted
+                              //     .isNotEmpty) {
+                              //   reworkORCompletedMapData(
+                              //     selectedMapObjectsReworkOrCompleted,
+                              //   );
+                              // }
                             },
-                            child: const Text(
+                            child:  _isReworkCompletedLoading
+                            ? const SizedBox(
+                            height: 20,
+                            width: 20,
+                            child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                           Colors.white,
+                             ),
+                            ),
+                            )
+                           : const Text(
                               "Yes, Rework",
                               style: TextStyle(color: Colors.white),
                             ),
@@ -6952,7 +6984,8 @@ class _MapScreenGFState extends State<MapScreenGF> {
       i < maintTypeList.length && i < maintStatusList.length;
       i++
     ) {
-      if (maintStatusList[i].toUpperCase() == "COMPLETED") {
+      if (maintStatusList[i].toUpperCase() == "COMPLETED"||
+      maintStatusList[i].toUpperCase() == "REWORK COMPLETED") {
         completedMaintTypes.add(maintTypeList[i]);
       }
     }
@@ -7068,11 +7101,17 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                   159,
                                   24,
                                 ),
+                                disabledBackgroundColor:  const Color.fromARGB(
+                                  255,
+                                  19,
+                                  159,
+                                  24,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
-                              onPressed: () {
+                              onPressed: () async {
                                 final selectedTypes = selectedWorkTypes.entries
                                     .where((entry) => entry.value == true)
                                     .map((entry) => entry.key.trim())
@@ -7154,13 +7193,28 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                   "selectedMapObjectsReworkOrCompleted:: "
                                   "$selectedMapObjectsReworkOrCompleted",
                                 );
-
-                                if (selectedMapObjectsReworkOrCompleted
-                                    .isNotEmpty) {
-                                  reworkORCompletedMapData(
+                                 setDialogState(() {
+                                _isReworkCompletedLoading = true;
+                                 });
+                                 try {
+                                 await  reworkORCompletedMapData(
                                     selectedMapObjectsReworkOrCompleted,
                                   );
-                                }
+                                 } catch (e) {
+                                 debugPrint("Complete submission failed: $e");
+                                 } finally {
+                                 if (mounted) {
+                                  setState(() {
+                                   _isReworkCompletedLoading = false;
+                                  });
+                                     }
+                                 }
+                                // if (selectedMapObjectsReworkOrCompleted
+                                //     .isNotEmpty) {
+                                //   reworkORCompletedMapData(
+                                //     selectedMapObjectsReworkOrCompleted,
+                                //   );
+                                // }
                               },
                               // onPressed: () {
                               //   final selected = selectedWorkTypes.values.any(
@@ -7211,7 +7265,18 @@ class _MapScreenGFState extends State<MapScreenGF> {
                               //     selectedMapObjectsReworkOrCompleted,
                               //   );
                               // },
-                              child: const Text(
+                              child:  _isReworkCompletedLoading
+                                   ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                     ),
+                                    ),
+                                  )
+                                 : const Text(
                                 "Complete",
                                 style: TextStyle(
                                   color: Colors.white,
