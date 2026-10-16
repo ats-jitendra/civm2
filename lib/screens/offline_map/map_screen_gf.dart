@@ -238,6 +238,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
   String imageSource = '';
 
   bool _isReworkCompletedLoading = false;
+  String selectedJobStatus = '';
 
   @override
   void initState() {
@@ -417,10 +418,12 @@ class _MapScreenGFState extends State<MapScreenGF> {
         actions: [
           widget.sourcePage == 'maintenanceReportView'
               ? const SizedBox.shrink()
-              : (widget
-                        .visibilityFlag /////visibilityFlag
-                        .toString() ==
-                    '2')
+              : 
+              // (widget
+              //           .visibilityFlag /////visibilityFlag
+              //           .toString() ==
+              //       '2')
+              (selectedJobStatus=='ASSIGNED')
               ? IconButton(
                   icon: const Icon(Icons.share, color: Colors.green),
                   onPressed: () {
@@ -432,7 +435,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                     );
                   },
                 )
-              : IconButton(
+              : (selectedJobStatus=='PENDING ZIELIES ASSIGNMENT')?IconButton(
                   icon: const Icon(Icons.share, color: Colors.blue),
                   onPressed: () {
                     showCrewDialogIVM(
@@ -442,7 +445,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                       widget.crew.toString(),
                     );
                   },
-                ),
+                ):SizedBox(),
           IconButton(
             icon: const Icon(Icons.visibility),
             onPressed: () {
@@ -2028,6 +2031,20 @@ class _MapScreenGFState extends State<MapScreenGF> {
       selectedSubstation.toString(),
       selectedFeeder.toString(),
     );
+     ////job Status--------
+    selectedJobStatus = "";
+
+    for (var row in overHeadData) {
+      if (row["jobNo"]?.toString().trim() == widget.jobNo.toString().trim()) {
+        selectedJobStatus = row["jobStatus"]?.toString() ?? "";
+
+        print("Job No: ${row["jobNo"]}");
+        print("Job Status: $selectedJobStatus");
+
+        break;
+      }
+    }
+///---------------------
     print("Overhead rows: ${overHeadData.length}");
     overHeadPolylines.clear();
 
@@ -2087,6 +2104,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
             rework: row["rework"]?.toString() ?? "",
             completionFlag: row["completionFlag"]?.toString() ?? "",
             service: row["service"]?.toString() ?? "",
+            jobStatus: row["jobStatus"]?.toString() ?? "",
           ),
           /////-------
         );
@@ -10216,8 +10234,9 @@ class _MapScreenGFState extends State<MapScreenGF> {
 
         // myFuture = fetchDetails(context);
         await Future.delayed(Duration(seconds: 3));
+        // Navigator.pop(context);
         Navigator.pop(context);
-        Navigator.pop(context);
+        loadApiData();
         // Navigator.pop(context);
       } else {
         print('Failed to update flag: ${response.statusCode}');
@@ -10331,6 +10350,7 @@ class OverHeadPolylineData {
   final String rework;
   final String completionFlag;
   final String service;
+  final String jobStatus;
 
   OverHeadPolylineData({
     required this.phase,
@@ -10361,6 +10381,7 @@ class OverHeadPolylineData {
     required this.rework,
     required this.completionFlag,
     required this.service,
+    required this.jobStatus,
   });
 }
 
