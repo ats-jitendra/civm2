@@ -240,6 +240,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
   StreamSubscription<CompassEvent>? _compassSubscription;
   ImageViewViewModel imageViewModel = ImageViewViewModel();
   String imageSource = '';
+  String selectedJobStatus = '';
 
   @override
   void initState() {
@@ -417,8 +418,9 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
         ),
         backgroundColor: const Color.fromARGB(255, 7, 59, 120),
         actions: [
-          (widget.visibilityFlag.toString() == '1' ||
-                  widget.visibilityFlag.toString() == '2')
+          // (widget.visibilityFlag.toString() == '1' ||
+          //         widget.visibilityFlag.toString() == '2')
+          (selectedJobStatus=='PENDING ZIELIES ASSIGNMENT'||selectedJobStatus=='ASSIGNED')
               ? IconButton(
                   icon: const Icon(Icons.share, color: Colors.green),
                   onPressed: () {
@@ -430,7 +432,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                     );
                   },
                 )
-              : IconButton(
+              :(selectedJobStatus=='PENDING')? IconButton(
                   icon: const Icon(Icons.share, color: Colors.blue),
                   onPressed: () {
                     showCrewDialogIVM(
@@ -440,7 +442,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                       widget.crew.toString(),
                     );
                   },
-                ),
+                ):SizedBox(),
           IconButton(
             icon: const Icon(Icons.visibility),
             onPressed: () {
@@ -2030,6 +2032,20 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
       selectedSubstation.toString(),
       selectedFeeder.toString(),
     );
+    ////job Status--------
+    selectedJobStatus = "";
+
+    for (var row in overHeadData) {
+      if (row["jobNo"]?.toString().trim() == widget.jobNo.toString().trim()) {
+        selectedJobStatus = row["jobStatus"]?.toString() ?? "";
+
+        print("Job No: ${row["jobNo"]}");
+        print("Job Status: $selectedJobStatus");
+
+        break;
+      }
+    }
+///---------------------
     print("Overhead rows: ${overHeadData.length}");
     overHeadPolylines.clear();
 
@@ -2089,6 +2105,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
             rework: row["rework"]?.toString() ?? "",
             completionFlag: row["completionFlag"]?.toString() ?? "",
             service: row["service"]?.toString() ?? "",
+            jobStatus: row["jobStatus"]?.toString() ?? "",
           ),
           /////-------
         );
@@ -8328,10 +8345,10 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
           );
         }
 
-        // myFuture = fetchDetails(context);
         await Future.delayed(Duration(seconds: 3));
         Navigator.pop(context);
         Navigator.pop(context);
+        loadApiData();
       } else {
         print('Failed to update flag: ${response.statusCode}');
       }
@@ -8592,6 +8609,7 @@ class OverHeadPolylineData {
   final String rework;
   final String completionFlag;
   final String service;
+  final String jobStatus;
 
   OverHeadPolylineData({
     required this.phase,
@@ -8622,6 +8640,7 @@ class OverHeadPolylineData {
     required this.rework,
     required this.completionFlag,
     required this.service,
+    required this.jobStatus,
   });
 }
 

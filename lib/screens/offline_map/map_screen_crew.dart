@@ -3832,7 +3832,9 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                           (selectedMaintStatus.trim().toLowerCase() ==
                                       "rework" ||
                                   selectedMaintStatus.trim().toLowerCase() ==
-                                      "pending")
+                                      "pending" ||
+                                  selectedMaintStatus.trim().toLowerCase() ==
+                                      "failed")
                               ? Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
