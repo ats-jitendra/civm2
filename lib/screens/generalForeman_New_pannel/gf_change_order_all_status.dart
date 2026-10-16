@@ -308,8 +308,8 @@ class _GfChangeOrderAllStatusState extends State<GfChangeOrderAllStatus>
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 8, vertical: 6),
                                 child: InkWell(
-                                  onTap: () {
-                                    Navigator.push(
+                                  onTap: () async{
+                                   await Navigator.push(
                                       context,
                                       MaterialPageRoute(
                                         builder: (_) =>
@@ -318,7 +318,9 @@ class _GfChangeOrderAllStatusState extends State<GfChangeOrderAllStatus>
                                         ),
                                       ),
                                     );
+                                      await fetchData(selectedYear.toString());
                                   },
+                                
                                   child: Container(
                                     decoration: BoxDecoration(
                                       color: getCardColor(item.status),

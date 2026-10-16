@@ -677,7 +677,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
                                             points: polyline.points,
                                             strokeWidth: 16,
                                             color: isMarkAsRead
-                                                ? Colors.grey
+                                                ? const Color.fromRGBO(158, 158, 158, 1)
                                                 : const Color.fromRGBO(
                                                     200,
                                                     184,
@@ -3047,8 +3047,13 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
       "Total Distance = ${totalSelectedDistanceMiles.toStringAsFixed(2)} miles",
     );
   }
-
+  bool _isPolylineModalOpen = false;
   void _showDetailsPopupUpdate(int index) async {
+      // Prevent opening multiple modals
+    if (_isPolylineModalOpen) {
+      return;
+    }
+        _isPolylineModalOpen = true;
     bool isSendButton = false;
     chatController.clear();
     final screenHeight = MediaQuery.of(context).size.height;
@@ -3064,6 +3069,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
       overHeadPolylines[index].coordinateIds.toString(),
     );
     showUpdateCardView = true;
+    try {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -3814,6 +3820,9 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
         );
       },
     );
+ } finally {
+      _isPolylineModalOpen = false;
+    }
   }
 
   Widget _detailRow(String title, String value) {

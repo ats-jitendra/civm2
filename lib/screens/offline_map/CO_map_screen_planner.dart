@@ -6,6 +6,7 @@ import 'package:CIVM/models/user_model.dart';
 import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/screens/offline_map/custom_widgets.dart';
 import 'package:CIVM/screens/offline_map/map_data_base_helper.dart';
+import 'package:CIVM/utils/common_functions.dart' hide progressBar;
 import 'package:CIVM/utils/custom_toast_snackbar_progressdialog.dart';
 
 import 'package:CIVM/utils/user_pref.dart';
@@ -37,16 +38,13 @@ class COMapScreenPlanner extends StatefulWidget {
   String substation;
   String feeder;
   String visibilityFlag;
-  String type;
-  String status;
+
   COMapScreenPlanner({
     super.key,
     required this.jobNo,
     required this.substation,
     required this.feeder,
     required this.visibilityFlag,
-    required this.type,
-    required this.status,
   });
 
   @override
@@ -54,6 +52,7 @@ class COMapScreenPlanner extends StatefulWidget {
 }
 
 class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
+  final TextEditingController _notes = TextEditingController();
   late final MapController _mapController;
   double _currentZoom = 17.0;
   int driveMode = 0;
@@ -208,6 +207,8 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
   bool isLoading = false;
   String? selectedCrew;
   String selectedJobStatus = "";
+  bool _isApproveLoading = false;
+  bool _isCancelLoading = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -222,7 +223,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-    //  ensureCameraInitialized();
+    ensureCameraInitialized();
     _startListeningToCompass();
 
     /////
@@ -394,43 +395,25 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
         ),
         backgroundColor: const Color.fromARGB(255, 7, 59, 120),
         actions: [
-          (widget.status.toString().trim().toUpperCase() ==
-                      "PENDING ZIELIES ASSIGNMENT" ||
-                  widget.status.toString().trim().toUpperCase() == "ASSIGNED")
-              ? (widget.type.toString() == 'Change Order' ||
-                        widget.type.toString() == 'Exception Maintenance' ||
-                        widget.type.toString() == 'No Exception Maintenance')
-                    ? (widget.visibilityFlag.toString() == '2')
-                          ? IconButton(
-                              icon: const Icon(
-                                Icons.share,
-                                color: Colors.green,
-                              ),
-                              onPressed: () async {
-                                showCrewDialog(
-                                  context,
-                                  widget.jobNo.toString(),
-                                );
-                              },
-                            )
-                          : IconButton(
-                              icon: const Icon(Icons.share, color: Colors.blue),
-                              onPressed: () {
-                                showCrewDialog(
-                                  context,
-                                  widget.jobNo.toString(),
-                                );
-                              },
-                            )
-                    : const Text(
-                        "",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 10,
-                        ),
-                      )
-              : Container(),
+          if (selectedJobStatus.toString().trim().toUpperCase() ==
+                  "PENDING ZIELIES ASSIGNMENT" ||
+              selectedJobStatus.toString().trim().toUpperCase() == "ASSIGNED")
+            if (selectedJobStatus.toString().trim().toUpperCase() ==
+                "PENDING ZIELIES ASSIGNMENT")
+              IconButton(
+                icon: const Icon(Icons.share, color: Colors.blue),
+                onPressed: () {
+                  showCrewDialog(context, widget.jobNo.toString());
+                },
+              ),
+          if (selectedJobStatus.toString().trim().toUpperCase() == "ASSIGNED")
+            IconButton(
+              icon: const Icon(Icons.share, color: Colors.green),
+              onPressed: () async {
+                showCrewDialog(context, widget.jobNo.toString());
+              },
+            ),
+
           IconButton(
             icon: const Icon(Icons.visibility),
             onPressed: () {
@@ -717,12 +700,22 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                                           Polyline(
                                             points: polyline.points,
                                             strokeWidth: 16,
-                                            color: const Color.fromRGBO(
-                                              200,
-                                              184,
-                                              22,
-                                              1,
-                                            ),
+                                            color:
+                                                polyline.maintStatus
+                                                        .toLowerCase() ==
+                                                    "completed"
+                                                ? const Color.fromRGBO(
+                                                    158,
+                                                    158,
+                                                    158,
+                                                    1,
+                                                  )
+                                                : const Color.fromRGBO(
+                                                    200,
+                                                    184,
+                                                    22,
+                                                    1,
+                                                  ),
                                           ),
                                         if (!showChangeOrderLayer)
                                           Polyline(
@@ -1624,7 +1617,8 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
 
     for (var row in overHeadData) {
       if (row["jobNo"]?.toString().trim() == coTokenNo.toString().trim()) {
-        selectedJobStatus = row["jobStatus"]?.toString() ?? "";
+        selectedJobStatus =
+            row["jobStatus"]?.trim().toUpperCase().toString() ?? "";
 
         print("Job No: ${row["jobNo"]}");
         print("Job Status: $selectedJobStatus");
@@ -1632,7 +1626,8 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
         break;
       }
     }
-///---------------------
+
+    ///---------------------
     overHeadPolylines.clear();
 
     for (var row in overHeadData) {
@@ -2291,15 +2286,10 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
         final rework = reworkArray[j].trim();
 
         final validStatuses = [
-          // "completed",
-          // "final completed",
-          // "approved",
-          // "rework",
-          // "failed",
-          // "rejected",
-          // "passed",
-          // "pending lcp inspection",
+          "completed",
           "pending",
+          "cancelled by gf",
+          "cancelled by planner",
         ];
 
         if (!validStatuses.contains(status.toLowerCase())) {
@@ -2316,32 +2306,26 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
             point: center,
             width: 34,
             height: 34,
-            child:
-                // (status.toLowerCase() == "completed" &&
-                //     flag == "1" &&
-                //     rework.toLowerCase() != "rework completed")
-                // ? Container(
-                //     decoration: BoxDecoration(
-                //       color: getColorFromName(maintType),
-                //       shape: BoxShape.circle,
-                //       border: Border.all(color: Colors.white, width: 2),
-                //     ),
-                //     child: const Icon(
-                //       Icons.check,
-                //       color: Colors.white,
-                //       size: 16,
-                //     ),
-                //   )
-                // :
-                Padding(
-                  padding: const EdgeInsets.only(top: 4.0),
-                  child: Image.asset(
+            child: (status.toLowerCase() == "completed")
+                ? Container(
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      //getColorFromName(maintType),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white, width: 2),
+                    ),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                  )
+                : Image.asset(
                     getStatusImage(status, flag, rework, maintType),
                     width: 34,
                     height: 34,
                     fit: BoxFit.contain,
                   ),
-                ),
           ),
         );
       }
@@ -3089,8 +3073,13 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
       "Total Distance = ${totalSelectedDistanceMiles.toStringAsFixed(2)} miles",
     );
   }
-
+  bool _isPolylineModalOpen = false;
   void _showDetailsPopupUpdate(int index) async {
+     // Prevent opening multiple modals
+    if (_isPolylineModalOpen) {
+      return;
+    }
+        _isPolylineModalOpen = true;
     bool isSendButton = false;
     chatController.clear();
     final screenHeight = MediaQuery.of(context).size.height;
@@ -3106,6 +3095,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
       overHeadPolylines[index].coordinateIds.toString(),
     );
     showUpdateCardView = true;
+    try {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -3253,7 +3243,9 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                             ),
                             _detailRow(
                               "Create Date",
-                              formatDate(overHeadPolylines[index].createDate),
+                              formatDateIfNeeded(
+                                overHeadPolylines[index].createDate,
+                              ),
                             ),
                             _detailRow(
                               "Span Name",
@@ -3318,7 +3310,128 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                           );
                         },
                       ),
-
+                      if (selectedJobStatus.toString() ==
+                          "PENDING ZIELIES APPROVAL")
+                        ///  ACTION BUTTONS
+                        Padding(
+                          padding: const EdgeInsets.only(
+                            top: 12,
+                            bottom: 12,
+                            left: 12,
+                            right: 12,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                onTap: () async {
+                                  _notes.clear();
+                                  openDailogPendingApproval(
+                                    widget.jobNo.toString(),
+                                  );
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.green,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.green.withOpacity(0.3),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: const Text(
+                                    "APPROVE",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              GestureDetector(
+                                onTap: () async {
+                                  _notes.clear();
+                                  openDailogCancel(widget.jobNo.toString());
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 12,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(12),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Colors.red.withOpacity(0.3),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ],
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: const Text(
+                                    "REJECT",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      // if (selectedJobStatus.toString().contains("CANCEL"))
+                      if (selectedJobStatus.toString() ==
+                              "CANCELLED BY PLANNER" ||
+                          selectedJobStatus.toString() == "CANCELLED BY GF")
+                        GestureDetector(
+                          onTap: () async {
+                            openDailogSubmitApproval(widget.jobNo.toString());
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(
+                              top: 12,
+                              bottom: 12,
+                              left: 12,
+                              right: 12,
+                            ),
+                            width: 200,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 8,
+                              horizontal: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.green,
+                              borderRadius: BorderRadius.circular(12),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.green.withOpacity(0.3),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 3),
+                                ),
+                              ],
+                            ),
+                            alignment: Alignment.center,
+                            child: const Text(
+                              "RECALL",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
                       const SizedBox(height: 8),
 
                       Container(
@@ -3769,6 +3882,9 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
         );
       },
     );
+   } finally {
+      _isPolylineModalOpen = false;
+    }
   }
 
   Widget _detailRow(String title, String value) {
@@ -4502,11 +4618,10 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
     //   return "assets/approved_status_n.png";
     // }
 
-    // // Rework / Failed / Rejected
-    // if ((status == "rework" || status == "failed" || status == "rejected") &&
-    //     completionFlag == "3") {
-    //   return "assets/reject2_n.png";
-    // }
+    // Rework / Failed / Rejected
+    if ((status == "cancelled by gf" || status == "cancelled by planner")) {
+      return "assets/reject2_n.png";
+    }
 
     // Pending (CO)
     if (status == "pending") {
@@ -6795,6 +6910,574 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
           isLoadingDelete = false;
         });
       }
+    }
+  }
+
+  Future openDailogPendingApproval(String tokenNo) => showDialog(
+    context: context,
+    builder: (context) {
+      final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            contentPadding: EdgeInsets.zero,
+            content: Padding(
+              padding: const EdgeInsets.only(
+                top: 12,
+                left: 12,
+                right: 12,
+                bottom: 12,
+              ),
+              child: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "SUBMIT FOR APPROVAL",
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              color: Color.fromARGB(255, 7, 59, 120),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            child: const SizedBox(
+                              height: 25,
+                              width: 25,
+                              child: Icon(Icons.close, color: Colors.red),
+                            ),
+                          ),
+                          // IconButton(
+                          //     onPressed: () {
+                          //       Navigator.pop(context);
+                          //     },
+                          //     icon: const Icon(
+                          //       Icons.close,
+                          //       color: Colors.red,
+                          //     ))
+                        ],
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 20.0),
+                          child: Text(
+                            "Job No. : $tokenNo",
+                            style: const TextStyle(
+                              fontSize: 16.0,
+                              color: Color.fromARGB(255, 7, 59, 120),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(top: 10),
+                        child: Column(
+                          children: [
+                            // const Align(
+                            //     alignment: Alignment.centerLeft,
+                            //     child: Padding(
+                            //       padding: EdgeInsets.all(2.0),
+                            //       child: Text(
+                            //         "Notes",
+                            //         style: TextStyle(
+                            //           fontSize: 16.0,
+                            //           color: Color.fromARGB(255, 7, 59, 120),
+                            //         ),
+                            //       ),
+                            //     )),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Padding(
+                                padding: const EdgeInsets.all(2.0),
+                                child: TextFormField(
+                                  //  key: formkey2,
+                                  controller: _notes,
+                                  style: const TextStyle(
+                                    color: Color.fromARGB(255, 7, 59, 120),
+                                    fontSize: 16,
+                                  ),
+                                  obscureText: false,
+                                  // keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Color.fromARGB(255, 7, 59, 120),
+                                      ),
+                                    ),
+                                    hintText: 'notes',
+                                  ),
+
+                                  validator: (value) {
+                                    if (value.toString() == '') {
+                                      return "Please enter notes";
+                                    } else {
+                                      return null;
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            actions: [
+              Row(
+                children: [
+                  CommonActionButton(
+                    title: "Submit",
+                    gradientColors: [Colors.green, Colors.green],
+                    onTap: () {
+                      setState(() {
+                        _isApproveLoading = true;
+                      });
+                      approveOrCancelOrder(tokenNo, 'PENDING LCP APPROVAL');
+                 
+                    },
+                    isLoading: _isApproveLoading,
+                  ),
+                  // CommonActionButton(
+                  //   title: "Cancel",
+                  //   gradientColors: [Colors.red, Colors.red],
+                  //   onTap: () {
+                  //     Navigator.pop(context);
+                  //   },
+                  // ),
+                ],
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+
+  void approveOrCancelOrder(String tokenNo, String status) async {
+    final userPreferences = Provider.of<UserPref>(context, listen: false);
+    UserModel data = await userPreferences.getUser();
+    String id = data.user!.id.toString();
+    final String url =
+        '${AppUrl.baseUrl}changeOrderLcpCreateOrder/approveOrCancelByToken?tokenNo=$tokenNo&status=$status&id=$id&notes=${_notes.text}';
+    print('url: $url');
+    try {
+    
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Authorization': 'Bearer ${data.token}',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        print('Success: ${response.body}');
+        Navigator.pop(context);
+        if (status == 'PENDING LCP APPROVAL') {
+          CustomToastSnackBarProgressDialog.flushBarSuccessMessage(
+            'Job no. $tokenNo Approved Successfully.',
+            context,
+          );
+        } else if (status == 'CANCELLED') {
+          CustomToastSnackBarProgressDialog.flushBarSuccessMessage(
+            'Job no. $tokenNo Rejected.',
+            context,
+          );
+        }
+
+       await loadApiData();
+        await Future.delayed(const Duration(milliseconds: 200));
+
+        Navigator.pop(context);
+        setState(() {
+          _isApproveLoading = false;
+          _isCancelLoading = false;
+        });
+      } else {
+        setState(() {
+          _isApproveLoading = false;
+          _isCancelLoading = false;
+        });
+        print('Failed: ${response.statusCode} - ${response.body}');
+      }
+    } catch (e) {
+      setState(() {
+        _isApproveLoading = false;
+        _isCancelLoading = false;
+      });
+      print('Error: $e');
+    }
+  }
+
+  Future openDailogCancel(String tokenNo) => showDialog(
+    context: context,
+    builder: (context) {
+      final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            contentPadding: EdgeInsets.zero,
+            content: Padding(
+              padding: const EdgeInsets.only(
+                top: 12,
+                left: 12,
+                right: 12,
+                bottom: 12,
+              ),
+              child: Form(
+                key: _formKey,
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "REJECT JOB NO.",
+                            style: TextStyle(
+                              fontSize: 18.0,
+                              color: Color.fromARGB(255, 7, 59, 120),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.pop(context);
+                            },
+                            child: const SizedBox(
+                              height: 25,
+                              width: 25,
+                              child: Icon(Icons.close, color: Colors.red),
+                            ),
+                          ),
+                        ],
+                      ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding: const EdgeInsets.only(top: 20.0),
+                          child: Text(
+                            "Job No. : $tokenNo",
+                            style: const TextStyle(
+                              fontSize: 16.0,
+                              color: Color.fromARGB(255, 7, 59, 120),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Container(
+                        margin: const EdgeInsets.only(top: 10),
+                        child: Column(
+                          children: [
+                            // const Align(
+                            //     alignment: Alignment.centerLeft,
+                            //     child: Padding(
+                            //       padding: EdgeInsets.all(2.0),
+                            //       child: Text(
+                            //         "Cancellation Notes",
+                            //         style: TextStyle(
+                            //           fontSize: 16.0,
+                            //           color: Color.fromARGB(255, 7, 59, 120),
+                            //         ),
+                            //       ),
+                            //     )),
+                            Align(
+                              alignment: Alignment.centerRight,
+                              child: Padding(
+                                padding: const EdgeInsets.all(2.0),
+                                child: TextFormField(
+                                  //  key: formkey2,
+                                  controller: _notes,
+                                  style: const TextStyle(
+                                    color: Color.fromARGB(255, 7, 59, 120),
+                                    fontSize: 16,
+                                  ),
+                                  obscureText: false,
+                                  // keyboardType: TextInputType.number,
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderSide: BorderSide(
+                                        color: Color.fromARGB(255, 7, 59, 120),
+                                      ),
+                                    ),
+                                    hintText: 'notes',
+                                  ),
+
+                                  validator: (value) {
+                                    if (value.toString() == '') {
+                                      return "Please enter notes";
+                                    } else {
+                                      return null;
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            actions: [
+              Row(
+                children: [
+                  CommonActionButton(
+                    title: "Submit",
+                    gradientColors: [Colors.green, Colors.green],
+                    onTap: () {
+                      setState(() {
+                        _isCancelLoading = true;
+                      });
+                      approveOrCancelOrder(tokenNo, 'CANCELLED');
+                     
+                    },
+                    isLoading: _isCancelLoading,
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+  Future openDailogSubmitApproval(String id) => showDialog(
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            content: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const Text(
+                    "RECALL",
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      color: Color.fromARGB(255, 7, 59, 120),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 20.0),
+                    child: Text(
+                      "Job No. : $id",
+                      style: const TextStyle(
+                        fontSize: 16.0,
+                        color: Color.fromARGB(255, 7, 59, 120),
+                      ),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(top: 20.0),
+                    child: Text(
+                      "Are you sure to you want to submit this work?",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16.0,
+                        color: Color.fromARGB(255, 7, 59, 120),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.only(
+                        left: 6,
+                        right: 6,
+                        bottom: 10,
+                      ),
+                      child: InkWell(
+                        onTap: () async {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                          try {
+                            await updateSubmitForApprovalStatus(id);
+                            if (!mounted) return;
+                            await Future.delayed(Duration(milliseconds: 100));
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                          
+                          } catch (e) {
+                            print(e);
+                            if (mounted) {
+                              Navigator.pop(context);
+                            }
+                          }
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 10.0),
+                          // padding: const EdgeInsets.all(8),
+                          alignment: Alignment.center,
+                          width: MediaQuery.of(context).size.width,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            // shape: BoxShape.circle,
+                            // borderRadius: BorderRadius.circular(25),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color.fromARGB(255, 1, 106, 5),
+                                blurRadius: 5,
+                                offset: Offset(2.0, 5.0),
+                              ),
+                            ],
+                            color: Colors.black,
+                            gradient: LinearGradient(
+                              colors: [Colors.green, Colors.green],
+                            ),
+                          ),
+                          child: const Row(
+                            children: [
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    "Yes",
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      margin: const EdgeInsets.only(
+                        left: 6,
+                        right: 6,
+                        bottom: 10,
+                      ),
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 10.0),
+                          // padding: const EdgeInsets.all(8),
+                          alignment: Alignment.center,
+                          width: MediaQuery.of(context).size.width,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            // shape: BoxShape.circle,
+                            // borderRadius: BorderRadius.circular(25),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color.fromARGB(255, 139, 10, 0),
+                                blurRadius: 5,
+                                offset: Offset(2.0, 5.0),
+                              ),
+                            ],
+                            color: Colors.black,
+                            gradient: LinearGradient(
+                              colors: [Colors.red, Colors.red],
+                            ),
+                          ),
+                          child: const Row(
+                            children: [
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    "No",
+                                    textAlign: TextAlign.left,
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 20,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+
+  Future<void> updateSubmitForApprovalStatus(String tokenNo) async {
+    String baseUrl =
+        'https://civm2.ariespro.com/civm2/workOrderPendingAndReject/updateStatusFromRejectedToPendingApproval';
+    final userPreferences = Provider.of<UserPref>(context, listen: false);
+    UserModel data = await userPreferences.getUser();
+    final Map<String, String> queryParams = {
+      //  'status': 'WORK FOR APPROVAL',
+      'status': 'RECALL',
+      // 'PENDING LCP APPROVAL',
+      // 'PENDING APPROVAL',
+      'tokenNo': tokenNo,
+    };
+    final String url = Uri.parse(
+      baseUrl,
+    ).replace(queryParameters: queryParams).toString();
+    print('url: $url');
+    Map<String, String> headers = {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "Authorization": 'Bearer ${data.token!}',
+    };
+
+    try {
+      final response = await http.put(Uri.parse(url), headers: headers);
+
+      if (response.statusCode == 200) {
+        print('Status updated successfully');
+        if (context.mounted) {
+          CustomToastSnackBarProgressDialog.flushBarSuccessMessage(
+            'Job No. $tokenNo Approved Successfully',
+            context,
+          );
+        }
+        await loadApiData();
+        await Future.delayed(const Duration(milliseconds: 200));
+        Navigator.pop(context);
+      } else {
+        print('Failed to update status: ${response.statusCode}');
+      }
+    } catch (e) {
+      print('Error: $e');
     }
   }
 

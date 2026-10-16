@@ -202,7 +202,7 @@ class _COMapScreenState extends State<COMapScreen> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-      ensureCameraInitialized();
+    ensureCameraInitialized();
     _startListeningToCompass();
 
     /////
@@ -376,7 +376,6 @@ class _COMapScreenState extends State<COMapScreen> {
         ),
         backgroundColor: const Color.fromARGB(255, 7, 59, 120),
         actions: [
-         
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
@@ -3621,8 +3620,13 @@ class _COMapScreenState extends State<COMapScreen> {
   //     },
   //   );
   // }
-
+  bool _isPolylineModalOpen = false;
   void _showDetailsPopupUpdate(int index) async {
+    // Prevent opening multiple modals
+    if (_isPolylineModalOpen) {
+      return;
+    }
+    _isPolylineModalOpen = true;
     bool isSendButton = false;
     chatController.clear();
     final screenHeight = MediaQuery.of(context).size.height;
@@ -3638,634 +3642,651 @@ class _COMapScreenState extends State<COMapScreen> {
       overHeadPolylines[index].coordinateIds.toString(),
     );
     showUpdateCardView = true;
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Container(
-                // width: 450,
-                padding: const EdgeInsets.only(
-                  left: 10,
-                  right: 10,
-                  bottom: 10,
-                  top: 4,
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setDialogState) {
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
                 ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              "",
-                              style: TextStyle(
-                                // fontWeight: FontWeight.bold,
-                                fontSize: 17,
-                              ),
-                            ),
-                          ),
-
-                          // Close Button
-                          InkWell(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            borderRadius: BorderRadius.circular(20),
-                            child: const Padding(
-                              padding: EdgeInsets.all(4),
-                              child: Icon(
-                                Icons.cancel_presentation_sharp,
-                                color: Colors.red,
-                                size: 22,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "Select Vegetation Type",
-                          style: TextStyle(
-                            // fontWeight: FontWeight.bold,
-                            fontSize: 17,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: const Color.fromRGBO(200, 184, 22, 1),
-
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(color: Colors.black, width: 1),
-
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(.20),
-                                blurRadius: 2,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      //  if (showUpdateCardView)
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final bool isTablet = constraints.maxWidth >= 600;
-
-                          final details = [
-                            _detailRow(
-                              "Estimated Time",
-                              "${overHeadPolylines[index].estTime} hours",
-                            ),
-                            _detailRow(
-                              "Job No",
-                              overHeadPolylines[index].jobNo,
-                            ),
-                            _detailRow(
-                              "Maintenance Type",
-                              overHeadPolylines[index].type,
-                            ),
-                            // _detailRow(
-                            //   "Distance",
-                            //   "${overHeadPolylines[index].spanDistanceApi} miles",
-                            // ),
-                            // _detailRow(
-                            //   "Total Distance",
-                            //   "${overHeadPolylines[index].totalMilesApi} miles",
-                            // ),
-                            // _detailRow(
-                            //   "Create Date",
-                            //   formatDate(overHeadPolylines[index].createDate),
-                            // ),
-                            _detailRow(
-                              "Span Name",
-                              overHeadPolylines[index].elementName,
-                            ),
-                            _detailRow(
-                              "Status",
-                              overHeadPolylines[index].maintStatus,
-                            ),
-                          ];
-
-                          return Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              border: const Border(
-                                left: BorderSide(
-                                  color: Color.fromARGB(255, 7, 59, 120),
-                                  width: 5,
-                                ),
-                              ),
-                            ),
-                            child: isTablet
-                                ? Column(
-                                    children: [
-                                      for (
-                                        int i = 0;
-                                        i < details.length;
-                                        i += 2
-                                      )
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Expanded(child: details[i]),
-                                            const SizedBox(width: 8),
-                                            if (i + 1 < details.length)
-                                              Expanded(child: details[i + 1])
-                                            else
-                                              const Expanded(child: SizedBox()),
-                                          ],
-                                        ),
-                                    ],
-                                  )
-                                : Column(
-                                    children: details
-                                        .map(
-                                          (detail) => Padding(
-                                            padding: const EdgeInsets.only(
-                                              bottom: 4,
-                                            ),
-                                            child: SizedBox(
-                                              width: double.infinity,
-                                              child: detail,
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                  ),
-                          );
-                        },
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      Container(
-                        padding: const EdgeInsets.only(
-                          top: 8,
-                          left: 8,
-                          bottom: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.white,
-                          border: Border(
-                            top: BorderSide(color: Colors.grey.shade300),
-                          ),
-                        ),
-                        child: Column(
+                child: Container(
+                  // width: 450,
+                  padding: const EdgeInsets.only(
+                    left: 10,
+                    right: 10,
+                    bottom: 10,
+                    top: 4,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            ConstrainedBox(
-                              constraints: BoxConstraints(
-                                // maxHeight: 230, // maximum chat height
-                                maxHeight: maxChatHeight,
-                              ),
-                              child: Scrollbar(
-                                controller: chatScrollController,
-                                thumbVisibility: true,
-                                // trackVisibility:
-                                //     true, // Optional: shows the scrollbar track
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: ListView.builder(
-                                    controller: chatScrollController,
-                                    shrinkWrap: true,
-                                    reverse: true,
-                                    padding: const EdgeInsets.only(bottom: 10),
-                                    itemCount: messagesData.length,
-                                    itemBuilder: (context, index) {
-                                      final message = messagesData[index];
-
-                                      final bool isPlanner =
-                                          message["userName"]
-                                              .toString()
-                                              .toLowerCase() ==
-                                          userName.toLowerCase();
-
-                                      return _chatBubble(
-                                        isPlanner: isPlanner,
-                                        userName: message["userName"] ?? "",
-                                        date: formatChatDate(
-                                          message["createdDate"] ?? "",
-                                        ),
-                                        message: message["description"] ?? "",
-                                      );
-                                    },
-                                  ),
+                            const Expanded(
+                              child: Text(
+                                "",
+                                style: TextStyle(
+                                  // fontWeight: FontWeight.bold,
+                                  fontSize: 17,
                                 ),
                               ),
                             ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: TextFormField(
-                                      controller: chatController,
-                                      maxLines: null,
-                                      textInputAction: TextInputAction.done,
-                                      decoration: InputDecoration(
-                                        hintText: "Write Your Comments here...",
 
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            5,
-                                          ),
-                                        ),
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 10,
-                                            ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 8.0),
-                                    child: SizedBox(
-                                      height: 42,
-                                      child: ElevatedButton(
-                                        onPressed: isSendButton
-                                            ? null
-                                            : () async {
-                                                setDialogState(() {
-                                                  isSendButton = true;
-                                                });
-                                                try {
-                                                  if (chatController.text
-                                                      .trim()
-                                                      .isEmpty) {
-                                                    return;
-                                                  }
-
-                                                  final data = {
-                                                    "lineId":
-                                                        overHeadPolylines[index]
-                                                            .coordinateIds,
-                                                    "description":
-                                                        chatController.text
-                                                            .trim(),
-                                                    "userId": id.toString(),
-                                                  };
-                                                  // showLoader(context);
-                                                  await updateMessageData(
-                                                    data,
-                                                    () {
-                                                      setDialogState(() {});
-                                                    },
-                                                  );
-                                                } finally {
-                                                  if (mounted) {
-                                                    setDialogState(() {
-                                                      isSendButton = false;
-                                                    });
-                                                  }
-                                                }
-                                              },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.teal,
-                                          foregroundColor: Colors.white,
-                                        ),
-                                        child: isSendButton
-                                            ? progressBar()
-                                            : const Text("Send"),
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                            // Close Button
+                            InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              borderRadius: BorderRadius.circular(20),
+                              child: const Padding(
+                                padding: EdgeInsets.all(4),
+                                child: Icon(
+                                  Icons.cancel_presentation_sharp,
+                                  color: Colors.red,
+                                  size: 22,
+                                ),
                               ),
                             ),
-                            SizedBox(height: 10),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                          ],
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "Select Vegetation Type",
+                            style: TextStyle(
+                              // fontWeight: FontWeight.bold,
+                              fontSize: 17,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: const Color.fromRGBO(200, 184, 22, 1),
+
+                              borderRadius: BorderRadius.circular(5),
+                              border: Border.all(color: Colors.black, width: 1),
+
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(.20),
+                                  blurRadius: 2,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        //  if (showUpdateCardView)
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final bool isTablet = constraints.maxWidth >= 600;
+
+                            final details = [
+                              _detailRow(
+                                "Estimated Time",
+                                "${overHeadPolylines[index].estTime} hours",
+                              ),
+                              _detailRow(
+                                "Job No",
+                                overHeadPolylines[index].jobNo,
+                              ),
+                              _detailRow(
+                                "Maintenance Type",
+                                overHeadPolylines[index].type,
+                              ),
+                              // _detailRow(
+                              //   "Distance",
+                              //   "${overHeadPolylines[index].spanDistanceApi} miles",
+                              // ),
+                              // _detailRow(
+                              //   "Total Distance",
+                              //   "${overHeadPolylines[index].totalMilesApi} miles",
+                              // ),
+                              // _detailRow(
+                              //   "Create Date",
+                              //   formatDate(overHeadPolylines[index].createDate),
+                              // ),
+                              _detailRow(
+                                "Span Name",
+                                overHeadPolylines[index].elementName,
+                              ),
+                              _detailRow(
+                                "Status",
+                                overHeadPolylines[index].maintStatus,
+                              ),
+                            ];
+
+                            return Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: const Border(
+                                  left: BorderSide(
+                                    color: Color.fromARGB(255, 7, 59, 120),
+                                    width: 5,
+                                  ),
+                                ),
+                              ),
+                              child: isTablet
+                                  ? Column(
+                                      children: [
+                                        for (
+                                          int i = 0;
+                                          i < details.length;
+                                          i += 2
+                                        )
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Expanded(child: details[i]),
+                                              const SizedBox(width: 8),
+                                              if (i + 1 < details.length)
+                                                Expanded(child: details[i + 1])
+                                              else
+                                                const Expanded(
+                                                  child: SizedBox(),
+                                                ),
+                                            ],
+                                          ),
+                                      ],
+                                    )
+                                  : Column(
+                                      children: details
+                                          .map(
+                                            (detail) => Padding(
+                                              padding: const EdgeInsets.only(
+                                                bottom: 4,
+                                              ),
+                                              child: SizedBox(
+                                                width: double.infinity,
+                                                child: detail,
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                    ),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 8),
+
+                        Container(
+                          padding: const EdgeInsets.only(
+                            top: 8,
+                            left: 8,
+                            bottom: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.white,
+                            border: Border(
+                              top: BorderSide(color: Colors.grey.shade300),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  // maxHeight: 230, // maximum chat height
+                                  maxHeight: maxChatHeight,
+                                ),
+                                child: Scrollbar(
+                                  controller: chatScrollController,
+                                  thumbVisibility: true,
+                                  // trackVisibility:
+                                  //     true, // Optional: shows the scrollbar track
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: ListView.builder(
+                                      controller: chatScrollController,
+                                      shrinkWrap: true,
+                                      reverse: true,
+                                      padding: const EdgeInsets.only(
+                                        bottom: 10,
+                                      ),
+                                      itemCount: messagesData.length,
+                                      itemBuilder: (context, index) {
+                                        final message = messagesData[index];
+
+                                        final bool isPlanner =
+                                            message["userName"]
+                                                .toString()
+                                                .toLowerCase() ==
+                                            userName.toLowerCase();
+
+                                        return _chatBubble(
+                                          isPlanner: isPlanner,
+                                          userName: message["userName"] ?? "",
+                                          date: formatChatDate(
+                                            message["createdDate"] ?? "",
+                                          ),
+                                          message: message["description"] ?? "",
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Row(
                                   children: [
                                     Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 0,
-                                        ),
-                                        child: InkWell(
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          onTap: () async {
-                                            //  await ensureCameraInitialized();
-                                            _takePictureDialog();
-                                          },
-                                          child: Container(
-                                            //  width: 200,
-                                            // width: double.infinity,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 16,
-                                              vertical: 14,
+                                      child: TextFormField(
+                                        controller: chatController,
+                                        maxLines: null,
+                                        textInputAction: TextInputAction.done,
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              "Write Your Comments here...",
+
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              5,
                                             ),
-                                            decoration: BoxDecoration(
-                                              color: Colors.white,
-                                              border: Border.all(
-                                                color: Colors.grey.shade400,
-                                                width: 1.2,
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                                vertical: 10,
                                               ),
-                                              borderRadius:
-                                                  BorderRadius.circular(12),
-                                            ),
-                                            child: Row(
-                                              children: [
-                                                const Icon(
-                                                  Icons.upload_file_outlined,
-                                                  color: Color(0xFF073B78),
-                                                  size: 26,
-                                                ),
-                                                const SizedBox(width: 12),
-                                                const Expanded(
-                                                  child: Text(
-                                                    "Choose Files",
-                                                    style: TextStyle(
-                                                      fontSize: 16,
-                                                      fontWeight:
-                                                          FontWeight.w600,
-                                                    ),
-                                                  ),
-                                                ),
-                                                if (imagePaths.isNotEmpty)
-                                                  Container(
-                                                    padding:
-                                                        const EdgeInsets.symmetric(
-                                                          horizontal: 10,
-                                                          vertical: 4,
-                                                        ),
-                                                    decoration: BoxDecoration(
-                                                      color:
-                                                          Colors.green.shade100,
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                            20,
-                                                          ),
-                                                    ),
-                                                    child: Text(
-                                                      "${imagePaths.length}",
-                                                      style: TextStyle(
-                                                        fontSize: 13,
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        color: Colors
-                                                            .green
-                                                            .shade800,
-                                                      ),
-                                                    ),
-                                                  ),
-                                                const SizedBox(width: 8),
-                                                Icon(
-                                                  Icons.chevron_right,
-                                                  color: Colors.grey.shade600,
-                                                ),
-                                              ],
-                                            ),
-                                          ),
                                         ),
                                       ),
                                     ),
+                                    const SizedBox(width: 8),
                                     Padding(
                                       padding: const EdgeInsets.only(
                                         right: 8.0,
-                                        left: 8,
                                       ),
                                       child: SizedBox(
                                         height: 42,
-                                        width: 80,
                                         child: ElevatedButton(
-                                          onPressed: () async {
-                                            await submitImage(imagePaths, "");
-                                            setState(() {
-                                              isUploadLoading = true;
-                                            });
-                                          },
+                                          onPressed: isSendButton
+                                              ? null
+                                              : () async {
+                                                  setDialogState(() {
+                                                    isSendButton = true;
+                                                  });
+                                                  try {
+                                                    if (chatController.text
+                                                        .trim()
+                                                        .isEmpty) {
+                                                      return;
+                                                    }
+
+                                                    final data = {
+                                                      "lineId":
+                                                          overHeadPolylines[index]
+                                                              .coordinateIds,
+                                                      "description":
+                                                          chatController.text
+                                                              .trim(),
+                                                      "userId": id.toString(),
+                                                    };
+                                                    // showLoader(context);
+                                                    await updateMessageData(
+                                                      data,
+                                                      () {
+                                                        setDialogState(() {});
+                                                      },
+                                                    );
+                                                  } finally {
+                                                    if (mounted) {
+                                                      setDialogState(() {
+                                                        isSendButton = false;
+                                                      });
+                                                    }
+                                                  }
+                                                },
                                           style: ElevatedButton.styleFrom(
                                             backgroundColor: Colors.teal,
                                             foregroundColor: Colors.white,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 6,
-                                            ), // Reduce padding
                                           ),
-                                          child: isUploadLoading
+                                          child: isSendButton
                                               ? progressBar()
-                                              : Text("Upload"),
+                                              : const Text("Send"),
                                         ),
                                       ),
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 15),
-
-                                /// Selected Images Count
-                                if (imagePaths.isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                    ),
-                                    child: Text(
-                                      "${imagePaths.length} file(s) selected",
-                                      style: TextStyle(
-                                        color: Colors.grey.shade700,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-
-                                const SizedBox(height: 10),
-
-                                /// Image Preview
-                                if (imagePaths.isNotEmpty)
-                                  SizedBox(
-                                    height: 125,
-                                    child: ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 15,
-                                      ),
-                                      itemCount: imagePaths.length,
-                                      itemBuilder: (context, index) {
-                                        return Container(
-                                          width: 110,
-                                          margin: const EdgeInsets.symmetric(
-                                            horizontal: 6,
+                              ),
+                              SizedBox(height: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 0,
                                           ),
-                                          child: Stack(
-                                            children: [
-                                              ClipRRect(
+                                          child: InkWell(
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            onTap: () async {
+                                              //  await ensureCameraInitialized();
+                                              _takePictureDialog();
+                                            },
+                                            child: Container(
+                                              //  width: 200,
+                                              // width: double.infinity,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 16,
+                                                    vertical: 14,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.white,
+                                                border: Border.all(
+                                                  color: Colors.grey.shade400,
+                                                  width: 1.2,
+                                                ),
                                                 borderRadius:
                                                     BorderRadius.circular(12),
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                      color:
-                                                          Colors.grey.shade300,
-                                                    ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          12,
-                                                        ),
-                                                  ),
-                                                  child: Image.file(
-                                                    File(imagePaths[index]),
-                                                    width: 110,
-                                                    height: 110,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ),
                                               ),
-
-                                              Positioned(
-                                                top: 6,
-                                                right: 6,
-                                                child: InkWell(
-                                                  onTap: () {
-                                                    dialogSetState?.call(() {
-                                                      imagePaths.removeAt(
-                                                        index,
-                                                      );
-                                                      images.removeAt(index);
-                                                    });
-                                                  },
-                                                  child: Container(
-                                                    padding:
-                                                        const EdgeInsets.all(4),
-                                                    decoration:
-                                                        const BoxDecoration(
-                                                          color: Colors.red,
-                                                          shape:
-                                                              BoxShape.circle,
-                                                        ),
-                                                    child: const Icon(
-                                                      Icons.close,
-                                                      color: Colors.white,
-                                                      size: 18,
+                                              child: Row(
+                                                children: [
+                                                  const Icon(
+                                                    Icons.upload_file_outlined,
+                                                    color: Color(0xFF073B78),
+                                                    size: 26,
+                                                  ),
+                                                  const SizedBox(width: 12),
+                                                  const Expanded(
+                                                    child: Text(
+                                                      "Choose Files",
+                                                      style: TextStyle(
+                                                        fontSize: 16,
+                                                        fontWeight:
+                                                            FontWeight.w600,
+                                                      ),
                                                     ),
                                                   ),
-                                                ),
+                                                  if (imagePaths.isNotEmpty)
+                                                    Container(
+                                                      padding:
+                                                          const EdgeInsets.symmetric(
+                                                            horizontal: 10,
+                                                            vertical: 4,
+                                                          ),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors
+                                                            .green
+                                                            .shade100,
+                                                        borderRadius:
+                                                            BorderRadius.circular(
+                                                              20,
+                                                            ),
+                                                      ),
+                                                      child: Text(
+                                                        "${imagePaths.length}",
+                                                        style: TextStyle(
+                                                          fontSize: 13,
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          color: Colors
+                                                              .green
+                                                              .shade800,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  const SizedBox(width: 8),
+                                                  Icon(
+                                                    Icons.chevron_right,
+                                                    color: Colors.grey.shade600,
+                                                  ),
+                                                ],
                                               ),
-                                            ],
+                                            ),
                                           ),
-                                        );
-                                      },
-                                    ),
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          right: 8.0,
+                                          left: 8,
+                                        ),
+                                        child: SizedBox(
+                                          height: 42,
+                                          width: 80,
+                                          child: ElevatedButton(
+                                            onPressed: () async {
+                                              await submitImage(imagePaths, "");
+                                              setState(() {
+                                                isUploadLoading = true;
+                                              });
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.teal,
+                                              foregroundColor: Colors.white,
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 6,
+                                                  ), // Reduce padding
+                                            ),
+                                            child: isUploadLoading
+                                                ? progressBar()
+                                                : Text("Upload"),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
+                                  const SizedBox(height: 15),
 
-                                const SizedBox(height: 20),
+                                  /// Selected Images Count
+                                  if (imagePaths.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                      ),
+                                      child: Text(
+                                        "${imagePaths.length} file(s) selected",
+                                        style: TextStyle(
+                                          color: Colors.grey.shade700,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
 
-                                // /// Upload Button
-                                // Padding(
-                                //   padding: const EdgeInsets.symmetric(
-                                //     horizontal: 20,
-                                //   ),
-                                //   child: SizedBox(
-                                //     width: double.infinity,
-                                //     height: 50,
-                                //     child: ElevatedButton.icon(
-                                //       onPressed: imagePaths.isEmpty
-                                //           ? null
-                                //           : () {
-                                //               submitImage(
-                                //                 imagePaths,
-                                //                 widget.jobNo,
-                                //               );
-                                //             },
-                                //       style: ElevatedButton.styleFrom(
-                                //         backgroundColor: Colors.teal,
-                                //         foregroundColor: Colors.white,
-                                //         disabledBackgroundColor:
-                                //             Colors.grey.shade300,
-                                //         elevation: 5,
-                                //         shape: RoundedRectangleBorder(
-                                //           borderRadius: BorderRadius.circular(
-                                //             14,
-                                //           ),
-                                //         ),
-                                //       ),
-                                //       icon: const Icon(
-                                //         Icons.cloud_upload_rounded,
-                                //       ),
-                                //       label: const Text(
-                                //         "Upload Images",
-                                //         style: TextStyle(
-                                //           fontSize: 17,
-                                //           fontWeight: FontWeight.bold,
-                                //         ),
-                                //       ),
-                                //     ),
-                                //   ),
-                                // ),
-                              ],
-                            ),
-                            SizedBox(height: 0),
+                                  const SizedBox(height: 10),
 
-                            // SizedBox(height: 12),
-                            // Align(
-                            //   alignment: Alignment.center,
-                            //   child: InkWell(
-                            //     onTap: () async {
-                            //       showCreateChangeOrderDialog(index);
-                            //     },
-                            //     borderRadius: BorderRadius.circular(8),
-                            //     child: Container(
-                            //       height: 40,
-                            //       width: 180,
-                            //       alignment: Alignment.center,
-                            //       decoration: BoxDecoration(
-                            //         color: const Color.fromARGB(
-                            //           255,
-                            //           34,
-                            //           113,
-                            //           249,
-                            //         ),
-                            //         borderRadius: BorderRadius.circular(8),
-                            //       ),
-                            //       child: const Text(
-                            //         "Create Change Order",
-                            //         style: TextStyle(
-                            //           color: Colors.white,
-                            //           fontSize: 16,
-                            //           fontWeight: FontWeight.bold,
-                            //         ),
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
-                          ],
+                                  /// Image Preview
+                                  if (imagePaths.isNotEmpty)
+                                    SizedBox(
+                                      height: 125,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 15,
+                                        ),
+                                        itemCount: imagePaths.length,
+                                        itemBuilder: (context, index) {
+                                          return Container(
+                                            width: 110,
+                                            margin: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                            ),
+                                            child: Stack(
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                        color: Colors
+                                                            .grey
+                                                            .shade300,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                    ),
+                                                    child: Image.file(
+                                                      File(imagePaths[index]),
+                                                      width: 110,
+                                                      height: 110,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                ),
+
+                                                Positioned(
+                                                  top: 6,
+                                                  right: 6,
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      dialogSetState?.call(() {
+                                                        imagePaths.removeAt(
+                                                          index,
+                                                        );
+                                                        images.removeAt(index);
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                            4,
+                                                          ),
+                                                      decoration:
+                                                          const BoxDecoration(
+                                                            color: Colors.red,
+                                                            shape:
+                                                                BoxShape.circle,
+                                                          ),
+                                                      child: const Icon(
+                                                        Icons.close,
+                                                        color: Colors.white,
+                                                        size: 18,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+
+                                  const SizedBox(height: 20),
+
+                                  // /// Upload Button
+                                  // Padding(
+                                  //   padding: const EdgeInsets.symmetric(
+                                  //     horizontal: 20,
+                                  //   ),
+                                  //   child: SizedBox(
+                                  //     width: double.infinity,
+                                  //     height: 50,
+                                  //     child: ElevatedButton.icon(
+                                  //       onPressed: imagePaths.isEmpty
+                                  //           ? null
+                                  //           : () {
+                                  //               submitImage(
+                                  //                 imagePaths,
+                                  //                 widget.jobNo,
+                                  //               );
+                                  //             },
+                                  //       style: ElevatedButton.styleFrom(
+                                  //         backgroundColor: Colors.teal,
+                                  //         foregroundColor: Colors.white,
+                                  //         disabledBackgroundColor:
+                                  //             Colors.grey.shade300,
+                                  //         elevation: 5,
+                                  //         shape: RoundedRectangleBorder(
+                                  //           borderRadius: BorderRadius.circular(
+                                  //             14,
+                                  //           ),
+                                  //         ),
+                                  //       ),
+                                  //       icon: const Icon(
+                                  //         Icons.cloud_upload_rounded,
+                                  //       ),
+                                  //       label: const Text(
+                                  //         "Upload Images",
+                                  //         style: TextStyle(
+                                  //           fontSize: 17,
+                                  //           fontWeight: FontWeight.bold,
+                                  //         ),
+                                  //       ),
+                                  //     ),
+                                  //   ),
+                                  // ),
+                                ],
+                              ),
+                              SizedBox(height: 0),
+
+                              // SizedBox(height: 12),
+                              // Align(
+                              //   alignment: Alignment.center,
+                              //   child: InkWell(
+                              //     onTap: () async {
+                              //       showCreateChangeOrderDialog(index);
+                              //     },
+                              //     borderRadius: BorderRadius.circular(8),
+                              //     child: Container(
+                              //       height: 40,
+                              //       width: 180,
+                              //       alignment: Alignment.center,
+                              //       decoration: BoxDecoration(
+                              //         color: const Color.fromARGB(
+                              //           255,
+                              //           34,
+                              //           113,
+                              //           249,
+                              //         ),
+                              //         borderRadius: BorderRadius.circular(8),
+                              //       ),
+                              //       child: const Text(
+                              //         "Create Change Order",
+                              //         style: TextStyle(
+                              //           color: Colors.white,
+                              //           fontSize: 16,
+                              //           fontWeight: FontWeight.bold,
+                              //         ),
+                              //       ),
+                              //     ),
+                              //   ),
+                              // ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
-        );
-      },
-    );
+              );
+            },
+          );
+        },
+      );
+    } finally {
+      _isPolylineModalOpen = false;
+    }
   }
 
   Widget _detailRow(String title, String value) {
@@ -6703,8 +6724,6 @@ class _COMapScreenState extends State<COMapScreen> {
         });
   }
 
-
-
   DropdownMenuItem<String> buildMenuItem(String item) => DropdownMenuItem(
     value: item,
     child: Text(
@@ -6780,10 +6799,6 @@ class _COMapScreenState extends State<COMapScreen> {
       }
     }
   }
-
-
-
- 
 
   Future<void> _takePictureDialog() async {
     return showDialog<void>(

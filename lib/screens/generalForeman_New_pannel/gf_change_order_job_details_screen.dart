@@ -349,10 +349,8 @@ class _ChangeOrderJobDetailsScreenState
                                                 substation: item!.substation.toString(),
                                                 feeder: item!.feeder!.split('(').first.trim(),
                                                  visibilityFlag: item!.visibilityFlag.toString(),
-                                                 type:item!.maintType
-                                                            .toString(),
-                                                            status:item!.status
-                                                  .toString()
+                                               
+                                                            
                                               ),
                                         ),
                                       );

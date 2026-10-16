@@ -355,10 +355,7 @@ class _PlannerJobDetailsScreenState extends State<PlannerJobDetailsScreen> {
                                                 substation: item!.substation.toString(),
                                                 feeder: item!.feeder!.split('(').first.trim(),
                                                  visibilityFlag: item!.visibilityFlag.toString(),
-                                                 type:item!.maintType
-                                                            .toString(),
-                                                            status:item!.status
-                                                  .toString()
+                                              
                                               ),
                                         ),
                                       );
