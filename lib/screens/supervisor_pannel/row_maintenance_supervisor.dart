@@ -3532,12 +3532,12 @@ class _DrawerManuState extends State<DrawerManu> {
                       //     builder: (BuildContext context) => const LoginPage()));
 
                       userPreferences.remove().then((value) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                const LoginPage(),
-                          ),
-                        );
+                        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (BuildContext context) => const LoginPage(),
+            ),
+            (route) => false,
+          );
                       });
                     },
                   ),
