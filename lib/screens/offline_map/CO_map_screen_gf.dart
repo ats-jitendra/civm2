@@ -6,7 +6,7 @@ import 'package:CIVM/models/user_model.dart';
 import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/screens/offline_map/custom_widgets.dart';
 import 'package:CIVM/screens/offline_map/map_data_base_helper.dart';
-import 'package:CIVM/utils/common_functions.dart' hide progressBar;
+
 import 'package:CIVM/utils/custom_toast_snackbar_progressdialog.dart';
 
 import 'package:CIVM/utils/user_pref.dart';
@@ -37,14 +37,14 @@ class COMapScreenGf extends StatefulWidget {
   String jobNo;
   String substation;
   String feeder;
-  String visibilityFlag;
+ 
 
   COMapScreenGf({
     super.key,
     required this.jobNo,
     required this.substation,
     required this.feeder,
-    required this.visibilityFlag,
+   
   });
 
   @override
@@ -3243,7 +3243,7 @@ class _COMapScreenGfState extends State<COMapScreenGf> {
                             ),
                             _detailRow(
                               "Create Date",
-                              formatDateIfNeeded(
+                              formatDate(
                                 overHeadPolylines[index].createDate,
                               ),
                             ),
@@ -6741,7 +6741,7 @@ class _COMapScreenGfState extends State<COMapScreenGf> {
 
   Future<void> updateFlagValue(String token, int flag) async {
     String url = "${AppUrl.baseUrl}vma_row_custom_main_plan/updateFlagValue";
-    // 'https://civm2.ariespro.com/civm2/vma_row_custom_main_plan/updateFlagValue';
+    // '${AppUrl.baseUrl}vma_row_custom_main_plan/updateFlagValue';
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
     try {
@@ -6807,7 +6807,7 @@ class _COMapScreenGfState extends State<COMapScreenGf> {
     // String contractorId = data.user!.id.toString();
 
     String url = AppUrl.crewList;
-    // "https://civm2.ariespro.com/civm2/login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
+    // "${AppUrl.baseUrl}login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
     print('urlCrewList gf pannel:: $url');
     try {
       final response = await http.get(
@@ -7482,7 +7482,7 @@ class _COMapScreenGfState extends State<COMapScreenGf> {
   );
   Future<void> updateSubmitForApprovalStatus(String tokenNo) async {
     String baseUrl =
-        'https://civm2.ariespro.com/civm2/workOrderPendingAndReject/updateStatusFromRejectedToPendingApproval';
+        '${AppUrl.baseUrl}workOrderPendingAndReject/updateStatusFromRejectedToPendingApproval';
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
     final Map<String, String> queryParams = {

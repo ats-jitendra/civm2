@@ -134,7 +134,8 @@ class _PlannerJobDetailsScreenState extends State<PlannerJobDetailsScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                              (primaryRoleText!=userTypeText)? Padding(
+                            (primaryRoleText != userTypeText)
+                                ? Padding(
                                     padding: EdgeInsets.only(top: 2.0),
                                     child: Align(
                                       alignment: Alignment.topLeft,
@@ -148,11 +149,13 @@ class _PlannerJobDetailsScreenState extends State<PlannerJobDetailsScreen> {
                                         ),
                                       ),
                                     ),
-                                  ):Container(), 
+                                  )
+                                : Container(),
                             Padding(
-                              padding: const EdgeInsets.only(top:8.0),
+                              padding: const EdgeInsets.only(top: 8.0),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     "JOB NO : ${item!.tokenNo}",
@@ -162,7 +165,7 @@ class _PlannerJobDetailsScreenState extends State<PlannerJobDetailsScreen> {
                                       color: Colors.black,
                                     ),
                                   ),
-                              
+
                                   /// STATUS BADGE
                                   Container(
                                     padding: const EdgeInsets.symmetric(
@@ -343,23 +346,24 @@ class _PlannerJobDetailsScreenState extends State<PlannerJobDetailsScreen> {
                                       //     barCollapsingEnabled: true,
                                       //   ),
                                       // );
-                                        print('maint Type ${item!.maintType
-                                                            .toString()}');
+                                      print(
+                                        'maint Type ${item!.maintType.toString()}',
+                                      );
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
                                           builder: (context) =>
-                                               COMapScreenPlanner(
-                                                
-                                               jobNo: widget.tokenNo,
-                                                substation: item!.substation.toString(),
-                                                feeder: item!.feeder!.split('(').first.trim(),
-                                                 visibilityFlag: item!.visibilityFlag.toString(),
-                                              
+                                              COMapScreenPlanner(
+                                                jobNo: widget.tokenNo,
+                                                substation: item!.substation
+                                                    .toString(),
+                                                feeder: item!.feeder!
+                                                    .split('(')
+                                                    .first
+                                                    .trim(),
                                               ),
                                         ),
                                       );
-                                    
                                     },
                                     child: Container(
                                       margin: const EdgeInsets.only(right: 0),
@@ -921,7 +925,8 @@ class _PlannerJobDetailsScreenState extends State<PlannerJobDetailsScreen> {
                         ),
                       ),
                     // if (item!.status.toString().contains("CANCEL"))
-                     if (item!.status.toString() == "CANCELLED BY PLANNER" || item!.status.toString() == "CANCELLED BY GF")
+                    if (item!.status.toString() == "CANCELLED BY PLANNER" ||
+                        item!.status.toString() == "CANCELLED BY GF")
                       (rights != "READ ONLY")
                           ? (item!.maintType == 'Change Order')
                                 ? const Text(
@@ -1098,10 +1103,7 @@ class _PlannerJobDetailsScreenState extends State<PlannerJobDetailsScreen> {
 
     if (length == 0) {
       return const Center(
-        child: Text(
-          "",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        child: Text("", style: TextStyle(fontWeight: FontWeight.bold)),
       );
     }
 
@@ -1175,7 +1177,8 @@ class _PlannerJobDetailsScreenState extends State<PlannerJobDetailsScreen> {
                   onTap: () {
                     downloadFile(
                       'https://civm.ariespro.com/assets/clientuploads/$fileLocation',
-                      'File',context
+                      'File',
+                      context,
                     );
                   },
                   child: const Icon(
@@ -1325,13 +1328,15 @@ class _PlannerJobDetailsScreenState extends State<PlannerJobDetailsScreen> {
                             if (!isPDF(fileLocation)) {
                               downloadFile(
                                 'https://civm.ariespro.com/assets/clientuploads/$fileLocation',
-                                'File',context
+                                'File',
+                                context,
                               );
                               Navigator.pop(context);
                             } else {
                               downloadFile(
                                 'https://civm.ariespro.com/assets/clientuploads/$fileLocation',
-                                'PDF',context
+                                'PDF',
+                                context,
                               );
                               Navigator.pop(context);
                             }
@@ -2338,19 +2343,19 @@ class _PlannerJobDetailsScreenState extends State<PlannerJobDetailsScreen> {
       print('Error: $e');
     }
   }
-  
-   Future<void> getUserType() async {
+
+  Future<void> getUserType() async {
     final SharedPreferences pref = await SharedPreferences.getInstance();
     String userType = pref.getString('userType').toString();
     String primaryRole = pref.getString('primaryRole').toString();
-    if(userType == '3'){
+    if (userType == '3') {
       userTypeText = 'General Foreman';
-    }else if(userType == '6'){
+    } else if (userType == '6') {
       userTypeText = 'Planner';
     }
-    if(primaryRole == '3'){
+    if (primaryRole == '3') {
       primaryRoleText = 'General Foreman';
-    }else if(primaryRole == '6'){
+    } else if (primaryRole == '6') {
       primaryRoleText = 'Planner';
     }
   }
@@ -2432,5 +2437,4 @@ class _PlannerJobDetailsScreenState extends State<PlannerJobDetailsScreen> {
     if (!mounted) return;
     await checkCurrentUser();
   }
-
 }

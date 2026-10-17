@@ -601,3 +601,71 @@ Future<void> showConfirmDialogWithMain({
     },
   );
 }
+class CommonActionButton extends StatelessWidget {
+  final String title;
+  final VoidCallback onTap;
+  final List<Color> gradientColors;
+  final bool isLoading;
+
+  const CommonActionButton({
+    super.key,
+    required this.title,
+    required this.onTap,
+    required this.gradientColors,
+    this.isLoading = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        margin: const EdgeInsets.only(left: 6, right: 6, bottom: 10),
+        child: InkWell(
+          onTap: isLoading ? null : onTap, // disable when loading
+          child: Container(
+            margin: const EdgeInsets.only(bottom: 10.0),
+            alignment: Alignment.center,
+            width: MediaQuery.of(context).size.width,
+            height: 40,
+            decoration: BoxDecoration(
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black54,
+                  blurRadius: 5,
+                  offset: Offset(2.0, 5.0),
+                ),
+              ],
+              gradient: LinearGradient(colors: gradientColors),
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: isLoading
+                        ? const SizedBox(
+                            height: 22,
+                            width: 22,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(
+                            title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 20,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}

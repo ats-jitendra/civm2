@@ -348,7 +348,7 @@ class _ChangeOrderJobDetailsScreenState
                                                jobNo: widget.tokenNo,
                                                 substation: item!.substation.toString(),
                                                 feeder: item!.feeder!.split('(').first.trim(),
-                                                 visibilityFlag: item!.visibilityFlag.toString(),
+                                                 
                                                
                                                             
                                               ),
