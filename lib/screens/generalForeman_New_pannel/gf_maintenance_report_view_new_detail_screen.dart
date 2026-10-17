@@ -1,11 +1,9 @@
 import 'dart:convert';
 import 'dart:math' as math;
 import 'package:CIVM/models/primary_secondary_mile_model.dart';
-import 'package:CIVM/repository/map_url.dart';
 import 'package:CIVM/screens/login_page.dart';
 import 'package:CIVM/screens/offline_map/map_screen_gf.dart';
 import 'package:CIVM/screens/work_progress_span_widget.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:intl/intl.dart';
 import 'package:CIVM/models/ivm_all_status_model.dart';
 import 'package:CIVM/models/log_model.dart';

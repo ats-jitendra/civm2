@@ -3,8 +3,6 @@ import 'package:CIVM/models/add_new_row_maintenance_tabular_detail_model.dart';
 import 'package:CIVM/models/log_model.dart';
 import 'package:CIVM/screens/login_page.dart';
 import 'package:CIVM/screens/offline_map/map_screen_supervisor.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:CIVM/repository/map_url.dart';
 import 'package:CIVM/models/primary_secondary_mile_model.dart';
 import 'package:CIVM/models/user_model.dart';
 import 'package:CIVM/models/work_progress_model.dart';
