@@ -195,6 +195,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
   StreamSubscription<CompassEvent>? _compassSubscription;
   ImageViewViewModel imageViewModel = ImageViewViewModel();
   String imageSource = '';
+  bool isSaveLoading = false;
 
   @override
   void initState() {
@@ -728,7 +729,8 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                       ? Colors.grey
                                       : status == "completed" ||
                                             status == "rework completed" ||
-                                            status == "final completed"
+                                            status == "final completed" ||
+                                          status == "passed"
                                       ? Colors.grey
                                       : getColorFromName(
                                           type,
@@ -761,7 +763,8 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                     visibleColors.add(Colors.grey);
                                   } else if (status == "completed" ||
                                       status == "rework completed" ||
-                                      status == "final completed") {
+                                      status == "final completed" ||
+                                          status == "passed") {
                                     visibleColors.add(Colors.grey);
                                   } else {
                                     visibleColors.add(
@@ -3666,10 +3669,29 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                       SizedBox(
                         //width: double.infinity,
                         child: InkWell(
-                          onTap: () async {
-                            await submitMapData(selectedMapObjects);
-                            // Navigator.pop(context);
-                          },
+                          onTap:  isSaveLoading
+        ? null
+        : () async {
+            setDialogState(() {
+              isSaveLoading = true;
+            });
+
+            try {
+              await submitMapData(selectedMapObjects);
+            } catch (e) {
+              debugPrint('Error saving map data: $e');
+            } finally {
+              if (mounted) {
+                setDialogState(() {
+                  isSaveLoading = false;
+                });
+              }
+            }
+          },
+                          // () async {
+                          //   await submitMapData(selectedMapObjects);
+                          //   // Navigator.pop(context);
+                          // },
                           borderRadius: BorderRadius.circular(8),
                           child: Container(
                             height: 45,
@@ -3679,7 +3701,16 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                               color: Colors.green,
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: const Text(
+                            child: isSaveLoading
+          ? const SizedBox(
+              height: 22,
+              width: 22,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2.5,
+              ),
+            )
+          : const Text(
                               "Save",
                               style: TextStyle(
                                 color: Colors.white,
