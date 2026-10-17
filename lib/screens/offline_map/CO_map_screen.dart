@@ -3698,10 +3698,10 @@ class _COMapScreenState extends State<COMapScreen> {
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            "Select Vegetation Type",
+                            "DANGER TREE REMOVAL",
                             style: TextStyle(
                               // fontWeight: FontWeight.bold,
-                              fontSize: 17,
+                              fontSize: 16,
                             ),
                           ),
                         ),

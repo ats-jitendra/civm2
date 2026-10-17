@@ -203,7 +203,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
   bool isLoading = false;
   String? selectedCrew;
   bool isMarkAsRead = false;
-
+String selectedJobStatus = "";
   @override
   void initState() {
     // TODO: implement initState
@@ -218,7 +218,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-     ensureCameraInitialized();
+    ensureCameraInitialized();
     _startListeningToCompass();
 
     /////
@@ -1587,6 +1587,22 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
       selectedFeeder.toString(),
     );
     print("Overhead rows: ${overHeadData.length}");
+    ////job Status--------
+    selectedJobStatus = "";
+
+    for (var row in overHeadData) {
+      if (row["jobNo"]?.toString().trim() == coTokenNo.toString().trim()) {
+        selectedJobStatus =
+            row["jobStatus"]?.trim().toUpperCase().toString() ?? "";
+
+        print("Job No: ${row["jobNo"]}");
+        print("Job Status: $selectedJobStatus");
+
+        break;
+      }
+    }
+
+    ///---------------------
     overHeadPolylines.clear();
 
     for (var row in overHeadData) {
@@ -3092,9 +3108,13 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                    
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
+                          if(selectedJobStatus!="ASSIGNED")
+                          SizedBox(),
+                           if(selectedJobStatus=="ASSIGNED")
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -3255,10 +3275,10 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          "Select Vegetation Type",
+                          "DANGER TREE REMOVAL",
                           style: TextStyle(
                             // fontWeight: FontWeight.bold,
-                            fontSize: 17,
+                            fontSize: 16,
                           ),
                         ),
                       ),
@@ -6683,7 +6703,8 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
                   ),
                   const SizedBox(height: 8),
 
-                  if (!allStatusesCompleted)
+                  // if (!allStatusesCompleted)
+                  if(selectedJobStatus=="ASSIGNED")
                     Row(
                       children: [
                         Checkbox(

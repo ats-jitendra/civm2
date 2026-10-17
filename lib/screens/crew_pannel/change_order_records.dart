@@ -130,7 +130,8 @@ class _ChangeOrderTableState extends State<ChangeOrderTable> {
                           context,
                           id,
                           "0,1,2",
-                          selectedYear.toString(),
+                          ""
+                         // selectedYear.toString(),
                         );
                     _initializeScreen();
                   },
@@ -429,7 +430,8 @@ class _ChangeOrderTableState extends State<ChangeOrderTable> {
         context,
         id,
         "0,1,2",
-        selectedYear.toString(),
+        ""
+       // selectedYear.toString(),
       );
     } else {
       crewChangeOrderRecordsViewModel
@@ -747,7 +749,8 @@ class _ChangeOrderTableState extends State<ChangeOrderTable> {
               context,
               id,
               "0,1,2",
-              selectedYear.toString(),
+              ""
+            //  selectedYear.toString(),
             );
       } else {
         print('API request failed with status code: ${response.statusCode}');
@@ -768,7 +771,8 @@ class _ChangeOrderTableState extends State<ChangeOrderTable> {
       context,
       id,
       "0,1,2",
-      year,
+      ""
+     // year,
     );
     _initializeScreen();
   }

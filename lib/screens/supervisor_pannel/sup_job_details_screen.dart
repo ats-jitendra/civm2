@@ -6,6 +6,7 @@ import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/screens/chat_history.dart';
 import 'package:CIVM/screens/login_page.dart';
 import 'package:CIVM/screens/my_chrome_safari_map_recording.dart';
+import 'package:CIVM/screens/offline_map/CO_map_screen_supervisor.dart';
 import 'package:CIVM/utils/common_functions.dart';
 import 'package:CIVM/utils/custom_toast_snackbar_progressdialog.dart';
 import 'package:CIVM/utils/user_pref.dart';
@@ -263,51 +264,66 @@ class _SupJobDetailsScreenState extends State<SupJobDetailsScreen> {
                                       /// VIEW MAP BUTTON
                                       InkWell(
                                         onTap: () async {
-                                          String id = '';
-                                          final userPreferences1 =
-                                              Provider.of<UserPref>(context,
-                                                  listen: false);
-                                          UserModel data =
-                                              await userPreferences1.getUser();
-                                          id = data.user!.id.toString();
+                                          // String id = '';
+                                          // final userPreferences1 =
+                                          //     Provider.of<UserPref>(context,
+                                          //         listen: false);
+                                          // UserModel data =
+                                          //     await userPreferences1.getUser();
+                                          // id = data.user!.id.toString();
 
-                                          await browser.open(
-                                              url: WebUri(
-                                                  // "https://mapapi.ariespro.com/main/contractor/CIVM_Map/${lCPWorkOrderPendingViewModel.lcpWorkOrderPendingGetTabularData.data!.findAllTableData![index].tokenNo.toString()}/USRQWXH589Z"),
-                                                  MapUrl
-                                                          .getSupervisorEndPoint(
-                                                              item!.tokenNo
-                                                                  .toString(),
-                                                              id)
-                                                              //commented lower code on 30April2026 asked by SANCHIT
-                                                  // (item!.status
-                                                  //                 .toString()
-                                                  //                 .trim()
-                                                  //                 .toUpperCase() ==
-                                                  //             "PENDING ZIELIES ASSIGNEMENT" ||
-                                                  //         item!.status
-                                                  //                 .toString()
-                                                  //                 .trim()
-                                                  //                 .toUpperCase() ==
-                                                  //             "COMPLETED")
-                                                  //     ? MapUrl
-                                                  //         .getAdminEndPoint(
-                                                  //             item!.tokenNo
-                                                  //                 .toString(),
-                                                  //             id)  
-                                                  //     : MapUrl
-                                                  //         .getSupervisorEndPoint(
-                                                  //             item!.tokenNo
-                                                  //                 .toString(),
-                                                  //             id)
-                                                          ),
-                                              settings:
-                                                  ChromeSafariBrowserSettings(
-                                                      shareState:
-                                                          CustomTabsShareState
-                                                              .SHARE_STATE_OFF,
-                                                      barCollapsingEnabled:
-                                                          true));
+                                          // await browser.open(
+                                          //     url: WebUri(
+                                          //         // "https://mapapi.ariespro.com/main/contractor/CIVM_Map/${lCPWorkOrderPendingViewModel.lcpWorkOrderPendingGetTabularData.data!.findAllTableData![index].tokenNo.toString()}/USRQWXH589Z"),
+                                          //         MapUrl
+                                          //                 .getSupervisorEndPoint(
+                                          //                     item!.tokenNo
+                                          //                         .toString(),
+                                          //                     id)
+                                          //                     //commented lower code on 30April2026 asked by SANCHIT
+                                          //         // (item!.status
+                                          //         //                 .toString()
+                                          //         //                 .trim()
+                                          //         //                 .toUpperCase() ==
+                                          //         //             "PENDING ZIELIES ASSIGNEMENT" ||
+                                          //         //         item!.status
+                                          //         //                 .toString()
+                                          //         //                 .trim()
+                                          //         //                 .toUpperCase() ==
+                                          //         //             "COMPLETED")
+                                          //         //     ? MapUrl
+                                          //         //         .getAdminEndPoint(
+                                          //         //             item!.tokenNo
+                                          //         //                 .toString(),
+                                          //         //             id)  
+                                          //         //     : MapUrl
+                                          //         //         .getSupervisorEndPoint(
+                                          //         //             item!.tokenNo
+                                          //         //                 .toString(),
+                                          //         //             id)
+                                          //                 ),
+                                          //     settings:
+                                          //         ChromeSafariBrowserSettings(
+                                          //             shareState:
+                                          //                 CustomTabsShareState
+                                          //                     .SHARE_STATE_OFF,
+                                          //             barCollapsingEnabled:
+                                          //                 true));
+                                       Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              COMapScreenSupervisor(
+                                                jobNo: widget.tokenNo,
+                                                substation: item!.substation
+                                                    .toString(),
+                                                feeder: item!.feeder!
+                                                    .split('(')
+                                                    .first
+                                                    .trim(),
+                                              ),
+                                        ),
+                                      );
                                         },
                                         child: Container(
                                           margin:
@@ -852,6 +868,70 @@ class _SupJobDetailsScreenState extends State<SupJobDetailsScreen> {
                             ],
                           ),
                         ),
+                          ////////////////////////////////
+                    if (item!.maintType.toString().toLowerCase() ==
+                            "change order" ||
+                        item!.maintType.toString().toLowerCase() ==
+                            "exception maintenance")
+                      // if (item!.status.toString().contains("CANCEL"))
+                      if (item!.status.toString() ==
+                              "CANCELLED BY SUPERVISOR" ||
+                          item!.status.toString() == "CANCELLED BY ADMIN")
+                        (rights != "READ ONLY")
+                            ? (item!.maintType == 'Change Order')
+                                  ? const Text(
+                                      "",
+                                      textAlign: TextAlign.left,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    )
+                                  : GestureDetector(
+                                      onTap: () async {
+                                        openDailogSubmitApproval(
+                                          item!.id.toString(),
+                                        );
+                                      },
+                                      child: Container(
+                                        margin: const EdgeInsets.only(
+                                          top: 12,
+                                          bottom: 12,
+                                          left: 12,
+                                          right: 12,
+                                        ),
+                                        width: 200,
+                                        padding: const EdgeInsets.symmetric(
+                                          vertical: 8,
+                                          horizontal: 8,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.green,
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Colors.green.withOpacity(
+                                                0.3,
+                                              ),
+                                              blurRadius: 6,
+                                              offset: const Offset(0, 3),
+                                            ),
+                                          ],
+                                        ),
+                                        alignment: Alignment.center,
+                                        child: const Text(
+                                          "RECALL",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    )
+                            : const SizedBox(),
                       // if (item!.status.toString().contains("CANCEL"))
                       //   (rights != "READ ONLY")
                       //       ? (item!.maintType == 'Change Order')
@@ -1530,7 +1610,7 @@ class _SupJobDetailsScreenState extends State<SupJobDetailsScreen> {
  
   Future<void> deleteOnlineImageApi2(String fileName, String tokenNo) async {
     final apiUrl = "${AppUrl.baseUrl}changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo";
-        // 'https://civm2.ariespro.com/civm2/changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo';
+        // '${AppUrl.baseUrl}changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo';
     print(apiUrl);
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
@@ -2049,7 +2129,7 @@ class _SupJobDetailsScreenState extends State<SupJobDetailsScreen> {
 
   Future<void> updateFlagValue(String token, int flag) async {
     String url = "${AppUrl.baseUrl}vma_row_custom_main_plan/updateFlagValue";
-    // 'https://civm2.ariespro.com/civm2/vma_row_custom_main_plan/updateFlagValue';
+    // '${AppUrl.baseUrl}vma_row_custom_main_plan/updateFlagValue';
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
     try {
@@ -2147,7 +2227,7 @@ class _SupJobDetailsScreenState extends State<SupJobDetailsScreen> {
     // String contractorId = data.user!.id.toString();
 
     String url = AppUrl.crewList;
-    // "https://civm2.ariespro.com/civm2/login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
+    // "${AppUrl.baseUrl}login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
     print('urlCrewList gf pannel:: $url');
     try {
       final response = await http.get(
@@ -2193,15 +2273,16 @@ class _SupJobDetailsScreenState extends State<SupJobDetailsScreen> {
   }
 
   Future openDailogSubmitApproval(String id) => showDialog(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(builder: (context, setState) {
+    context: context,
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {
           return AlertDialog(
             content: SingleChildScrollView(
               child: Column(
                 children: [
                   const Text(
-                    "SUBMIT FOR APPROVAL",
+                    "RECALL",
                     style: TextStyle(
                       fontSize: 20.0,
                       color: Color.fromARGB(255, 7, 59, 120),
@@ -2221,7 +2302,7 @@ class _SupJobDetailsScreenState extends State<SupJobDetailsScreen> {
                   const Padding(
                     padding: EdgeInsets.only(top: 20.0),
                     child: Text(
-                      "Are you sure to submit for Approval?",
+                      "Are you sure to you want to submit this work?",
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 16.0,
@@ -2237,47 +2318,59 @@ class _SupJobDetailsScreenState extends State<SupJobDetailsScreen> {
                 children: [
                   Expanded(
                     child: Container(
-                        margin: const EdgeInsets.only(
-                            left: 6, right: 6, bottom: 10),
-                        child: InkWell(
-                          onTap: () {
-                            // contractorOrderPendingViewModel
-                            //     .fetchStatusChangeApi(
-                            //         context,
-                            //         'PENDING APPROVAL',
-                            //         _notes.text.toString(),
-                            //         int.parse(id))
-                            //     .then((value) {
-                            //   print('Success');
-                            //   Navigator.pop(context);
-                            //   fetchData();
-                            // });
-                            // print(updatedCard);
-                            updateSubmitForApprovalStatus(id);
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 10.0),
-                            // padding: const EdgeInsets.all(8),
-                            alignment: Alignment.center,
-                            width: MediaQuery.of(context).size.width,
-                            height: 40,
-                            decoration: const BoxDecoration(
-                                // shape: BoxShape.circle,
-                                // borderRadius: BorderRadius.circular(25),
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Color.fromARGB(255, 1, 106, 5),
-                                      blurRadius: 5,
-                                      offset: Offset(2.0, 5.0))
-                                ],
-                                color: Colors.black,
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.green,
-                                    Colors.green,
-                                  ],
-                                )),
-                            child: const Row(children: [
+                      margin: const EdgeInsets.only(
+                        left: 6,
+                        right: 6,
+                        bottom: 10,
+                      ),
+                      child: InkWell(
+                        onTap: () async {
+                          showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (_) => const Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                          try {
+                            await updateSubmitForApprovalStatus(id);
+                            if (!mounted) return;
+                            await Future.delayed(Duration(milliseconds: 100));
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                            Navigator.pop(context);
+                            // Navigator.pop(context);
+                            // Navigator.pop(context);
+                          } catch (e) {
+                            print(e);
+                            if (mounted) {
+                              Navigator.pop(context);
+                            }
+                          }
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 10.0),
+                          // padding: const EdgeInsets.all(8),
+                          alignment: Alignment.center,
+                          width: MediaQuery.of(context).size.width,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            // shape: BoxShape.circle,
+                            // borderRadius: BorderRadius.circular(25),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color.fromARGB(255, 1, 106, 5),
+                                blurRadius: 5,
+                                offset: Offset(2.0, 5.0),
+                              ),
+                            ],
+                            color: Colors.black,
+                            gradient: LinearGradient(
+                              colors: [Colors.green, Colors.green],
+                            ),
+                          ),
+                          child: const Row(
+                            children: [
                               Expanded(
                                 child: Align(
                                   alignment: Alignment.center,
@@ -2292,41 +2385,46 @@ class _SupJobDetailsScreenState extends State<SupJobDetailsScreen> {
                                   ),
                                 ),
                               ),
-                            ]),
+                            ],
                           ),
-                        )),
+                        ),
+                      ),
+                    ),
                   ),
                   Expanded(
                     child: Container(
-                        margin: const EdgeInsets.only(
-                            left: 6, right: 6, bottom: 10),
-                        child: InkWell(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: Container(
-                            margin: const EdgeInsets.only(bottom: 10.0),
-                            // padding: const EdgeInsets.all(8),
-                            alignment: Alignment.center,
-                            width: MediaQuery.of(context).size.width,
-                            height: 40,
-                            decoration: const BoxDecoration(
-                                // shape: BoxShape.circle,
-                                // borderRadius: BorderRadius.circular(25),
-                                boxShadow: [
-                                  BoxShadow(
-                                      color: Color.fromARGB(255, 139, 10, 0),
-                                      blurRadius: 5,
-                                      offset: Offset(2.0, 5.0))
-                                ],
-                                color: Colors.black,
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.red,
-                                    Colors.red,
-                                  ],
-                                )),
-                            child: const Row(children: [
+                      margin: const EdgeInsets.only(
+                        left: 6,
+                        right: 6,
+                        bottom: 10,
+                      ),
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.pop(context);
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.only(bottom: 10.0),
+                          // padding: const EdgeInsets.all(8),
+                          alignment: Alignment.center,
+                          width: MediaQuery.of(context).size.width,
+                          height: 40,
+                          decoration: const BoxDecoration(
+                            // shape: BoxShape.circle,
+                            // borderRadius: BorderRadius.circular(25),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Color.fromARGB(255, 139, 10, 0),
+                                blurRadius: 5,
+                                offset: Offset(2.0, 5.0),
+                              ),
+                            ],
+                            color: Colors.black,
+                            gradient: LinearGradient(
+                              colors: [Colors.red, Colors.red],
+                            ),
+                          ),
+                          child: const Row(
+                            children: [
                               Expanded(
                                 child: Align(
                                   alignment: Alignment.center,
@@ -2341,30 +2439,37 @@ class _SupJobDetailsScreenState extends State<SupJobDetailsScreen> {
                                   ),
                                 ),
                               ),
-                            ]),
+                            ],
                           ),
-                        )),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
             ],
           );
-        });
-      });
+        },
+      );
+    },
+  );
 
   Future<void> updateSubmitForApprovalStatus(String tokenNo) async {
     String baseUrl =
-        'https://civm2.ariespro.com/civm2/workOrderPendingAndReject/updateStatusFromRejectedToPendingApproval';
+        '${AppUrl.baseUrl}workOrderPendingAndReject/updateStatusFromRejectedToPendingApproval';
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
     final Map<String, String> queryParams = {
       //  'status': 'WORK FOR APPROVAL',
-      'status': 'PENDING ZIELIES ASSIGNMENT',
+      'status': 'RECALL',
+      // 'PENDING LCP APPROVAL',
       // 'PENDING APPROVAL',
       'tokenNo': tokenNo,
+      'userId': data.user!.id.toString(),
     };
-    final String url =
-        Uri.parse(baseUrl).replace(queryParameters: queryParams).toString();
+    final String url = Uri.parse(
+      baseUrl,
+    ).replace(queryParameters: queryParams).toString();
     print('url: $url');
     Map<String, String> headers = {
       "Content-Type": "application/json",
@@ -2373,27 +2478,17 @@ class _SupJobDetailsScreenState extends State<SupJobDetailsScreen> {
     };
 
     try {
-      final response = await http.put(
-        Uri.parse(url),
-        headers: headers,
-      );
+      final response = await http.put(Uri.parse(url), headers: headers);
 
       if (response.statusCode == 200) {
         print('Status updated successfully');
-        Navigator.pop(context);
-        CustomToastSnackBarProgressDialog.flushBarSuccessMessage(
-            '$tokenNo Successfully Submitted for approval ', context);
+        if (context.mounted) {
+          CustomToastSnackBarProgressDialog.flushBarSuccessMessage(
+            'Job No. $tokenNo Approved Successfully',
+            context,
+          );
+        }
         fetchDetails(context);
-        // iniciatedCancelWorkForApprovalViewModel.fetchLCPWorkOrderRejectTabularListApi(
-        //     context,
-        //     '',
-        //     '',
-        //     'REJECTED',
-        //     '',
-        //     '',
-        //     'Change Order',
-        //     id,
-        //     'generalforeman');
       } else {
         print('Failed to update status: ${response.statusCode}');
       }

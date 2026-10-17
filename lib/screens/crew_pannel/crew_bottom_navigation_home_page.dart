@@ -50,7 +50,6 @@ class _CrewBottomNavigationHomePageState
   String? selectedYear;
   var selectedYearCurrent;
 
-
   @override
   void initState() {
     selectedYear = selectedYearCurrent = currentYear.toString();
@@ -97,15 +96,15 @@ class _CrewBottomNavigationHomePageState
             title: const Text('CIVM', style: TextStyle(color: Colors.white)),
             backgroundColor: const Color.fromARGB(255, 7, 59, 120),
             actions: [
-             
               IconButton(
                 icon: const Icon(Icons.logout, color: Colors.white),
                 onPressed: () {
                   userPreferences.remove().then((value) {
-                    Navigator.of(context).push(
+                    Navigator.of(context).pushAndRemoveUntil(
                       MaterialPageRoute(
                         builder: (BuildContext context) => const LoginPage(),
                       ),
+                      (Route<dynamic> route) => false,
                     );
                   });
                   // Navigator.of(context).push(MaterialPageRoute(
@@ -145,7 +144,7 @@ class _CrewBottomNavigationHomePageState
                       await getData(selectedYearCurrent);
                     },
                     // Important when content is smaller than screen
-                    displacement: 40, 
+                    displacement: 40,
                     edgeOffset: 10,
                     child: SingleChildScrollView(
                       physics: const AlwaysScrollableScrollPhysics(),
@@ -162,7 +161,10 @@ class _CrewBottomNavigationHomePageState
                           ),
                           Card(
                             color: Colors.white.withOpacity(0.4),
-                            margin: const EdgeInsets.only(left: 16.0, right: 16),
+                            margin: const EdgeInsets.only(
+                              left: 16.0,
+                              right: 16,
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.all(6.0),
                               child: Column(
@@ -177,9 +179,8 @@ class _CrewBottomNavigationHomePageState
                                               color: Colors.white.withOpacity(
                                                 0.5,
                                               ),
-                                              borderRadius: BorderRadius.circular(
-                                                10,
-                                              ),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
                                             ),
                                             child: Padding(
                                               padding: const EdgeInsets.only(
@@ -210,13 +211,15 @@ class _CrewBottomNavigationHomePageState
                                               Navigator.of(context).push(
                                                 MaterialPageRoute(
                                                   builder: (BuildContext context) =>
-                                                       CrewIVMMaintenancePlanTable(year: selectedYear.toString()),
+                                                      CrewIVMMaintenancePlanTable(
+                                                        year: selectedYear
+                                                            .toString(),
+                                                      ),
                                                 ),
                                               );
-                                             await getData(
-                                  selectedYear.toString()
-                                );
-                    
+                                              await getData(
+                                                selectedYear.toString(),
+                                              );
                                             },
                                             child: Container(
                                               margin: const EdgeInsets.only(
@@ -257,10 +260,11 @@ class _CrewBottomNavigationHomePageState
                                                       alignment:
                                                           Alignment.topCenter,
                                                       child: Padding(
-                                                        padding: EdgeInsets.only(
-                                                          bottom: 10.0,
-                                                          top: 10,
-                                                        ),
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                              bottom: 10.0,
+                                                              top: 10,
+                                                            ),
                                                         child: ClipRRect(
                                                           borderRadius:
                                                               BorderRadius.all(
@@ -274,12 +278,13 @@ class _CrewBottomNavigationHomePageState
                                                             ),
                                                             // image: AssetImage(
                                                             //     'assets/2.png'),
-                                                            color: Color.fromARGB(
-                                                              255,
-                                                              82,
-                                                              185,
-                                                              13,
-                                                            ),
+                                                            color:
+                                                                Color.fromARGB(
+                                                                  255,
+                                                                  82,
+                                                                  185,
+                                                                  13,
+                                                                ),
                                                           ),
                                                         ),
                                                       ),
@@ -347,13 +352,16 @@ class _CrewBottomNavigationHomePageState
                                                 MaterialPageRoute(
                                                   builder:
                                                       (BuildContext context) =>
-                                                           ChangeOrderTable(year: selectedYear.toString()),
+                                                          ChangeOrderTable(
+                                                            year: selectedYear
+                                                                .toString(),
+                                                          ),
                                                 ),
                                               );
-                    
-                                               await getData(
-                                  selectedYear.toString()
-                                );
+
+                                              await getData(
+                                                selectedYear.toString(),
+                                              );
                                             },
                                             child: Container(
                                               margin: const EdgeInsets.only(
@@ -394,10 +402,11 @@ class _CrewBottomNavigationHomePageState
                                                       alignment:
                                                           Alignment.topCenter,
                                                       child: Padding(
-                                                        padding: EdgeInsets.only(
-                                                          bottom: 10.0,
-                                                          top: 10,
-                                                        ),
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                              bottom: 10.0,
+                                                              top: 10,
+                                                            ),
                                                         child: ClipRRect(
                                                           borderRadius:
                                                               BorderRadius.all(
@@ -411,12 +420,13 @@ class _CrewBottomNavigationHomePageState
                                                             ),
                                                             // image: AssetImage(
                                                             //     'assets/2.png'),
-                                                            color: Color.fromARGB(
-                                                              255,
-                                                              82,
-                                                              185,
-                                                              13,
-                                                            ),
+                                                            color:
+                                                                Color.fromARGB(
+                                                                  255,
+                                                                  82,
+                                                                  185,
+                                                                  13,
+                                                                ),
                                                           ),
                                                         ),
                                                       ),
@@ -482,7 +492,7 @@ class _CrewBottomNavigationHomePageState
                                               ),
                                             ),
                                           ),
-                                          
+
                                           InkWell(
                                             onTap: () async {
                                               provider.getLocation();
@@ -534,10 +544,11 @@ class _CrewBottomNavigationHomePageState
                                                       alignment:
                                                           Alignment.topCenter,
                                                       child: Padding(
-                                                        padding: EdgeInsets.only(
-                                                          top: 10.0,
-                                                          bottom: 10,
-                                                        ),
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                              top: 10.0,
+                                                              bottom: 10,
+                                                            ),
                                                         child: ClipRRect(
                                                           borderRadius:
                                                               BorderRadius.all(
@@ -615,7 +626,7 @@ class _CrewBottomNavigationHomePageState
                             padding: const EdgeInsets.only(bottom: 8.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
-                    
+
                               // alignment: Alignment.bottomCenter,
                               children: [
                                 Text(
@@ -743,9 +754,12 @@ class _CrewBottomNavigationHomePageState
     UserModel data = await userPreferences.getUser();
 
     id = data.user!.id.toString();
-    final url = Uri.parse(
-      AppUrl.crewChangeOrderTabularDataEndPoint,
-    ).replace(queryParameters: {"crewId": id, "vFlag": "0,1,2","year": year});
+    final url = Uri.parse(AppUrl.crewChangeOrderTabularDataEndPoint).replace(
+      queryParameters: {
+        "crewId": id, "vFlag": "0,1,2", "year": "",
+        //year
+      },
+    );
     print('url::change order $url');
     try {
       final response = await http.get(
@@ -792,7 +806,7 @@ class _CrewBottomNavigationHomePageState
         "contractor": id,
         "visibilityFlag": "2",
         "status": "PENDING ZIELIES APPROVAL,REJECTED,ASSIGNED",
-        "year": year
+        "year": year,
       },
     );
     print('url::Ivm $url');
@@ -824,99 +838,91 @@ class _CrewBottomNavigationHomePageState
   }
 
   void showYearFilterDialog() {
- final String currentYear = DateTime.now().year.toString();
+    final String currentYear = DateTime.now().year.toString();
 
     if (selectedYear == null || !years.contains(selectedYear)) {
       selectedYear = years.contains(currentYear) ? currentYear : null;
     }
     String? tempSelectedYear = selectedYear;
-  showDialog(
-    context: context,
-    builder: (dialogContext) {
-      return StatefulBuilder(
-        builder: (dialogContext, setDialogState) {
-          return AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-            ),
-
-            title: const Text(
-              "Filter",
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            content: DropdownButtonFormField<String>(
-              value: years.contains(tempSelectedYear)
-                  ? tempSelectedYear
-                  : null,
-
-              isExpanded: true,
-
-              decoration: InputDecoration(
-                labelText: "Select Year",
-                prefixIcon: const Icon(
-                  Icons.calendar_today_rounded,
-                ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 14,
-                ),
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (dialogContext, setDialogState) {
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15),
               ),
 
-              items: years.map((year) {
-                return DropdownMenuItem<String>(
-                  value: year,
-                  child: Text(year),
-                );
-              }).toList(),
-
-              onChanged: (value) {
-                setDialogState(() {
-                  tempSelectedYear = value;
-                });
-              },
-            ),
-
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(dialogContext);
-                },
-                child: const Text("Cancel"),
+              title: const Text(
+                "Filter",
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
 
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    selectedYear = tempSelectedYear;
-                  });
+              content: DropdownButtonFormField<String>(
+                value: years.contains(tempSelectedYear)
+                    ? tempSelectedYear
+                    : null,
 
-                  Navigator.pop(dialogContext);
+                isExpanded: true,
 
-                  print(
-                    "Selected Year: $selectedYear",
+                decoration: InputDecoration(
+                  labelText: "Select Year",
+                  prefixIcon: const Icon(Icons.calendar_today_rounded),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 14,
+                  ),
+                ),
+
+                items: years.map((year) {
+                  return DropdownMenuItem<String>(
+                    value: year,
+                    child: Text(year),
                   );
+                }).toList(),
 
-                 getData(
-              selectedYear.toString()
-            );
+                onChanged: (value) {
+                  setDialogState(() {
+                    tempSelectedYear = value;
+                  });
                 },
-                child: const Text("Search"),
               ),
-            ],
-          );
-        },
-      );
-    },
-  );
-}
 
-   Future<void> checkCurrentUser() async {
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(dialogContext);
+                  },
+                  child: const Text("Cancel"),
+                ),
+
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      selectedYear = tempSelectedYear;
+                    });
+
+                    Navigator.pop(dialogContext);
+
+                    print("Selected Year: $selectedYear");
+
+                    getData(selectedYear.toString());
+                  },
+                  child: const Text("Search"),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Future<void> checkCurrentUser() async {
     print('planner authentication');
 
     try {
@@ -992,5 +998,5 @@ class _CrewBottomNavigationHomePageState
     await Future.delayed(const Duration(seconds: 10));
     if (!mounted) return;
     await checkCurrentUser();
-  }//----
+  } //----
 }
