@@ -1576,7 +1576,7 @@ class _BottomNavigationAccountPageState
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
     final apiUrl =
-        'https://civm2.ariespro.com/civm2/login_user/get_userDetails_by_username/${data.user?.email}';
+        '${AppUrl.baseUrl}login_user/get_userDetails_by_username/${data.user?.email}';
     print(apiUrl);
     final response = await http.get(
       Uri.parse(apiUrl),

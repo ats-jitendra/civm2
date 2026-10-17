@@ -10,6 +10,7 @@ import 'package:camera/camera.dart';
 import 'package:CIVM/data/response/status.dart';
 import 'package:CIVM/models/contractor_row_maintenance_progress_model.dart';
 import 'package:CIVM/models/user_model.dart';
+import 'package:CIVM/resources/app_url.dart';
 // import 'package:CIVM/screens/crew_pannel/Crewedit_ivmTimeSheet.dart';
 // import 'package:CIVM/screens/crew_pannel/crewEdit_dailyHerbicide_cntractor.dart';
 // import 'package:CIVM/screens/crew_pannel/crewEdit_mixingInventory.dart';
@@ -1342,7 +1343,7 @@ class _CrewChangeOrderFormState extends State<CrewChangeOrderForm> {
 
     try {
       var uri = Uri.parse(
-        "https://civm2.ariespro.com/civm2/contractorPanel/updateImageVEGETATION_CREW_FORMs",
+        "${AppUrl.baseUrl}contractorPanel/updateImageVEGETATION_CREW_FORMs",
       );
       var request = http.MultipartRequest("POST", uri);
 
@@ -1557,7 +1558,7 @@ class _CrewChangeOrderFormState extends State<CrewChangeOrderForm> {
       final userPreferences = Provider.of<UserPref>(context, listen: false);
       UserModel data = await userPreferences.getUser();
       final String apiUrl =
-          "https://civm2.ariespro.com/civm2/contractorPanel/updateStatusByIds/$id";
+          "${AppUrl.baseUrl}contractorPanel/updateStatusByIds/$id";
       print(apiUrl);
       Map<String, dynamic> updatedData = {"status": "new_status"};
       final http.Response response = await http.put(
@@ -1930,7 +1931,7 @@ class _CrewChangeOrderFormState extends State<CrewChangeOrderForm> {
 
   //   try {
   //     var uri = Uri.parse(
-  //         "https://civm2.ariespro.com/civm2/contractorPanel/uploadFiles");
+  //         "${AppUrl.baseUrl}contractorPanel/uploadFiles");
   //     var request = http.MultipartRequest("POST", uri);
 
   //     final userPreferences = Provider.of<UserPref>(context, listen: false);
@@ -2202,7 +2203,7 @@ class _CrewChangeOrderFormState extends State<CrewChangeOrderForm> {
     Map<String, String> mappedData,
   ) async {
     String apiUrl =
-        'https://civm2.ariespro.com/civm2/changeOrderLcpCreateOrder/updateStatusAndCrewNotesByTokenNo';
+        '${AppUrl.baseUrl}changeOrderLcpCreateOrder/updateStatusAndCrewNotesByTokenNo';
 
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();

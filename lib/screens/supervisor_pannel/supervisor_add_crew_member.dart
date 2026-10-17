@@ -2165,7 +2165,7 @@ class _SupervisorAddCrewMemberState extends State<SupervisorAddCrewMember> {
   ) async {
     try {
       final response = await http.post(
-        Uri.parse("https://civm2.ariespro.com/civm2/login_user/create_crew"
+        Uri.parse("${AppUrl.baseUrl}login_user/create_crew"
         //  'https://lcpmapapi.ariespro.com/main/create_crew'
           ),
         headers: {'Content-Type': 'application/json'},

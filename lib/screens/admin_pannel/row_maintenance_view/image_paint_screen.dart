@@ -1,6 +1,7 @@
 import 'dart:io';
 // import 'dart:typed_data';
 import 'package:CIVM/models/user_model.dart';
+import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/utils/custom_toast_snackbar_progressdialog.dart';
 import 'package:CIVM/utils/user_pref.dart';
 import 'package:flutter/material.dart';
@@ -134,7 +135,7 @@ class _ImagePaintScreenState extends State<ImagePaintScreen> {
     try {
       print('submit image 333333333333333333333');
       var uri = Uri.parse(
-          "https://civm2.ariespro.com/civm2/contractorPanel/updateImageVEGETATION_CREW_FORMs");
+          "${AppUrl.baseUrl}contractorPanel/updateImageVEGETATION_CREW_FORMs");
       var request = http.MultipartRequest("POST", uri);
       final userPreferences = Provider.of<UserPref>(context, listen: false);
       UserModel data = await userPreferences.getUser();
