@@ -1338,144 +1338,144 @@ class _SupervisorIvmAllStatusJobDetailsScreenState
                         ),
                       ),
                     ),
-                    if (item!.status.toString().trim() ==
-                        "PENDING LCP INSPECTION")
-                      ///  ACTION BUTTONS
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          top: 12,
-                          bottom: 12,
-                          left: 12,
-                          right: 12,
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            GestureDetector(
-                              onTap: () async {
-                                showDialog(
-                                  context: context,
-                                  barrierDismissible: false,
-                                  builder: (_) => const Center(
-                                    child: CircularProgressIndicator(),
-                                  ),
-                                );
-                                try {
-                                  await lCPDocumentApprovalPendingViewModel
-                                      .fetchLCPDocumentPendingApprovalChangeStatusListApi(
-                                        context,
-                                        item!.tokenNo.toString(),
-                                        'COMPLETED',
-                                        '',
-                                      );
-                                  CustomToastSnackBarProgressDialog.flushBarSuccessMessage(
-                                    'Job No. ${item?.tokenNo} completed successfully.',
-                                    context,
-                                  );
-                                  await fetchDetails(context);
-                                  final userPreferences = Provider.of<UserPref>(
-                                    context,
-                                    listen: false,
-                                  );
-                                  UserModel data = await userPreferences
-                                      .getUser();
-                                  String id = '';
-                                  id = data.user!.id.toString();
-                                  await addLog(
-                                    context,
-                                    "Approved",
-                                    "Job Approved.",
-                                    int.parse(id.toString()),
-                                    int.parse(item!.tokenNo.toString()),
-                                  );
-                                  if (mounted) {
-                                    Navigator.pop(context);
-                                    Navigator.pop(context);
-                                    Navigator.pop(context);
-                                    Navigator.pop(context);
-                                  }
-                                } catch (e) {
-                                  print(e);
-                                  if (mounted) {
-                                    Navigator.pop(context);
-                                  }
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                  horizontal: 12,
-                                ),
-                                decoration: const BoxDecoration(
-                                  // shape: BoxShape.circle,
-                                  //borderRadius: BorderRadius.circular(25),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Color.fromARGB(255, 3, 47, 97),
-                                      blurRadius: 5,
-                                      offset: Offset(2.0, 5.0),
-                                    ),
-                                  ],
-                                  color: Color.fromARGB(255, 130, 193, 245),
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Color.fromARGB(255, 49, 150, 232),
-                                      Color.fromARGB(255, 49, 150, 232),
-                                    ],
-                                  ),
-                                ),
-                                alignment: Alignment.center,
-                                child: const Text(
-                                  "APPROVE",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            GestureDetector(
-                              onTap: () async {
-                                _notes.clear();
-                                openDailogCancel(
-                                  item!.tokenNo.toString(),
-                                  'REJECTED',
-                                );
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 8,
-                                  horizontal: 12,
-                                ),
-                                decoration: const BoxDecoration(
-                                  // shape: BoxShape.circle,
-                                  //borderRadius: BorderRadius.circular(25),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Color.fromARGB(255, 141, 11, 2),
-                                      blurRadius: 5,
-                                      offset: Offset(2.0, 5.0),
-                                    ),
-                                  ],
-                                  color: Color.fromARGB(255, 130, 193, 245),
-                                  gradient: LinearGradient(
-                                    colors: [Colors.red, Colors.red],
-                                  ),
-                                ),
-                                alignment: Alignment.center,
-                                child: const Text(
-                                  "REJECT",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                    // if (item!.status.toString().trim() ==
+                    //     "PENDING LCP INSPECTION")
+                    //   ///  ACTION BUTTONS
+                    //   Padding(
+                    //     padding: const EdgeInsets.only(
+                    //       top: 12,
+                    //       bottom: 12,
+                    //       left: 12,
+                    //       right: 12,
+                    //     ),
+                    //     child: Row(
+                    //       mainAxisAlignment: MainAxisAlignment.center,
+                    //       children: [
+                    //         GestureDetector(
+                    //           onTap: () async {
+                    //             showDialog(
+                    //               context: context,
+                    //               barrierDismissible: false,
+                    //               builder: (_) => const Center(
+                    //                 child: CircularProgressIndicator(),
+                    //               ),
+                    //             );
+                    //             try {
+                    //               await lCPDocumentApprovalPendingViewModel
+                    //                   .fetchLCPDocumentPendingApprovalChangeStatusListApi(
+                    //                     context,
+                    //                     item!.tokenNo.toString(),
+                    //                     'COMPLETED',
+                    //                     '',
+                    //                   );
+                    //               CustomToastSnackBarProgressDialog.flushBarSuccessMessage(
+                    //                 'Job No. ${item?.tokenNo} completed successfully.',
+                    //                 context,
+                    //               );
+                    //               await fetchDetails(context);
+                    //               final userPreferences = Provider.of<UserPref>(
+                    //                 context,
+                    //                 listen: false,
+                    //               );
+                    //               UserModel data = await userPreferences
+                    //                   .getUser();
+                    //               String id = '';
+                    //               id = data.user!.id.toString();
+                    //               await addLog(
+                    //                 context,
+                    //                 "Approved",
+                    //                 "Job Approved.",
+                    //                 int.parse(id.toString()),
+                    //                 int.parse(item!.tokenNo.toString()),
+                    //               );
+                    //               if (mounted) {
+                    //                 Navigator.pop(context);
+                    //                 Navigator.pop(context);
+                    //                 Navigator.pop(context);
+                    //                 Navigator.pop(context);
+                    //               }
+                    //             } catch (e) {
+                    //               print(e);
+                    //               if (mounted) {
+                    //                 Navigator.pop(context);
+                    //               }
+                    //             }
+                    //           },
+                    //           child: Container(
+                    //             padding: const EdgeInsets.symmetric(
+                    //               vertical: 8,
+                    //               horizontal: 12,
+                    //             ),
+                    //             decoration: const BoxDecoration(
+                    //               // shape: BoxShape.circle,
+                    //               //borderRadius: BorderRadius.circular(25),
+                    //               boxShadow: [
+                    //                 BoxShadow(
+                    //                   color: Color.fromARGB(255, 3, 47, 97),
+                    //                   blurRadius: 5,
+                    //                   offset: Offset(2.0, 5.0),
+                    //                 ),
+                    //               ],
+                    //               color: Color.fromARGB(255, 130, 193, 245),
+                    //               gradient: LinearGradient(
+                    //                 colors: [
+                    //                   Color.fromARGB(255, 49, 150, 232),
+                    //                   Color.fromARGB(255, 49, 150, 232),
+                    //                 ],
+                    //               ),
+                    //             ),
+                    //             alignment: Alignment.center,
+                    //             child: const Text(
+                    //               "APPROVE",
+                    //               style: TextStyle(
+                    //                 color: Colors.white,
+                    //                 fontWeight: FontWeight.bold,
+                    //               ),
+                    //             ),
+                    //           ),
+                    //         ),
+                    //         const SizedBox(width: 10),
+                    //         GestureDetector(
+                    //           onTap: () async {
+                    //             _notes.clear();
+                    //             openDailogCancel(
+                    //               item!.tokenNo.toString(),
+                    //               'REJECTED',
+                    //             );
+                    //           },
+                    //           child: Container(
+                    //             padding: const EdgeInsets.symmetric(
+                    //               vertical: 8,
+                    //               horizontal: 12,
+                    //             ),
+                    //             decoration: const BoxDecoration(
+                    //               // shape: BoxShape.circle,
+                    //               //borderRadius: BorderRadius.circular(25),
+                    //               boxShadow: [
+                    //                 BoxShadow(
+                    //                   color: Color.fromARGB(255, 141, 11, 2),
+                    //                   blurRadius: 5,
+                    //                   offset: Offset(2.0, 5.0),
+                    //                 ),
+                    //               ],
+                    //               color: Color.fromARGB(255, 130, 193, 245),
+                    //               gradient: LinearGradient(
+                    //                 colors: [Colors.red, Colors.red],
+                    //               ),
+                    //             ),
+                    //             alignment: Alignment.center,
+                    //             child: const Text(
+                    //               "REJECT",
+                    //               style: TextStyle(
+                    //                 color: Colors.white,
+                    //                 fontWeight: FontWeight.bold,
+                    //               ),
+                    //             ),
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ),
                   ],
                 ),
               ),
@@ -1965,7 +1965,7 @@ class _SupervisorIvmAllStatusJobDetailsScreenState
   Future<void> deleteOnlineImageApi2(String fileName, String tokenNo) async {
     final apiUrl =
         "${AppUrl.baseUrl}changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo";
-    // 'https://civm2.ariespro.com/civm2/changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo';
+    // '${AppUrl.baseUrl}changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo';
     print(apiUrl);
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
@@ -2362,7 +2362,7 @@ class _SupervisorIvmAllStatusJobDetailsScreenState
 
   Future<void> updateFlagValue(String token, int flag) async {
     String url = "${AppUrl.baseUrl}vma_row_custom_main_plan/updateFlagValue";
-    // 'https://civm2.ariespro.com/civm2/vma_row_custom_main_plan/updateFlagValue';
+    // '${AppUrl.baseUrl}vma_row_custom_main_plan/updateFlagValue';
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
     try {
@@ -2466,7 +2466,7 @@ class _SupervisorIvmAllStatusJobDetailsScreenState
     // String contractorId = data.user!.id.toString();
 
     String url = AppUrl.crewList;
-    // "https://civm2.ariespro.com/civm2/login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
+    // "${AppUrl.baseUrl}login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
     print('urlCrewList gf pannel:: $url');
     try {
       final response = await http.get(
@@ -2686,7 +2686,7 @@ class _SupervisorIvmAllStatusJobDetailsScreenState
 
   Future<void> updateSubmitForApprovalStatus(String tokenNo) async {
     String baseUrl =
-        'https://civm2.ariespro.com/civm2/workOrderPendingAndReject/updateStatusFromRejectedToPendingApproval';
+        '${AppUrl.baseUrl}workOrderPendingAndReject/updateStatusFromRejectedToPendingApproval';
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
     final Map<String, String> queryParams = {

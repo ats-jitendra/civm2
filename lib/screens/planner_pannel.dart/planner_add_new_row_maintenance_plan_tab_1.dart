@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:CIVM/resources/app_url.dart';
 import 'package:camera/camera.dart';
 import 'package:CIVM/models/add_new_row_maintenance_plan_model.dart';
 import 'package:CIVM/models/user_model.dart';
@@ -3670,7 +3671,7 @@ class _PlannerAddNewRowMaintenancePlanTab1State
     try {
       print('submit image 333333333333333333333');
       var uri = Uri.parse(
-          "https://civm2.ariespro.com/civm2/contractorPanel/updateImageVEGETATION_CREW_FORMs");
+          "${AppUrl.baseUrl}contractorPanel/updateImageVEGETATION_CREW_FORMs");
       var request = http.MultipartRequest("POST", uri);
       final userPreferences = Provider.of<UserPref>(context, listen: false);
       UserModel data = await userPreferences.getUser();
@@ -3785,7 +3786,7 @@ class _PlannerAddNewRowMaintenancePlanTab1State
 
     try {
       var uri = Uri.parse(
-          "https://civm2.ariespro.com/civm2/contractorPanel/updateImageVEGETATION_CREW_FORMs");
+          "${AppUrl.baseUrl}contractorPanel/updateImageVEGETATION_CREW_FORMs");
       var request = http.MultipartRequest("POST", uri);
 
       // Get the user token
@@ -4439,7 +4440,7 @@ class _PlannerAddNewRowMaintenancePlanTab1State
 
   // Future<String?> getMonthFromNextMaintDue(String tokenNo) async {
   //   final url =
-  //       'https://civm2.ariespro.com/civm2/rowMaintenancePlanTabViewAndDashboard/getMonthFromNextMaintDueFromTokenNo?tokenNo=$tokenNo';
+  //       '${AppUrl.baseUrl}rowMaintenancePlanTabViewAndDashboard/getMonthFromNextMaintDueFromTokenNo?tokenNo=$tokenNo';
   //   final userPreferences = Provider.of<UserPref>(context, listen: false);
   //   UserModel data = await userPreferences.getUser();
   //   final headers = {

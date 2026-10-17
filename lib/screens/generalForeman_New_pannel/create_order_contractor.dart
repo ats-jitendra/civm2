@@ -1,5 +1,5 @@
 import 'dart:convert';
-
+import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/data/response/status.dart';
 import 'package:CIVM/models/user_model.dart';
 import 'package:CIVM/screens/generalForeman_New_pannel/total_order_pending_CO.dart';
@@ -2509,7 +2509,7 @@ class _CreateOrderContractorState extends State<CreateOrderContractor> {
   //   String tempPath = tempDir.path;
   //   try {
   //     var uri = Uri.parse(
-  //         "https://civm2.ariespro.com/civm2/contractorPanel/updateImageVEGETATION_CREW_FORMs");
+  //         "${AppUrl.baseUrl}contractorPanel/updateImageVEGETATION_CREW_FORMs");
   //     var request = http.MultipartRequest("POST", uri);
   //     final userPreferences = Provider.of<UserPref>(context, listen: false);
   //     UserModel data = await userPreferences.getUser();
@@ -2617,7 +2617,7 @@ class _CreateOrderContractorState extends State<CreateOrderContractor> {
     try {
       print('submit image 333333333333333333333');
       var uri = Uri.parse(
-          "https://civm2.ariespro.com/civm2/contractorPanel/updateImageVEGETATION_CREW_FORMs");
+          "${AppUrl.baseUrl}contractorPanel/updateImageVEGETATION_CREW_FORMs");
       var request = http.MultipartRequest("POST", uri);
       final userPreferences = Provider.of<UserPref>(context, listen: false);
       UserModel data = await userPreferences.getUser();
@@ -3283,7 +3283,7 @@ class _CreateOrderContractorState extends State<CreateOrderContractor> {
 
     try {
       var uri = Uri.parse(
-          "https://civm2.ariespro.com/civm2/contractorPanel/updateImageVEGETATION_CREW_FORMs");
+          "${AppUrl.baseUrl}contractorPanel/updateImageVEGETATION_CREW_FORMs");
       var request = http.MultipartRequest("POST", uri);
 
       // Get the user token

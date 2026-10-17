@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/models/user_model.dart';
 import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/screens/login_page.dart';
@@ -3997,8 +3998,8 @@ class _MapScreenLeafLatState extends State<MapScreenLeafLat>
 
   Future<List<dynamic>?> fetchDataByLatLong(
       double latitude, double longitude) async {
-    const String baseUrl =
-        'https://civm2.ariespro.com/civm2/supervisorLoginPanel/getDataByLatitudeLongitude';
+     String baseUrl =
+        '${AppUrl.baseUrl}supervisorLoginPanel/getDataByLatitudeLongitude';
     final Uri url =
         Uri.parse('$baseUrl?latitude=$latitude&longitude=$longitude');
     print(url);
@@ -4262,8 +4263,8 @@ class _MapScreenLeafLatState extends State<MapScreenLeafLat>
   Future<dynamic> getDataByNameAndAccountNumber(String accOrName) async {
     //102114900
     print('inside getDataByNameAndAccountNumber');
-    const String endpoint =
-        "https://civm2.ariespro.com/civm2/supervisorLoginPanel/suggestions";
+     String endpoint =
+        "${AppUrl.baseUrl}supervisorLoginPanel/suggestions";
     final Uri url = Uri.parse(
       "$endpoint?searchTerm=$accOrName&substation=",
     );
@@ -4475,7 +4476,7 @@ class _MapScreenLeafLatState extends State<MapScreenLeafLat>
   Future<void> getMapLinesBySubstation(
       BuildContext context, String substationName) async {
     final String url =
-        'https://civm2.ariespro.com/civm2/supervisorLoginPanel/getMapLinesBySubstationAndType?substationName=$substationName';
+        '${AppUrl.baseUrl}supervisorLoginPanel/getMapLinesBySubstationAndType?substationName=$substationName';
     final userPreferences = Provider.of<UserPref>(context, listen: false);
     UserModel data = await userPreferences.getUser();
     print('Fetching map lines from URL: $url');

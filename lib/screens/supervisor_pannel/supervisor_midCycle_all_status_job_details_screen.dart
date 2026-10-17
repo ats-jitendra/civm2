@@ -1268,7 +1268,7 @@
 
 //   Future<void> deleteOnlineImageApi2(String fileName, String tokenNo) async {
 //     final apiUrl = "${AppUrl.baseUrl}changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo";
-//         // 'https://civm2.ariespro.com/civm2/changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo';
+//         // '${AppUrl.baseUrl}changeOrderLcpCreateOrder/deleteFile?fileName=$fileName&tokenNo=$tokenNo';
 //     print(apiUrl);
 //     final userPreferences = Provider.of<UserPref>(context, listen: false);
 //     UserModel data = await userPreferences.getUser();
@@ -1824,7 +1824,7 @@
 
 //   Future<void> updateFlagValue(String token, int flag) async {
 //     String url = "${AppUrl.baseUrl}vma_row_custom_main_plan/updateFlagValue";
-//     // 'https://civm2.ariespro.com/civm2/vma_row_custom_main_plan/updateFlagValue';
+//     // '${AppUrl.baseUrl}vma_row_custom_main_plan/updateFlagValue';
 //     final userPreferences = Provider.of<UserPref>(context, listen: false);
 //     UserModel data = await userPreferences.getUser();
 //     try {
@@ -1928,7 +1928,7 @@
 //     // String contractorId = data.user!.id.toString();
 
 //     String url = AppUrl.crewList;
-//     // "https://civm2.ariespro.com/civm2/login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
+//     // "${AppUrl.baseUrl}login_user/getAllCrewFromCREWMASTER?contractorId=$contractorId";
 //     print('urlCrewList gf pannel:: $url');
 //     try {
 //       final response = await http.get(
@@ -2148,7 +2148,7 @@
 
 //   Future<void> updateSubmitForApprovalStatus(String tokenNo) async {
 //     String baseUrl =
-//         'https://civm2.ariespro.com/civm2/workOrderPendingAndReject/updateStatusFromRejectedToPendingApproval';
+//         '${AppUrl.baseUrl}workOrderPendingAndReject/updateStatusFromRejectedToPendingApproval';
 //     final userPreferences = Provider.of<UserPref>(context, listen: false);
 //     UserModel data = await userPreferences.getUser();
 //     final Map<String, String> queryParams = {
