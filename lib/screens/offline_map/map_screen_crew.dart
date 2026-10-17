@@ -3180,7 +3180,8 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                     ],
                   ),
                   const SizedBox(height: 8),
-
+                  if (selectedJobStatus != "ASSIGNED")
+                    Text("Select Vegetation",style: TextStyle(fontWeight: FontWeight.bold),),
                   if (!allStatusesCompleted)
                     if (selectedJobStatus == "ASSIGNED")
                       Row(
@@ -3878,142 +3879,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          if (selectedJobStatus != "ASSIGNED") SizedBox(),
-                          if (selectedJobStatus == "ASSIGNED")
-                            (selectedMaintStatus.trim().toLowerCase() ==
-                                        "rework" ||
-                                    selectedMaintStatus.trim().toLowerCase() ==
-                                        "pending" ||
-                                    selectedMaintStatus.trim().toLowerCase() ==
-                                        "failed")
-                                ? Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Checkbox(
-                                        value: isMarkAsRead,
-                                        activeColor: Colors.green,
-                                        onChanged: (value) {
-                                          setDialogState(() {
-                                            isMarkAsRead = value ?? false;
-
-                                            final polyline =
-                                                overHeadPolylines[index];
-
-                                            if (isMarkAsRead) {
-                                              final maintTypes = polyline
-                                                  .maintType
-                                                  .split(',')
-                                                  .map((e) => e.trim())
-                                                  .toList();
-
-                                              final maintStatuses = polyline
-                                                  .maintStatus
-                                                  .split(',')
-                                                  .map((e) => e.trim())
-                                                  .toList();
-
-                                              final coordinateIds = polyline
-                                                  .coordinateIds
-                                                  .split(',')
-                                                  .map((e) => e.trim())
-                                                  .toList();
-
-                                              for (
-                                                int i = 0;
-                                                i < maintTypes.length;
-                                                i++
-                                              ) {
-                                                final maintType = maintTypes[i];
-
-                                                final maintStatus =
-                                                    i < maintStatuses.length
-                                                    ? maintStatuses[i]
-                                                    : "";
-
-                                                // Skip completed maintenance types
-                                                if (maintStatus.toLowerCase() ==
-                                                    "completed") {
-                                                  continue;
-                                                }
-
-                                                final parentFeatureId =
-                                                    i < coordinateIds.length
-                                                    ? coordinateIds[i]
-                                                    : "";
-
-                                                final exists = lines.any(
-                                                  (e) =>
-                                                      e["parentFeatureId"] ==
-                                                          parentFeatureId &&
-                                                      e["maintTypes"] ==
-                                                          maintType,
-                                                );
-
-                                                if (!exists) {
-                                                  lines.add({
-                                                    "mapId": polyline.oid
-                                                        .toString(),
-                                                    "crewId": id.toString(),
-                                                    "parentFeatureId":
-                                                        parentFeatureId,
-                                                    "maintTypes": maintType,
-                                                    "tokenNo": widget.jobNo,
-                                                  });
-                                                }
-                                              }
-                                            } else {
-                                              lines.removeWhere(
-                                                (e) =>
-                                                    e["mapId"] ==
-                                                    polyline.oid.toString(),
-                                              );
-                                            }
-                                          });
-                                        },
-                                      ),
-                                      //  const SizedBox(width: 4),
-                                      const Text(
-                                        "Mark as Completed",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      InkWell(
-                                        onTap: isMarkAsRead
-                                            ? () async {
-                                                _showSubmitProgressDialog();
-                                              }
-                                            : null,
-                                        borderRadius: BorderRadius.circular(8),
-                                        child: Opacity(
-                                           opacity: isMarkAsRead ? 1.0 : 0.4,
-                                          child: Container(
-                                            height: 30,
-                                            width: 64,
-                                            alignment: Alignment.center,
-                                            decoration: BoxDecoration(
-                                              color: Colors.green,
-                                              borderRadius: BorderRadius.circular(
-                                                8,
-                                              ),
-                                            ),
-                                            child: const Text(
-                                              "Submit",
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  )
-                                : SizedBox(),
+                          SizedBox(),
 
                           SizedBox(
                             width: 60,
@@ -4055,6 +3921,137 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                           ),
                         ],
                       ),
+                      if (selectedJobStatus == "ASSIGNED")
+                        (selectedMaintStatus.trim().toLowerCase() == "rework" ||
+                                selectedMaintStatus.trim().toLowerCase() ==
+                                    "pending" ||
+                                selectedMaintStatus.trim().toLowerCase() ==
+                                    "failed")
+                            ? Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  Checkbox(
+                                    value: isMarkAsRead,
+                                    activeColor: Colors.green,
+                                    onChanged: (value) {
+                                      setDialogState(() {
+                                        isMarkAsRead = value ?? false;
+
+                                        final polyline =
+                                            overHeadPolylines[index];
+
+                                        if (isMarkAsRead) {
+                                          final maintTypes = polyline.maintType
+                                              .split(',')
+                                              .map((e) => e.trim())
+                                              .toList();
+
+                                          final maintStatuses = polyline
+                                              .maintStatus
+                                              .split(',')
+                                              .map((e) => e.trim())
+                                              .toList();
+
+                                          final coordinateIds = polyline
+                                              .coordinateIds
+                                              .split(',')
+                                              .map((e) => e.trim())
+                                              .toList();
+
+                                          for (
+                                            int i = 0;
+                                            i < maintTypes.length;
+                                            i++
+                                          ) {
+                                            final maintType = maintTypes[i];
+
+                                            final maintStatus =
+                                                i < maintStatuses.length
+                                                ? maintStatuses[i]
+                                                : "";
+
+                                            // Skip completed maintenance types
+                                            if (maintStatus.toLowerCase() ==
+                                                "completed") {
+                                              continue;
+                                            }
+
+                                            final parentFeatureId =
+                                                i < coordinateIds.length
+                                                ? coordinateIds[i]
+                                                : "";
+
+                                            final exists = lines.any(
+                                              (e) =>
+                                                  e["parentFeatureId"] ==
+                                                      parentFeatureId &&
+                                                  e["maintTypes"] == maintType,
+                                            );
+
+                                            if (!exists) {
+                                              lines.add({
+                                                "mapId": polyline.oid
+                                                    .toString(),
+                                                "crewId": id.toString(),
+                                                "parentFeatureId":
+                                                    parentFeatureId,
+                                                "maintTypes": maintType,
+                                                "tokenNo": widget.jobNo,
+                                              });
+                                            }
+                                          }
+                                        } else {
+                                          lines.removeWhere(
+                                            (e) =>
+                                                e["mapId"] ==
+                                                polyline.oid.toString(),
+                                          );
+                                        }
+                                      });
+                                    },
+                                  ),
+                                  //  const SizedBox(width: 4),
+                                  const Text(
+                                    "Mark as Completed",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  InkWell(
+                                    onTap: isMarkAsRead
+                                        ? () async {
+                                            _showSubmitProgressDialog();
+                                          }
+                                        : null,
+                                    borderRadius: BorderRadius.circular(8),
+                                    child: Opacity(
+                                      opacity: isMarkAsRead ? 1.0 : 0.4,
+                                      child: Container(
+                                        height: 30,
+                                        width: 64,
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: Colors.green,
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          "Submit",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              )
+                            : SizedBox(),
                       Padding(
                         padding: const EdgeInsets.only(left: 10.0),
                         child: Column(
