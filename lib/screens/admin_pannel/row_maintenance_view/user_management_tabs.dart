@@ -485,12 +485,12 @@ class _DrawerManuState extends State<DrawerManu> {
                         // Navigator.pushReplacement(context, RoutesName.login);
                         // Navigator.pushNamed(
                         //     context, RoutesName.login);
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                const LoginPage(),
-                          ),
-                        );
+                       Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (BuildContext context) => const LoginPage(),
+            ),
+            (route) => false,
+          );
                       });
                       // Navigator.of(context).push(MaterialPageRoute(
                       //     builder: (BuildContext context) => const LoginPage()));

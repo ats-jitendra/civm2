@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:CIVM/screens/offline_map/CO_map_screen.dart';
 import 'package:CIVM/screens/offline_map/map_screen.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:CIVM/repository/map_url.dart';
 import 'package:CIVM/models/add_new_row_maint_model.dart';
 import 'package:CIVM/models/add_new_row_tabular_data.dart';
 import 'package:CIVM/models/user_details.dart';

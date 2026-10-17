@@ -1603,11 +1603,12 @@ class _DrawerManuState extends State<DrawerManu> {
                   onTap: () {
                     // // Constants.prefs.setBool("LoggedIn", false);
                     userPreferences.remove().then((value) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (BuildContext context) => const LoginPage(),
-                        ),
-                      );
+                     Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (BuildContext context) => const LoginPage(),
+            ),
+            (route) => false,
+          );
                     });
                     // Navigator.of(context).pushReplacement(MaterialPageRoute(
                     //     builder: (BuildContext context) => const LoginPage()));
