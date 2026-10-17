@@ -1692,12 +1692,12 @@ class _DrawerManuState extends State<DrawerManu> {
                     iconColor: const Color.fromARGB(255, 7, 59, 120),
                     onTap: () {
                       userPreferences.remove().then((value) {
-                        Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (BuildContext context) =>
-                                const LoginPage(),
-                          ),
-                        );
+                        Navigator.of(context).pushAndRemoveUntil(
+            MaterialPageRoute(
+              builder: (BuildContext context) => const LoginPage(),
+            ),
+            (route) => false,
+          );
                       });
                     },
                   ),
