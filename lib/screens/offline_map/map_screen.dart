@@ -198,7 +198,7 @@ class _MapScreenState extends State<MapScreen> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-      ensureCameraInitialized();
+    ensureCameraInitialized();
     _startListeningToCompass();
     /////
   }
@@ -371,20 +371,22 @@ class _MapScreenState extends State<MapScreen> {
         ),
         backgroundColor: const Color.fromARGB(255, 7, 59, 120),
         actions: [
-          (mainStatusForShareButton == 'PENDING'
-          ||mainStatusForShareButton == 'ASSIGNED'
-          ||mainStatusForShareButton == 'PENDING ZIELIES ASSIGNMENT')?IconButton(
-            icon: Icon(Icons.share, color: colorValue),
-            onPressed: () {
-              showCrewDialogIVM(
-                context,
-                "",
-                "",
-                // widget.jobNo.toString(),
-                // widget.type.toString(),
-              );
-            },
-          ):SizedBox(),
+          (mainStatusForShareButton == 'PENDING' ||
+                  mainStatusForShareButton == 'ASSIGNED' ||
+                  mainStatusForShareButton == 'PENDING ZIELIES ASSIGNMENT')
+              ? IconButton(
+                  icon: Icon(Icons.share, color: colorValue),
+                  onPressed: () {
+                    showCrewDialogIVM(
+                      context,
+                      "",
+                      "",
+                      // widget.jobNo.toString(),
+                      // widget.type.toString(),
+                    );
+                  },
+                )
+              : SizedBox(),
           IconButton(
             icon: const Icon(Icons.search),
             onPressed: () {
@@ -3945,7 +3947,17 @@ class _MapScreenState extends State<MapScreen> {
                             ),
                           ],
                         ),
-
+                        if (overHeadPolylines[index].service == "1")
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "✔️Service Line",
+                              style: TextStyle(
+                                // fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ),
                         if (!isEditMode)
                           Row(
                             children: [
@@ -7707,17 +7719,20 @@ class _MapScreenState extends State<MapScreen> {
                 },
               )
               .toList();
-              mainStatusForShareButton = workOrderList.isNotEmpty
-      ? workOrderList.first["status"].toString().toUpperCase()
-      : "";
-      print('mainStatusForShareButton:: $mainStatusForShareButton');
+          mainStatusForShareButton = workOrderList.isNotEmpty
+              ? workOrderList.first["status"].toString().toUpperCase()
+              : "";
+          print('mainStatusForShareButton:: $mainStatusForShareButton');
 
           // Check if the list contains PENDING
           // final hasPending = workOrderList.any(
           //   (item) => item["status"].toString().toUpperCase() == "PENDING",
           // );
           final hasAssigned = workOrderList.any(
-            (item) => (item["status"].toString().toUpperCase() == "ASSIGNED" || item["status"].toString().toUpperCase() == "PENDING ZIELIES ASSIGNMENT"),
+            (item) =>
+                (item["status"].toString().toUpperCase() == "ASSIGNED" ||
+                item["status"].toString().toUpperCase() ==
+                    "PENDING ZIELIES ASSIGNMENT"),
           );
           // ASSIGNED = Green
           // Otherwise = Blue
@@ -7809,7 +7824,7 @@ class _MapScreenState extends State<MapScreen> {
             int.parse(token.toString()),
           );
         }
-        getWorkOrderList();// new added for share button color change
+        getWorkOrderList(); // new added for share button color change
         // myFuture = fetchDetails(context);
         await Future.delayed(Duration(seconds: 3));
         // Navigator.pop(context);

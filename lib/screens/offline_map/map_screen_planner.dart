@@ -3944,6 +3944,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                           ),
                         ),
                         SizedBox(height: 10),
+                          if(overHeadPolylines[index].service=="1")
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(

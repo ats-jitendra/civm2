@@ -3521,6 +3521,7 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                           ),
                         ),
                         SizedBox(height: 10),
+                        if(overHeadPolylines[index].service=="1")
                         Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
