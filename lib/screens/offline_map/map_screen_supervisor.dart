@@ -125,6 +125,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
   /////////////
   bool showLayerPanel = false;
   bool expandWorkLayers = true;
+  bool subLayersText = true;
   bool showSubstationLayer = true;
   // bool showOverHeadLayer = true;
   // bool showUnderGroundLayer = true;
@@ -211,6 +212,9 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
   StreamSubscription<CompassEvent>? _compassSubscription;
   ImageViewViewModel imageViewModel = ImageViewViewModel();
   bool isSaveLoading = false;
+
+  bool isPassLoading = false;
+  bool isFailLoading = false;
   
   @override
   void initState() {
@@ -225,7 +229,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     _initializeMap();
     WakelockPlus.enable();
     /////
-    cameraInit();
+    // cameraInit();
     _startListeningToCompass();
   }
 
@@ -1430,6 +1434,8 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                                   panelState(() {
                                                     expandWorkLayers =
                                                         !expandWorkLayers;
+                                                    subLayersText =
+                                                        !subLayersText;
                                                   });
                                                 },
                                                 child: Row(
@@ -1477,7 +1483,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                                           : Icons
                                                                 .keyboard_arrow_right,
                                                     ),
-                                                    // const Text(
+                                                     // const Text(
                                                     //   "IVM Work Plan",
                                                     //   style: TextStyle(
                                                     //     fontWeight:
@@ -1488,6 +1494,24 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                                   ],
                                                 ),
                                               ),
+                                                 const SizedBox(width: 6),
+
+      if (subLayersText)
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.only(left:6.0),
+            child: const Text(
+              "Sub Layer",
+              style: TextStyle(
+                color: Color.fromARGB(255, 27, 116, 30),
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+                                                 
                                               if (expandWorkLayers) ...[
                                                 const SizedBox(height: 5),
 
@@ -5948,6 +5972,13 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                   19,
                                   4,
                                 ),
+                                disabledBackgroundColor: const Color.fromARGB(
+                                  255,
+                                  222,
+                                  19,
+                                  4,
+                                ),
+                                disabledForegroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4),
                                 ),
@@ -6001,7 +6032,9 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                               //     selectedMapObjectsReworkOrCompleted,
                               //   );
                               // },
-                              onPressed: () {
+                              onPressed:  isFailLoading
+                                         ? null
+                                         : () async {
                                 // Get only the work types selected by the user
                                 final selectedTypes = selectedWorkTypes.entries
                                     .where((entry) => entry.value == true)
@@ -6082,15 +6115,48 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                   'selectedMapObjectsReworkOrCompleted failed:: '
                                   '$selectedMapObjectsReworkOrCompleted',
                                 );
-
+                                 setDialogState(() {
+                                  isFailLoading = true;
+                                });
+                                try {
                                 if (selectedMapObjectsReworkOrCompleted
                                     .isNotEmpty) {
-                                  reworkORCompletedMapData(
+                                  await reworkORCompletedMapData(
                                     selectedMapObjectsReworkOrCompleted,
                                   );
-                                }
-                              },
-                              child: const Text(
+                               }
+                               }  catch (e) {
+                  debugPrint("Pass submission error: $e");
+
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Failed to submit. Please try again.",
+                        ),
+                      ),
+                    );
+                  }
+                } finally {
+                  if (mounted) {
+                    setDialogState(() {
+                      isFailLoading = false;
+                    });
+                  }
+                }
+              },
+                              child: isFailLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Colors.white,
+                  ),
+                ),
+              )
+            : const Text(
                                 "Yes, Fail",
                                 style: TextStyle(
                                   color: Colors.white,
@@ -6263,6 +6329,8 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                   159,
                                   24,
                                 ),
+                                disabledBackgroundColor: const Color.fromARGB(255, 19, 159, 24),
+                                disabledForegroundColor: Colors.white,
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(4),
                                 ),
@@ -6316,7 +6384,9 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                               //     selectedMapObjectsReworkOrCompleted,
                               //   );
                               // },
-                              onPressed: () {
+                              onPressed: isPassLoading
+                                         ? null
+                                         : () async {
                                 // Get only the work types actually selected by the user
                                 final selectedTypes = selectedWorkTypes.entries
                                     .where((entry) => entry.value == true)
@@ -6396,16 +6466,49 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                 print(
                                   'selectedMapObjectsReworkOrCompleted:: '
                                   '$selectedMapObjectsReworkOrCompleted',
-                                );
-
+                                ); 
+                                 
+                                                 setDialogState(() {
+                                                   isPassLoading = true;
+                                                   });
+                                    try {
                                 if (selectedMapObjectsReworkOrCompleted
                                     .isNotEmpty) {
-                                  reworkORCompletedMapData(
+                                 await reworkORCompletedMapData(
                                     selectedMapObjectsReworkOrCompleted,
                                   );
-                                }
-                              },
-                              child: const Text(
+                                }} catch (e) {
+                  debugPrint("Pass submission error: $e");
+
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Failed to submit. Please try again.",
+                        ),
+                      ),
+                    );
+                  }
+                } finally {
+                  if (mounted) {
+                    setDialogState(() {
+                      isPassLoading = false;
+                     });
+                  }
+                }
+              },
+                              child:  isPassLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Colors.white,
+                  ),
+                ),
+              )
+            :const Text(
                                 "Pass",
                                 style: TextStyle(
                                   color: Colors.white,

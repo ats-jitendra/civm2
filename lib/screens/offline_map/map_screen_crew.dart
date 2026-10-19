@@ -126,6 +126,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
   /////////////
   bool showLayerPanel = false;
   bool expandWorkLayers = true;
+  bool subLayersText = true;
   bool showSubstationLayer = true;
   // bool showOverHeadLayer = true;
   // bool showUnderGroundLayer = true;
@@ -210,7 +211,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     _initializeMap();
     WakelockPlus.enable();
     /////
-    ensureCameraInitialized();
+    // ensureCameraInitialized();
     _startListeningToCompass();
   }
 
@@ -1418,6 +1419,8 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                                   panelState(() {
                                                     expandWorkLayers =
                                                         !expandWorkLayers;
+                                                        subLayersText =
+                                                        !subLayersText;
                                                   });
                                                 },
                                                 child: Row(
@@ -1475,6 +1478,23 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                                   ],
                                                 ),
                                               ),
+                                                const SizedBox(width: 6),
+
+      if (subLayersText)
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.only(left:6.0),
+            child: const Text(
+              "Sub Layer",
+              style: TextStyle(
+                color: Color.fromARGB(255, 27, 116, 30),
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
                                               if (expandWorkLayers) ...[
                                                 const SizedBox(height: 5),
 

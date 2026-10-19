@@ -6,6 +6,7 @@ import 'package:CIVM/models/user_model.dart';
 import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/screens/offline_map/custom_widgets.dart';
 import 'package:CIVM/screens/offline_map/map_data_base_helper.dart';
+import 'package:CIVM/screens/offline_map/map_screen.dart';
 import 'package:CIVM/utils/custom_toast_snackbar_progressdialog.dart';
 
 import 'package:CIVM/utils/user_pref.dart';
@@ -55,7 +56,7 @@ class _COMapScreenState extends State<COMapScreen> {
   var position; //position variable while moving marker
 
   bool showFilters = true;
-  String? selectedType = "IVM";
+  String? selectedType = "Change Order";
   // String? selectedYear = "2024";
   String? selectedYear = DateTime.now().year.toString();
   String? selectedSubstation;
@@ -430,18 +431,30 @@ class _COMapScreenState extends State<COMapScreen> {
                       children: [
                         Row(
                           children: [
-                            // Expanded(
-                            //   child:
-                            //   // _buildDropdown(
-                            //   //   "Select Type",
-                            //   //   selectedType,
-                            //   //   typeList,
-                            //   //   (value) {
-                            //   //     setState(() => selectedType = value);
-                            //   //   },
-                            //   // ),
-                            // ),
-                            // const SizedBox(width: 8),
+                            Expanded(
+                              child:
+                              _buildDropdown(
+                                "Select Type",
+                                selectedType,
+                                typeList,
+                                (value) {
+                                  if (value == "IVM") {
+                                     Navigator.pushReplacement(
+                                       context,
+                                       MaterialPageRoute(
+                                       builder: (context) => MapScreen(),
+                                      ),
+                                    );
+                                    } else {
+                                    setState(() {
+                                     selectedType = value;
+                                     });
+                                   }
+                                  // setState(() => selectedType = value);
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                           ],
                         ),
                         const SizedBox(height: 8),

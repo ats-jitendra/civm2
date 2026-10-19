@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math';
 import 'package:CIVM/models/user_model.dart';
 import 'package:CIVM/resources/app_url.dart';
+import 'package:CIVM/screens/offline_map/CO_map_screen.dart';
 import 'package:CIVM/screens/offline_map/custom_widgets.dart';
 import 'package:CIVM/screens/offline_map/map_data_base_helper.dart';
 import 'package:CIVM/utils/custom_toast_snackbar_progressdialog.dart';
@@ -126,6 +127,7 @@ class _MapScreenState extends State<MapScreen> {
   /////////////
   bool showLayerPanel = false;
   bool expandWorkLayers = true;
+  bool subLayersText = true;
   bool showSubstationLayer = true;
   // bool showOverHeadLayer = true;
   // bool showUnderGroundLayer = true;
@@ -198,7 +200,7 @@ class _MapScreenState extends State<MapScreen> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-    ensureCameraInitialized();
+    // ensureCameraInitialized();
     _startListeningToCompass();
     /////
   }
@@ -443,18 +445,30 @@ class _MapScreenState extends State<MapScreen> {
                       children: [
                         Row(
                           children: [
-                            // Expanded(
-                            //   child:
-                            //   // _buildDropdown(
-                            //   //   "Select Type",
-                            //   //   selectedType,
-                            //   //   typeList,
-                            //   //   (value) {
-                            //   //     setState(() => selectedType = value);
-                            //   //   },
-                            //   // ),
-                            // ),
-                            // const SizedBox(width: 8),
+                            Expanded(
+                              child:
+                              _buildDropdown(
+                                "Select Type",
+                                selectedType,
+                                typeList,
+                                (value) {
+                                   if (value == "Change Order") {
+                                     Navigator.pushReplacement(
+                                       context,
+                                       MaterialPageRoute(
+                                       builder: (context) => COMapScreen(),
+                                      ),
+                                    );
+                                    } else {
+                                    setState(() {
+                                     selectedType = value;
+                                     });
+                                   }
+                                  // setState(() => selectedType = value);
+                                },
+                              ),
+                            ),
+                            const SizedBox(width: 8),
                           ],
                         ),
                         const SizedBox(height: 8),
@@ -1582,6 +1596,8 @@ class _MapScreenState extends State<MapScreen> {
                                                   panelState(() {
                                                     expandWorkLayers =
                                                         !expandWorkLayers;
+                                                        subLayersText =
+                                                        !subLayersText;
                                                   });
                                                 },
                                                 child: Row(
@@ -1640,6 +1656,23 @@ class _MapScreenState extends State<MapScreen> {
                                                   ],
                                                 ),
                                               ),
+                                                const SizedBox(width: 6),
+
+      if (subLayersText)
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.only(left:6.0),
+            child: const Text(
+              "Sub Layer",
+              style: TextStyle(
+                color: Color.fromARGB(255, 27, 116, 30),
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
                                               if (expandWorkLayers) ...[
                                                 const SizedBox(height: 5),
 

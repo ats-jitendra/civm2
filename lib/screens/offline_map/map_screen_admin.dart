@@ -125,6 +125,7 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
   /////////////
   bool showLayerPanel = false;
   bool expandWorkLayers = true;
+  bool subLayersText = true;
   bool showSubstationLayer = true;
   // bool showOverHeadLayer = true;
   // bool showUnderGroundLayer = true;
@@ -211,6 +212,10 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
   StreamSubscription<CompassEvent>? _compassSubscription;
   ImageViewViewModel imageViewModel = ImageViewViewModel();
   bool isSaveLoading = false;
+  
+  bool isPassLoading = false;
+  bool isFailLoading = false;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -225,7 +230,7 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
     WakelockPlus.enable();
     _startListeningToCompass();
     /////
-    cameraInit();
+    // cameraInit();
   }
 
   @override
@@ -1428,6 +1433,8 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                                   panelState(() {
                                                     expandWorkLayers =
                                                         !expandWorkLayers;
+                                                        subLayersText =
+                                                        !subLayersText;
                                                   });
                                                 },
                                                 child: Row(
@@ -1486,6 +1493,23 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                                   ],
                                                 ),
                                               ),
+                                                const SizedBox(width: 6),
+
+      if (subLayersText)
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.only(left:6.0),
+            child: const Text(
+              "Sub Layer",
+              style: TextStyle(
+                color: Color.fromARGB(255, 27, 116, 30),
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
                                               if (expandWorkLayers) ...[
                                                 const SizedBox(height: 5),
 
@@ -5994,7 +6018,9 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
-                              onPressed: () {
+                              onPressed: isFailLoading
+                                         ? null
+                                         : () async {
                                 final selected = selectedWorkTypes.values.any(
                                   (e) => e,
                                 );
@@ -6038,12 +6064,45 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                 print(
                                   'selectedMapObjectsReworkOrCompleted failed:: $selectedMapObjectsReworkOrCompleted',
                                 );
-
-                                reworkORCompletedMapData(
+                                 setDialogState(() {
+                                  isFailLoading = true;
+                                });
+                                try {
+                                await reworkORCompletedMapData(
                                   selectedMapObjectsReworkOrCompleted,
                                 );
-                              },
-                              child: const Text(
+                               }  catch (e) {
+                  debugPrint("Pass submission error: $e");
+
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Failed to submit. Please try again.",
+                        ),
+                      ),
+                    );
+                  }
+                } finally {
+                  if (mounted) {
+                    setDialogState(() {
+                      isFailLoading = false;
+                    });
+                  }
+                }
+              },
+                              child: isFailLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Colors.white,
+                  ),
+                ),
+              )
+            : const Text(
                                 "Yes, Fail",
                                 style: TextStyle(
                                   color: Colors.white,
@@ -6220,7 +6279,9 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                   borderRadius: BorderRadius.circular(4),
                                 ),
                               ),
-                              onPressed: () {
+                              onPressed: isPassLoading
+                                         ? null
+                                         : () async {
                                 final selected = selectedWorkTypes.values.any(
                                   (e) => e,
                                 );
@@ -6264,12 +6325,45 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
                                 print(
                                   'selectedMapObjectsReworkOrCompleted:: $selectedMapObjectsReworkOrCompleted',
                                 );
-
-                                reworkORCompletedMapData(
+                                 setDialogState(() {
+                                                   isPassLoading = true;
+                                                   });
+                                    try {
+                                await reworkORCompletedMapData(
                                   selectedMapObjectsReworkOrCompleted,
                                 );
-                              },
-                              child: const Text(
+                              } catch (e) {
+                  debugPrint("Pass submission error: $e");
+
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Failed to submit. Please try again.",
+                        ),
+                      ),
+                    );
+                  }
+                } finally {
+                  if (mounted) {
+                    setDialogState(() {
+                      isPassLoading = false;
+                     });
+                  }
+                }
+              },
+                              child:  isPassLoading
+            ? const SizedBox(
+                height: 20,
+                width: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor: AlwaysStoppedAnimation<Color>(
+                    Colors.white,
+                  ),
+                ),
+              )
+            : const Text(
                                 "Pass",
                                 style: TextStyle(
                                   color: Colors.white,

@@ -140,6 +140,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
   /////////////
   bool showLayerPanel = false;
   bool expandWorkLayers = true;
+  bool subLayersText = true;
   bool showSubstationLayer = true;
   // bool showOverHeadLayer = true;
   // bool showUnderGroundLayer = true;
@@ -257,7 +258,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
     WakelockPlus.enable();
     getUserType();
     /////
-    cameraInit();
+    // cameraInit();
     _startListeningToCompass();
   }
 
@@ -1607,6 +1608,8 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                                   panelState(() {
                                                     expandWorkLayers =
                                                         !expandWorkLayers;
+                                                        subLayersText =
+                                                        !subLayersText;
                                                   });
                                                 },
                                                 child: Row(
@@ -1665,6 +1668,23 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                                   ],
                                                 ),
                                               ),
+                                                const SizedBox(width: 6),
+
+      if (subLayersText)
+        Align(
+          alignment: Alignment.centerLeft,
+          child: Padding(
+            padding: const EdgeInsets.only(left:6.0),
+            child: const Text(
+              "Sub Layer",
+              style: TextStyle(
+                color: Color.fromARGB(255, 27, 116, 30),
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
                                               if (expandWorkLayers) ...[
                                                 const SizedBox(height: 5),
 

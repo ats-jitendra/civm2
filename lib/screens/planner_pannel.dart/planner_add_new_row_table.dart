@@ -1624,20 +1624,20 @@ class _DrawerManuState extends State<DrawerManu> {
                       );
                     },
                   ),
-                  ListTile(
-                    leading: const Icon(Icons.location_searching),
-                    title: const Text('Change Order System Map'),
-                    textColor: const Color.fromARGB(255, 7, 59, 120),
-                    iconColor: const Color.fromARGB(255, 7, 59, 120),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const COMapScreen(),
-                        ),
-                      );
-                    },
-                  ),
+                  // ListTile(
+                  //   leading: const Icon(Icons.location_searching),
+                  //   title: const Text('Change Order System Map'),
+                  //   textColor: const Color.fromARGB(255, 7, 59, 120),
+                  //   iconColor: const Color.fromARGB(255, 7, 59, 120),
+                  //   onTap: () {
+                  //     Navigator.push(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //         builder: (context) => const COMapScreen(),
+                  //       ),
+                  //     );
+                  //   },
+                  // ),
                   ListTile(
                     leading: const Icon(Icons.location_on),
                     title: const Text('Live IVM System Map'),
