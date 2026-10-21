@@ -1649,6 +1649,36 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                                         });
                                                       },
                                                     ),
+                                                      const SizedBox(width: 8),
+
+                                                    if (overHeadPolylines.any(
+                                                    (item) => item.jobNo.toString().trim().isNotEmpty,
+                                                    ))
+                                                    Builder(
+                                                    builder: (context) {
+                                                    final jobItem = overHeadPolylines.firstWhere(
+                                                    (item) => item.jobNo.toString().trim().isNotEmpty,
+                                                    );
+                                                    return Text(
+                                                    '(${jobItem.completedMiles}/${jobItem.totalMilesApi})',
+                                                     style: const TextStyle(
+                                                     color: Colors.black,
+                                                     fontSize: 14,
+                                                     // fontWeight: FontWeight.w600,
+                                                     ),
+                                                    );
+                                                  },
+                                                   )else(
+                                                   Text(
+                                                   '(0.00/0.00)',
+                                                   style: const TextStyle(
+                                                   color: Colors.black,
+                                                   fontSize: 14,
+                                                   // fontWeight: FontWeight.w600,
+                                                   ),
+                                                   )
+                                                   ),
+                                                    
                                                     const SizedBox(width: 10),
                                                     Icon(
                                                       expandWorkLayers
@@ -1765,16 +1795,75 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                                             const SizedBox(
                                                               width: 2,
                                                             ),
+                                                            // Expanded(
+                                                            //   child: Text(
+                                                            //     name,
+                                                            //     style:
+                                                            //         const TextStyle(
+                                                            //           fontSize:
+                                                            //               13,
+                                                            //         ),
+                                                            //   ),
+                                                            // ),
+                                                              ///progress value changes
                                                             Expanded(
-                                                              child: Text(
-                                                                name,
-                                                                style:
-                                                                    const TextStyle(
+                                                              child: Builder(
+                                                                builder: (context) {
+                                                                  final isNoSpray =
+                                                                      name
+                                                                          .trim()
+                                                                          .toUpperCase() ==
+                                                                      'NO SPRAY';
+                                                                  final progress =
+                                                                      getMaintTypeProgress();
+                                                                  final typeProgress =
+                                                                      progress[name
+                                                                          .toUpperCase()];
+
+                                                                  final completed =
+                                                                      typeProgress?['completed'] ??
+                                                                      0.0;
+                                                                  final total =
+                                                                      typeProgress?['total'] ??
+                                                                      0.0;
+
+                                                                  final displayName = name
+                                                                      .toLowerCase()
+                                                                      .split(
+                                                                        ' ',
+                                                                      )
+                                                                      .map(
+                                                                        (
+                                                                          word,
+                                                                        ) =>
+                                                                            word.isEmpty
+                                                                            ? word
+                                                                            : '${word[0].toUpperCase()}${word.substring(1)}',
+                                                                      )
+                                                                      .join(
+                                                                        ' ',
+                                                                      );
+
+                                                                  return Text(
+                                                                    isNoSpray
+                                                                        ? '$displayName (${total.toStringAsFixed(2)})'
+                                                                        : '$displayName (${completed.toStringAsFixed(2)}/${total.toStringAsFixed(2)})',
+                                                                    style: const TextStyle(
                                                                       fontSize:
                                                                           13,
                                                                     ),
+                                                                  );
+                                                                  // Text(
+                                                                  //   '$displayName (${completed.toStringAsFixed(2)}/${total.toStringAsFixed(2)})',
+                                                                  //   style: const TextStyle(
+                                                                  //     fontSize:
+                                                                  //         13,
+                                                                  //   ),
+                                                                  // );
+                                                                },
                                                               ),
                                                             ),
+                                                         
                                                           ],
                                                         ),
                                                       ),
@@ -1782,6 +1871,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                                   );
                                                 }).toList(),
                                               ],
+                                           
                                             ],
                                           ),
                                         ),
@@ -2129,6 +2219,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
             completionFlag: row["completionFlag"]?.toString() ?? "",
             service: row["service"]?.toString() ?? "",
             jobStatus: row["jobStatus"]?.toString() ?? "",
+            completedMiles: row["completedMiles"]?.toString() ?? "",
           ),
           /////-------
         );
@@ -8620,6 +8711,46 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
     return NetworkImageGallery(imageLocations: imageLocations);
   }
 
+  Map<String, Map<String, double>> getMaintTypeProgress() {
+    final Map<String, Map<String, double>> progress = {};
+
+    for (final polyline in overHeadPolylines) {
+      final maintTypes = polyline.maintType
+          .split(',')
+          .map((e) => e.trim().toUpperCase())
+          .toList();
+
+      final maintStatuses = polyline.maintStatus
+          .split(',')
+          .map((e) => e.trim().toUpperCase())
+          .toList();
+
+      final spanDistance =
+          double.tryParse(polyline.spanDistanceApi.toString().trim()) ?? 0.0;
+
+      for (int i = 0; i < maintTypes.length; i++) {
+        final type = maintTypes[i];
+
+        if (type.isEmpty) continue;
+
+        progress.putIfAbsent(type, () => {'completed': 0.0, 'total': 0.0});
+
+        progress[type]!['total'] = progress[type]!['total']! + spanDistance;
+
+        final status = i < maintStatuses.length ? maintStatuses[i] : '';
+
+        if (status == 'COMPLETED' ||
+            status == 'FINAL COMPLETED' ||
+            status == "PASSED") {
+          progress[type]!['completed'] =
+              progress[type]!['completed']! + spanDistance;
+        }
+      }
+    }
+
+    return progress;
+  }
+
   //////////
 }
 
@@ -8662,6 +8793,7 @@ class OverHeadPolylineData {
   final String completionFlag;
   final String service;
   final String jobStatus;
+  final String completedMiles;
 
   OverHeadPolylineData({
     required this.phase,
@@ -8693,6 +8825,7 @@ class OverHeadPolylineData {
     required this.completionFlag,
     required this.service,
     required this.jobStatus,
+    required this.completedMiles,
   });
 }
 

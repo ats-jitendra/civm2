@@ -1639,25 +1639,33 @@ class _MapScreenState extends State<MapScreen> {
                                                     ),
                                                     const SizedBox(width: 8),
 
-if (overHeadPolylines.any(
-  (item) => item.jobNo.toString().trim().isNotEmpty,
-))
-  Builder(
-    builder: (context) {
-      final jobItem = overHeadPolylines.firstWhere(
-        (item) => item.jobNo.toString().trim().isNotEmpty,
-      );
-      return Text(
-        '(/${jobItem.totalMilesApi})',
-        style: const TextStyle(
-          color: Colors.green,
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-        ),
-      );
-    },
-  ),
-                                                    
+                                                    if (overHeadPolylines.any(
+                                                    (item) => item.jobNo.toString().trim().isNotEmpty,
+                                                    ))
+                                                    Builder(
+                                                    builder: (context) {
+                                                    final jobItem = overHeadPolylines.firstWhere(
+                                                    (item) => item.jobNo.toString().trim().isNotEmpty,
+                                                    );
+                                                    return Text(
+                                                    '(${jobItem.completedMiles}/${jobItem.totalMilesApi})',
+                                                     style: const TextStyle(
+                                                     color: Colors.black,
+                                                     fontSize: 14,
+                                                     // fontWeight: FontWeight.w600,
+                                                     ),
+                                                    );
+                                                  },
+                                                   )else(
+                                                   Text(
+                                                   '(0.00/0.00)',
+                                                   style: const TextStyle(
+                                                   color: Colors.black,
+                                                   fontSize: 14,
+                                                   // fontWeight: FontWeight.w600,
+                                                   ),
+                                                   )
+                                                   ),
                                                     const SizedBox(width: 10),
                                                     Icon(
                                                       expandWorkLayers
@@ -1679,21 +1687,21 @@ if (overHeadPolylines.any(
                                               ),
                                                 const SizedBox(width: 6),
 
-      if (subLayersText)
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Padding(
-            padding: const EdgeInsets.only(left:6.0),
-            child: const Text(
-              "Sub Layer",
-              style: TextStyle(
-                color: Color.fromARGB(255, 27, 116, 30),
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ),
+                                                if (subLayersText)
+                                                  Align(
+                                                  alignment: Alignment.centerLeft,
+                                                  child: Padding(
+                                                  padding: const EdgeInsets.only(left:6.0),
+                                                  child: const Text(
+                                                  "Sub Layer",
+                                                  style: TextStyle(
+                                                  color: Color.fromARGB(255, 27, 116, 30),
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 16,
+                                                  ),
+                                                 ),
+                                                 ),
+                                               ),
                                               if (expandWorkLayers) ...[
                                                 const SizedBox(height: 5),
 
@@ -2178,6 +2186,7 @@ if (overHeadPolylines.any(
             rework: row["rework"]?.toString() ?? "",
             completionFlag: row["completionFlag"]?.toString() ?? "",
             service: row["service"]?.toString() ?? "",
+            completedMiles: row["completedMiles"]?.toString() ?? "",
           ),
           /////-------
         );
@@ -8166,6 +8175,7 @@ class OverHeadPolylineData {
   final String rework;
   final String completionFlag;
   final String service;
+  final String completedMiles;
 
   OverHeadPolylineData({
     required this.phase,
@@ -8191,6 +8201,7 @@ class OverHeadPolylineData {
     required this.rework,
     required this.completionFlag,
     required this.service,
+    required this.completedMiles,
   });
 }
 

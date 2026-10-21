@@ -28,7 +28,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 22,
+      version: 23,
       onCreate: _createDB,
       onUpgrade: (db, oldVersion, newVersion) async {
         // Future database migrations go here.
@@ -287,9 +287,21 @@ class DatabaseHelper {
             "ALTER TABLE commentHistoryTable ADD COLUMN flag TEXT",
           );
         }
-          if (oldVersion < 22) {
-          await db.execute("ALTER TABLE overHeadTable ADD COLUMN jobStatus TEXT");
-           await db.execute("ALTER TABLE overHeadChangeOrderTable ADD COLUMN jobStatus TEXT");
+        if (oldVersion < 22) {
+          await db.execute(
+            "ALTER TABLE overHeadTable ADD COLUMN jobStatus TEXT",
+          );
+          await db.execute(
+            "ALTER TABLE overHeadChangeOrderTable ADD COLUMN jobStatus TEXT",
+          );
+        }
+        if (oldVersion < 23) {
+          await db.execute(
+            "ALTER TABLE overHeadTable ADD COLUMN completedMiles TEXT",
+          );
+          await db.execute(
+            "ALTER TABLE overHeadChangeOrderTable ADD COLUMN completedMiles TEXT",
+          );
         }
       },
     );
@@ -334,7 +346,8 @@ class DatabaseHelper {
       completionStatus INTEGER DEFAULT 1,
       createdAt INTEGER,
       fetchId INTEGER,
-      jobStatus TEXT
+      jobStatus TEXT,
+      completedMiles TEXT
       )
     ''');
     await db.execute('''
@@ -375,7 +388,8 @@ class DatabaseHelper {
       completionStatus INTEGER DEFAULT 1,
       createdAt INTEGER,
       fetchId INTEGER,
-       jobStatus TEXT
+       jobStatus TEXT,
+       completedMiles TEXT
       )
     ''');
 
@@ -697,7 +711,8 @@ CREATE TABLE inspectionListTable(
           "completionStatus": 1,
           "createdAt": DateTime.now().millisecondsSinceEpoch,
           "fetchId": fetchId,
-          "jobStatus":item["jobStatus"],
+          "jobStatus": item["jobStatus"],
+          "completedMiles": item["completedMiles"] ?? "",
         }, conflictAlgorithm: ConflictAlgorithm.replace);
       }
       //Poles
