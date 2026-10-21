@@ -2,15 +2,16 @@ class AddCrewMemberModel {
   List<GetaAllCewMemberTableDatas>? getaAllCewMemberTableDatas;
   List<ContractorListNameId>? contractorListNameId;
 
-  AddCrewMemberModel(
-      {this.getaAllCewMemberTableDatas, this.contractorListNameId});
+  AddCrewMemberModel({
+    this.getaAllCewMemberTableDatas,
+    this.contractorListNameId,
+  });
 
   AddCrewMemberModel.fromJson(Map<String, dynamic> json) {
     if (json['getaAllCewMemberTableDatas'] != null) {
       getaAllCewMemberTableDatas = <GetaAllCewMemberTableDatas>[];
       json['getaAllCewMemberTableDatas'].forEach((v) {
-        getaAllCewMemberTableDatas!
-            .add(GetaAllCewMemberTableDatas.fromJson(v));
+        getaAllCewMemberTableDatas!.add(GetaAllCewMemberTableDatas.fromJson(v));
       });
     }
     if (json['contractorListNameId'] != null) {
@@ -24,12 +25,14 @@ class AddCrewMemberModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (getaAllCewMemberTableDatas != null) {
-      data['getaAllCewMemberTableDatas'] =
-          getaAllCewMemberTableDatas!.map((v) => v.toJson()).toList();
+      data['getaAllCewMemberTableDatas'] = getaAllCewMemberTableDatas!
+          .map((v) => v.toJson())
+          .toList();
     }
     if (contractorListNameId != null) {
-      data['contractorListNameId'] =
-          contractorListNameId!.map((v) => v.toJson()).toList();
+      data['contractorListNameId'] = contractorListNameId!
+          .map((v) => v.toJson())
+          .toList();
     }
     return data;
   }
@@ -44,26 +47,39 @@ class GetaAllCewMemberTableDatas {
   int? id;
   String? supervisor;
   String? status;
+  String? email;
+  String? password;
+  String? mobile;
+  String? address;
 
-  GetaAllCewMemberTableDatas(
-      {this.contractor,
-      this.lName,
-      this.crewType,
-      this.fName,
-      this.name,
-      this.id,
-      this.supervisor,
-      this.status});
+  GetaAllCewMemberTableDatas({
+    this.contractor,
+    this.lName,
+    this.crewType,
+    this.fName,
+    this.name,
+    this.id,
+    this.supervisor,
+    this.status,
+    this.email,
+    this.password,
+    this.mobile,
+    this.address
+  });
 
   GetaAllCewMemberTableDatas.fromJson(Map<String, dynamic> json) {
-    contractor = json['contractor'];
-    lName = json['lName'];
-    crewType = json['crewType'];
-    fName = json['fName'];
-    name = json['name'];
-    id = json['id'];
-    supervisor = json['supervisor'];
-    status = json['status'];
+    contractor = json['contractor']??"";
+    lName = json['lName']??"";
+    crewType = json['crewType']??"";
+    fName = json['fName']??"";
+    name = json['name']??"";
+    id = json['id']??0;
+    supervisor = json['supervisor']??"";
+    status = json['status']??"";
+    email = json['email']?? "";
+    password = json['password']??"";
+    mobile = json['mobile']??"";
+    address = json['address']??"";
   }
 
   Map<String, dynamic> toJson() {
@@ -76,6 +92,10 @@ class GetaAllCewMemberTableDatas {
     data['id'] = id;
     data['supervisor'] = supervisor;
     data['status'] = status;
+    data['email'] = email;
+    data['password'] = password;
+    data['mobile'] = mobile;
+    data['address'] = address;
     return data;
   }
 }

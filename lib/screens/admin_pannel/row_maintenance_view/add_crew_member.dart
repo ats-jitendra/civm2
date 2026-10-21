@@ -814,6 +814,18 @@ class _AddCrewMemberState extends State<AddCrewMember> {
                                                                     filteredCrewMemberList[index]
                                                                         .lName
                                                                         .toString(),
+                                                                    filteredCrewMemberList[index]
+                                                                        .email
+                                                                        .toString(),
+                                                                    filteredCrewMemberList[index]
+                                                                        .password
+                                                                        .toString(),
+                                                                    filteredCrewMemberList[index]
+                                                                        .mobile
+                                                                        .toString(),
+                                                                    filteredCrewMemberList[index]
+                                                                        .address
+                                                                        .toString(),
                                                                   );
                                                                 },
                                                                 child: Container(
@@ -1525,6 +1537,10 @@ class _AddCrewMemberState extends State<AddCrewMember> {
     String id,
     String fName,
     String lName,
+    String email,
+    String password,
+    String mobile,
+    String address,
   ) {
     final TextEditingController fNameController = TextEditingController(
       text: fName,
@@ -1532,6 +1548,19 @@ class _AddCrewMemberState extends State<AddCrewMember> {
     final TextEditingController lNameController = TextEditingController(
       text: lName,
     );
+    final TextEditingController emailController = TextEditingController(
+      text: email,
+    );
+    final TextEditingController passwordController = TextEditingController(
+      text: password,
+    );
+    final TextEditingController mobileController = TextEditingController(
+      text: mobile,
+    );
+    final TextEditingController addressController = TextEditingController(
+      text: address,
+    );
+    bool isPasswordVisible = false;
     return showDialog(
       context: context,
       builder: (context) {
@@ -1573,6 +1602,7 @@ class _AddCrewMemberState extends State<AddCrewMember> {
                     children: [
                       Column(
                         children: [
+                           const SizedBox(height: 10),
                           TextFormField(
                             controller: fNameController,
                             textCapitalization: TextCapitalization.words,
@@ -1669,6 +1699,84 @@ class _AddCrewMemberState extends State<AddCrewMember> {
                             ),
                           ),
                         ],
+                      ),
+                      const SizedBox(height: 10),
+
+                      TextFormField(
+                        controller: emailController,
+                        keyboardType: TextInputType.emailAddress,
+                        decoration: editInputDecoration(
+                          label: "Email/UserName",
+                          icon: Icons.email_outlined,
+                        ),
+                         style: const TextStyle(
+                              fontSize: 15,
+                              color: Color.fromARGB(255, 7, 59, 120),
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: passwordController,
+                        obscureText: !isPasswordVisible,
+                        decoration:
+                            editInputDecoration(
+                              label: "Password",
+                              icon: Icons.lock_outline,
+                            ).copyWith(
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  isPasswordVisible
+                                      ? Icons.visibility_off
+                                      : Icons.visibility,
+                                ),
+                                onPressed: () {
+                                  setState(() {
+                                    isPasswordVisible = !isPasswordVisible;
+                                  });
+                                },
+                              ),
+                            ),
+                             style: const TextStyle(
+                              fontSize: 15,
+                              color: Color.fromARGB(255, 7, 59, 120),
+                              fontWeight: FontWeight.w500,
+                            ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return "Please enter password";
+                          }
+                          if (value.trim().length < 8) {
+                            return "Password must be at least 8 characters";
+                          }
+                          return null;
+                        },
+                      ),
+
+                      const SizedBox(height: 12),
+
+                      TextFormField(
+                        controller: mobileController,
+                        keyboardType: TextInputType.phone,
+                        decoration: editInputDecoration(
+                          label: "Mobile",
+                          icon: Icons.phone_outlined,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      TextFormField(
+                        controller: addressController,
+                        maxLines: 2,
+                        decoration: editInputDecoration(
+                          label: "Address",
+                          icon: Icons.location_on_outlined,
+                        ),
+                         style: const TextStyle(
+                              fontSize: 15,
+                              color: Color.fromARGB(255, 7, 59, 120),
+                              fontWeight: FontWeight.w500,
+                            ),
                       ),
                       Container(
                         alignment: Alignment.centerLeft,
@@ -1885,6 +1993,10 @@ class _AddCrewMemberState extends State<AddCrewMember> {
                             id,
                             fNameController.text.toString(),
                             lNameController.text.toString(),
+                            emailController.text.toString(),
+                            passwordController.text.toString(),
+                            mobileController.text.toString(),
+                            addressController.text.toString()
                           );
                         },
                         child: Container(
@@ -2149,9 +2261,8 @@ class _AddCrewMemberState extends State<AddCrewMember> {
   ) async {
     try {
       final response = await http.post(
-        Uri.parse("${AppUrl.baseUrl}login_user/create_crew"
-        //  'https://lcpmapapi.ariespro.com/main/create_crew'
-          ),
+        Uri.parse("${AppUrl.baseUrl}login_user/create_crew"),
+          // 'https://lcpmapapi.ariespro.com/main/create_crew'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(mappedData),
       );
@@ -2209,13 +2320,17 @@ class _AddCrewMemberState extends State<AddCrewMember> {
     String id,
     String fName,
     String lName,
+    String email,
+    String password,
+    String mobile,
+    String address
   ) async {
     try {
       final userPreferences = Provider.of<UserPref>(context, listen: false);
       UserModel data = await userPreferences.getUser();
 
       var url =
-          '${AppUrl.baseUrl}login_user/editCrewType?type=$crewType&id=$id&fName=$fName&lName=$lName';
+          '${AppUrl.baseUrl}login_user/editCrewType?type=$crewType&id=$id&fName=$fName&lName=$lName&address=$address&mobile=$mobile&email=$email&password=$password';
 
       final response = await http.put(
         Uri.parse(url),
@@ -2400,6 +2515,10 @@ class _AddCrewMemberState extends State<AddCrewMember> {
       return;
     }
 
+     print(
+      "CREW LIST: ${addCrewMemberViewModel.addCrewMemberTabularData.data?.getaAllCewMemberTableDatas}",
+    );
+
     print("STATUS: ${addCrewMemberViewModel.addCrewMemberTabularData.status}");
 
     print("DATA: ${addCrewMemberViewModel.addCrewMemberTabularData.data}");
@@ -2430,5 +2549,33 @@ class _AddCrewMemberState extends State<AddCrewMember> {
 
     print("========== LOAD CREW END ==========");
     _input.clear();
+  }
+
+  InputDecoration editInputDecoration({
+    required String label,
+    required IconData icon,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      
+      prefixIcon: Icon(icon),
+      filled: true,
+      fillColor: const Color(0xffF6F8FC),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide.none,
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.grey.shade300),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: const BorderSide(color: Color(0xff0A4DA2), width: 1.5),
+      ),
+      
+    );
+    
   }
 }
