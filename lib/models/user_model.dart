@@ -36,6 +36,7 @@ class User {
   String? rights;
   String? additionalUserType;
   String? primaryRole;
+  String? maintType;
 
   User(
       {this.id,
@@ -53,7 +54,8 @@ class User {
       this.status,
       this.rights,
       this.additionalUserType,
-      this.primaryRole});
+      this.primaryRole,
+      this.maintType});
 
   User.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -72,6 +74,7 @@ class User {
     rights = json['rights'];
     additionalUserType = json['additionalUserType'];
     primaryRole = json['primaryRole'];
+    maintType = json['maintType'];
   }
 
   Map<String, dynamic> toJson() {

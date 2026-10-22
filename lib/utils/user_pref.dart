@@ -19,6 +19,7 @@ class UserPref with ChangeNotifier {
     pref.setString('rights', user.user!.rights.toString());
     pref.setString('additionalUserType', user.user!.additionalUserType.toString());
     pref.setString('primaryRole', user.user!.primaryRole.toString());
+    pref.setString('maintType', user.user!.maintType.toString());
     String secureAccessCodeEmail;
     secureAccessCodeEmail = userNameForOTP;
     pref.setBool('deviceToken', true);
@@ -41,6 +42,7 @@ class UserPref with ChangeNotifier {
     final String? img = pref.getString('img');
     final String? rights = pref.getString('rights');
     final String? additionalUserType = pref.getString('additionalUserType');
+    final String? maintType = pref.getString('maintType');
     print(token);
 
     return UserModel(
@@ -55,7 +57,8 @@ class UserPref with ChangeNotifier {
             status: status,
             profilePhoto: img,
             rights: rights,
-            additionalUserType: additionalUserType),
+            additionalUserType: additionalUserType,
+            maintType: maintType),
         token: token.toString());
   }
 

@@ -198,6 +198,8 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
   String imageSource = '';
   bool isSaveLoading = false;
   String selectedJobStatus = "";
+  bool _isWorkLayerInitialized = false;
+
   @override
   void initState() {
     // TODO: implement initState
@@ -1909,6 +1911,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
   String id = "";
   String token = "";
   String userName = "";
+  String maintType = "";
 
   Future<void> loadApiData() async {
     final userPreferences = Provider.of<UserPref>(context, listen: false);
@@ -1916,6 +1919,8 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     id = data.user!.id.toString();
     token = data.token.toString();
     userName = data.user!.fName.toString();
+    maintType = data.user!.maintType.toString();
+    print("maintType:: $maintType");
     _createdByCO.text = userName;
     clearWorkTypes();
     lines.clear();
@@ -2528,15 +2533,55 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
       availableWorkTypes.addAll(types);
     }
 
+    // workLayerVisibility.updateAll((key, value) {
+    //   return availableWorkTypes.contains(key.toUpperCase());
+    // });
+    /////checkbox according to crew maintType initially
+    if(_isWorkLayerInitialized == false){
+      final Set<String> userMaintTypes = maintType
+    .split(',')
+    .map((type) => type.trim().toUpperCase())
+    .where((type) => type.isNotEmpty)
+    .toSet();
     workLayerVisibility.updateAll((key, value) {
-      return availableWorkTypes.contains(key.toUpperCase());
-    });
+  final normalizedKey = key.trim().toUpperCase();
+
+  return userMaintTypes.contains(normalizedKey) &&
+      availableWorkTypes.contains(normalizedKey);
+});
+_isWorkLayerInitialized = true;
+    }
+    
     // atleast one child work layer is selected.
     showMaintLayer = workLayerVisibility.values.any((isSelected) => isSelected);
 
     print('availableWorkTypes: $availableWorkTypes');
     print('workLayerVisibility: $workLayerVisibility');
   }
+  
+//   void updateWorkLayerVisibilityFromMaintType(
+//   List<OverHeadPolylineData> objects,
+// ) {
+//   // Maintenance types assigned to the logged-in user.
+//   final Set<String> userMaintTypes = maintType
+//       .split(',')
+//       .map((type) => type.trim().toUpperCase())
+//       .where((type) => type.isNotEmpty)
+//       .toSet();
+
+//   // Initially check only the user's assigned maintenance types.
+//   workLayerVisibility.updateAll((key, value) {
+//     final normalizedKey = key.trim().toUpperCase();
+//     return userMaintTypes.contains(normalizedKey);
+//   });
+
+//   // Show the parent layer if at least one checkbox is checked.
+//   showMaintLayer = workLayerVisibility.values.any((selected) => selected);
+
+//   print('User maintType: $maintType');
+//   print('User maintenance types: $userMaintTypes');
+//   print('Checkbox visibility: $workLayerVisibility');
+// }
 
   void _buildStatusMarkers() {
     completedMarkers.clear();
@@ -3293,9 +3338,46 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                   const SizedBox(height: 8),
                   if (selectedJobStatus != "ASSIGNED")
                     Text("Select Vegetation",style: TextStyle(fontWeight: FontWeight.bold),),
-                  if (!allStatusesCompleted)
-                    if (selectedJobStatus == "ASSIGNED")
-                      Row(
+                    /////checkbox according to crew maintType initially
+                    Builder(
+  builder: (context) {
+                    final userMaintTypes = maintType
+    .split(',')
+    .map((type) => type.trim().toUpperCase())
+    .where((type) => type.isNotEmpty)
+    .toSet();
+
+final polyline = overHeadPolylines[selectedPolylineIndex!];
+
+final maintTypes = polyline.maintType
+    .split(',')
+    .map((type) => type.trim())
+    .toList();
+
+final maintStatuses = polyline.maintStatus
+    .split(',')
+    .map((status) => status.trim())
+    .toList();
+
+final hasAssignedIncompleteType = List.generate(
+  maintTypes.length,
+  (i) => i,
+).any((i) {
+  final type = maintTypes[i].toUpperCase();
+
+  final status = i < maintStatuses.length
+      ? maintStatuses[i].toUpperCase()
+      : '';
+
+  return userMaintTypes.contains(type) && status != 'COMPLETED';
+});
+
+if (!allStatusesCompleted &&
+    selectedJobStatus == "ASSIGNED" &&
+    hasAssignedIncompleteType){
+                  // if (!allStatusesCompleted)
+                  //   if (selectedJobStatus == "ASSIGNED")
+                     return Row(
                         children: [
                           Checkbox(
                             value: isMarkAsRead,
@@ -3379,7 +3461,15 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                             ),
                           ),
                         ],
-                      ),
+                      );}
+                      else{
+                          return Padding(
+                            padding: const EdgeInsets.only(left:8.0),
+                            child: Text("Select Vegetation",style: TextStyle(fontWeight: FontWeight.bold),),
+                          );
+                      }
+                   },
+                    ),
                 ],
               ),
             ),
@@ -4032,13 +4122,60 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                           ),
                         ],
                       ),
-                      if (selectedJobStatus == "ASSIGNED")
-                        (selectedMaintStatus.trim().toLowerCase() == "rework" ||
-                                selectedMaintStatus.trim().toLowerCase() ==
-                                    "pending" ||
-                                selectedMaintStatus.trim().toLowerCase() ==
-                                    "failed")
-                            ? Row(
+                      // if (selectedJobStatus == "ASSIGNED")
+                      //   (selectedMaintStatus.trim().toLowerCase() == "rework" ||
+                      //           selectedMaintStatus.trim().toLowerCase() ==
+                      //               "pending" ||
+                      //           selectedMaintStatus.trim().toLowerCase() ==
+                      //               "failed")
+                            // ?
+                            /////checkbox according to crew maintType initially
+                            Builder(
+  builder: (context) {
+    final userMaintTypes = maintType
+        .split(',')
+        .map((type) => type.trim().toUpperCase())
+        .where((type) => type.isNotEmpty)
+        .toSet();
+
+    final polyline = overHeadPolylines[index];
+
+    final maintTypes = polyline.maintType
+        .split(',')
+        .map((e) => e.trim())
+        .toList();
+
+    final maintStatuses = polyline.maintStatus
+        .split(',')
+        .map((e) => e.trim())
+        .toList();
+
+    final hasAssignedIncompleteType =
+        List.generate(maintTypes.length, (i) => i).any((i) {
+      final type = maintTypes[i].toUpperCase();
+
+      final status = i < maintStatuses.length
+          ? maintStatuses[i].toUpperCase()
+          : '';
+
+      return userMaintTypes.contains(type) &&
+          status != 'COMPLETED';
+    });
+
+    final normalizedStatus =
+        selectedMaintStatus.trim().toLowerCase();
+
+    final isAllowedStatus =
+        normalizedStatus == 'rework' ||
+        normalizedStatus == 'pending' ||
+        normalizedStatus == 'failed';
+
+    if (selectedJobStatus != "ASSIGNED" ||
+        !isAllowedStatus ||
+        !hasAssignedIncompleteType) {
+      return const SizedBox.shrink();
+    }
+                            return Row(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 children: [
                                   Checkbox(
@@ -4161,8 +4298,10 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                     ),
                                   ),
                                 ],
-                              )
-                            : SizedBox(),
+                              );
+                               },
+),
+                            // : SizedBox(),
                       Padding(
                         padding: const EdgeInsets.only(left: 10.0),
                         child: Column(
