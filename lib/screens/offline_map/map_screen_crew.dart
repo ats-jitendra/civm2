@@ -1421,7 +1421,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                                   panelState(() {
                                                     expandWorkLayers =
                                                         !expandWorkLayers;
-                                                        subLayersText =
+                                                    subLayersText =
                                                         !subLayersText;
                                                   });
                                                 },
@@ -1461,36 +1461,48 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                                         });
                                                       },
                                                     ),
-                                                      const SizedBox(width: 8),
+                                                    const SizedBox(width: 8),
 
                                                     if (overHeadPolylines.any(
-                                                    (item) => item.jobNo.toString().trim().isNotEmpty,
+                                                      (item) => item.jobNo
+                                                          .toString()
+                                                          .trim()
+                                                          .isNotEmpty,
                                                     ))
-                                                    Builder(
-                                                    builder: (context) {
-                                                    final jobItem = overHeadPolylines.firstWhere(
-                                                    (item) => item.jobNo.toString().trim().isNotEmpty,
-                                                    );
-                                                    return Text(
-                                                    '(${jobItem.completedMiles}/${jobItem.totalMilesApi})',
-                                                     style: const TextStyle(
-                                                     color: Colors.black,
-                                                     fontSize: 14,
-                                                     // fontWeight: FontWeight.w600,
-                                                     ),
-                                                    );
-                                                  },
-                                                   )else(
-                                                   Text(
-                                                   '(0.00/0.00)',
-                                                   style: const TextStyle(
-                                                   color: Colors.black,
-                                                   fontSize: 14,
-                                                   // fontWeight: FontWeight.w600,
-                                                   ),
-                                                   )
-                                                   ),
-                                                    
+                                                      Builder(
+                                                        builder: (context) {
+                                                          final jobItem =
+                                                              overHeadPolylines
+                                                                  .firstWhere(
+                                                                    (
+                                                                      item,
+                                                                    ) => item
+                                                                        .jobNo
+                                                                        .toString()
+                                                                        .trim()
+                                                                        .isNotEmpty,
+                                                                  );
+                                                          return Text(
+                                                            '(${jobItem.completedMiles}/${jobItem.totalMilesApi})',
+                                                            style: const TextStyle(
+                                                              color:
+                                                                  Colors.black,
+                                                              fontSize: 14,
+                                                              // fontWeight: FontWeight.w600,
+                                                            ),
+                                                          );
+                                                        },
+                                                      )
+                                                    else
+                                                      (Text(
+                                                        '(0.00/0.00)',
+                                                        style: const TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 14,
+                                                          // fontWeight: FontWeight.w600,
+                                                        ),
+                                                      )),
+
                                                     const SizedBox(width: 10),
                                                     Icon(
                                                       expandWorkLayers
@@ -1510,23 +1522,33 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                                   ],
                                                 ),
                                               ),
-                                                const SizedBox(width: 6),
+                                              const SizedBox(width: 6),
 
-      if (subLayersText)
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Padding(
-            padding: const EdgeInsets.only(left:6.0),
-            child: const Text(
-              "Sub Layer",
-              style: TextStyle(
-                color: Color.fromARGB(255, 27, 116, 30),
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ),
+                                              if (subLayersText)
+                                                Align(
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                          left: 6.0,
+                                                        ),
+                                                    child: const Text(
+                                                      "Sub Layer",
+                                                      style: TextStyle(
+                                                        color: Color.fromARGB(
+                                                          255,
+                                                          27,
+                                                          116,
+                                                          30,
+                                                        ),
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
                                               if (expandWorkLayers) ...[
                                                 const SizedBox(height: 5),
 
@@ -1617,7 +1639,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                                             //         ),
                                                             //   ),
                                                             // ),
-                                                              ///progress value changes
+                                                            ///progress value changes
                                                             Expanded(
                                                               child: Builder(
                                                                 builder: (context) {
@@ -1675,7 +1697,6 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                                                 },
                                                               ),
                                                             ),
-                                                         
                                                           ],
                                                         ),
                                                       ),
@@ -1683,7 +1704,6 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                                   );
                                                 }).toList(),
                                               ],
-                                           
                                             ],
                                           ),
                                         ),
@@ -2537,51 +2557,51 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     //   return availableWorkTypes.contains(key.toUpperCase());
     // });
     /////checkbox according to crew maintType initially
-    if(_isWorkLayerInitialized == false){
+    if (_isWorkLayerInitialized == false) {
       final Set<String> userMaintTypes = maintType
-    .split(',')
-    .map((type) => type.trim().toUpperCase())
-    .where((type) => type.isNotEmpty)
-    .toSet();
-    workLayerVisibility.updateAll((key, value) {
-  final normalizedKey = key.trim().toUpperCase();
+          .split(',')
+          .map((type) => type.trim().toUpperCase())
+          .where((type) => type.isNotEmpty)
+          .toSet();
+      workLayerVisibility.updateAll((key, value) {
+        final normalizedKey = key.trim().toUpperCase();
 
-  return userMaintTypes.contains(normalizedKey) &&
-      availableWorkTypes.contains(normalizedKey);
-});
-_isWorkLayerInitialized = true;
+        return userMaintTypes.contains(normalizedKey) &&
+            availableWorkTypes.contains(normalizedKey);
+      });
+      _isWorkLayerInitialized = true;
     }
-    
+
     // atleast one child work layer is selected.
     showMaintLayer = workLayerVisibility.values.any((isSelected) => isSelected);
 
     print('availableWorkTypes: $availableWorkTypes');
     print('workLayerVisibility: $workLayerVisibility');
   }
-  
-//   void updateWorkLayerVisibilityFromMaintType(
-//   List<OverHeadPolylineData> objects,
-// ) {
-//   // Maintenance types assigned to the logged-in user.
-//   final Set<String> userMaintTypes = maintType
-//       .split(',')
-//       .map((type) => type.trim().toUpperCase())
-//       .where((type) => type.isNotEmpty)
-//       .toSet();
 
-//   // Initially check only the user's assigned maintenance types.
-//   workLayerVisibility.updateAll((key, value) {
-//     final normalizedKey = key.trim().toUpperCase();
-//     return userMaintTypes.contains(normalizedKey);
-//   });
+  //   void updateWorkLayerVisibilityFromMaintType(
+  //   List<OverHeadPolylineData> objects,
+  // ) {
+  //   // Maintenance types assigned to the logged-in user.
+  //   final Set<String> userMaintTypes = maintType
+  //       .split(',')
+  //       .map((type) => type.trim().toUpperCase())
+  //       .where((type) => type.isNotEmpty)
+  //       .toSet();
 
-//   // Show the parent layer if at least one checkbox is checked.
-//   showMaintLayer = workLayerVisibility.values.any((selected) => selected);
+  //   // Initially check only the user's assigned maintenance types.
+  //   workLayerVisibility.updateAll((key, value) {
+  //     final normalizedKey = key.trim().toUpperCase();
+  //     return userMaintTypes.contains(normalizedKey);
+  //   });
 
-//   print('User maintType: $maintType');
-//   print('User maintenance types: $userMaintTypes');
-//   print('Checkbox visibility: $workLayerVisibility');
-// }
+  //   // Show the parent layer if at least one checkbox is checked.
+  //   showMaintLayer = workLayerVisibility.values.any((selected) => selected);
+
+  //   print('User maintType: $maintType');
+  //   print('User maintenance types: $userMaintTypes');
+  //   print('Checkbox visibility: $workLayerVisibility');
+  // }
 
   void _buildStatusMarkers() {
     completedMarkers.clear();
@@ -3337,155 +3357,172 @@ _isWorkLayerInitialized = true;
                   ),
                   const SizedBox(height: 8),
                   if (selectedJobStatus != "ASSIGNED")
-                    Text("Select Vegetation",style: TextStyle(fontWeight: FontWeight.bold),),
-                    /////checkbox according to crew maintType initially
-                    Builder(
-  builder: (context) {
-                     final userMaintTypes = maintType
-        .split(',')
-        .map((type) => type.trim().toUpperCase())
-        .where((type) => type.isNotEmpty)
-        .toSet();
-
-    final polyline = overHeadPolylines[selectedPolylineIndex!];
-
-    final maintTypes = polyline.maintType
-        .split(',')
-        .map((type) => type.trim().toUpperCase())
-        .toList();
-
-    final maintStatuses = polyline.maintStatus
-        .split(',')
-        .map((status) => status.trim().toUpperCase())
-        .toList();
-
-    // Only show the row if the user's assigned maintenance type
-    // has an eligible status.
-    final hasAssignedIncompleteType =
-        List.generate(maintTypes.length, (i) => i).any((i) {
-      final type = maintTypes[i];
-
-      final status = i < maintStatuses.length
-          ? maintStatuses[i]
-          : '';
-
-      return userMaintTypes.contains(type) &&
-          {'REWORK', 'PENDING', 'FAILED'}.contains(status);
-    });
-
-    final shouldShowRow =
-        !allStatusesCompleted &&
-        selectedJobStatus.trim().toUpperCase() == 'ASSIGNED' &&
-        hasAssignedIncompleteType;
-
-    if (!shouldShowRow) {
-      return const Padding(
-        padding: EdgeInsets.only(left: 8.0),
-        child: Text(
-          "Select Vegetation",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
-      );
-    }
-
-if (!allStatusesCompleted &&
-    selectedJobStatus == "ASSIGNED" &&
-    hasAssignedIncompleteType){
-                  // if (!allStatusesCompleted)
-                  //   if (selectedJobStatus == "ASSIGNED")
-                     return Row(
-                        children: [
-                          Checkbox(
-                            value: isMarkAsRead,
-                            activeColor: Colors.green,
-                            onChanged: (value) {
-                              final polyline =
-                                  overHeadPolylines[selectedPolylineIndex!];
-
-                              setState(() {
-                                isMarkAsRead = value ?? false;
-
-                                if (isMarkAsRead) {
-                                  final maintTypes = polyline.maintType
-                                      .split(',')
-                                      .map((e) => e.trim())
-                                      .toList();
-
-                                  final maintStatuses = polyline.maintStatus
-                                      .split(',')
-                                      .map((e) => e.trim())
-                                      .toList();
-
-                                  final coordinateIds = polyline.coordinateIds
-                                      .split(',')
-                                      .map((e) => e.trim())
-                                      .toList();
-
-                                  for (int i = 0; i < maintTypes.length; i++) {
-                                    final maintType = maintTypes[i];
-
-                                    final maintStatus = i < maintStatuses.length
-                                        ? maintStatuses[i]
-                                        : "";
-
-                                    // Skip completed maintenance types
-                                    if (maintStatus.toLowerCase() ==
-                                        "completed") {
-                                      continue;
-                                    }
-
-                                    final parentFeatureId =
-                                        i < coordinateIds.length
-                                        ? coordinateIds[i]
-                                        : "";
-
-                                    final exists = lines.any(
-                                      (e) =>
-                                          e["parentFeatureId"] ==
-                                              parentFeatureId &&
-                                          e["maintTypes"] == maintType,
-                                    );
-
-                                    if (!exists) {
-                                      lines.add({
-                                        "mapId": polyline.oid.toString(),
-                                        "crewId": id.toString(),
-                                        "parentFeatureId": parentFeatureId,
-                                        "maintTypes": maintType,
-                                        "tokenNo": widget.jobNo,
-                                      });
-                                    }
-                                  }
-                                } else {
-                                  // Remove only current span objects
-                                  lines.removeWhere(
-                                    (e) =>
-                                        e["mapId"] == polyline.oid.toString(),
-                                  );
-                                }
-
-                                print(lines);
-                              });
-                            },
-                          ),
-                          const SizedBox(width: 4),
-                          const Text(
-                            "Mark as Completed",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      );}
-                      else{
-                          return Padding(
-                            padding: const EdgeInsets.only(left:8.0),
-                            child: Text("Select Vegetation",style: TextStyle(fontWeight: FontWeight.bold),),
-                          );
-                      }
-                   },
+                    Text(
+                      "Select Vegetation",
+                      style: TextStyle(fontWeight: FontWeight.bold),
                     ),
+                  /////checkbox according to crew maintType initially
+                  Builder(
+                    builder: (context) {
+                      final userMaintTypes = maintType
+                          .split(',')
+                          .map((type) => type.trim().toUpperCase())
+                          .where((type) => type.isNotEmpty)
+                          .toSet();
+
+                      final polyline =
+                          overHeadPolylines[selectedPolylineIndex!];
+
+                      final maintTypes = polyline.maintType
+                          .split(',')
+                          .map((type) => type.trim().toUpperCase())
+                          .toList();
+
+                      final maintStatuses = polyline.maintStatus
+                          .split(',')
+                          .map((status) => status.trim().toUpperCase())
+                          .toList();
+
+                      // Only show the row if the user's assigned maintenance type
+                      // has an eligible status.
+                      final hasAssignedIncompleteType =
+                          List.generate(maintTypes.length, (i) => i).any((i) {
+                            final type = maintTypes[i];
+
+                            final status = i < maintStatuses.length
+                                ? maintStatuses[i]
+                                : '';
+
+                            return userMaintTypes.contains(type) &&
+                                {
+                                  'REWORK',
+                                  'PENDING',
+                                  'FAILED',
+                                }.contains(status);
+                          });
+
+                      final shouldShowRow =
+                          !allStatusesCompleted &&
+                          selectedJobStatus.trim().toUpperCase() ==
+                              'ASSIGNED' &&
+                          hasAssignedIncompleteType;
+
+                      if (!shouldShowRow) {
+                        return const Padding(
+                          padding: EdgeInsets.only(left: 8.0),
+                          child: Text(
+                            "Select Vegetation",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        );
+                      }
+
+                      if (!allStatusesCompleted &&
+                          selectedJobStatus == "ASSIGNED" &&
+                          hasAssignedIncompleteType) {
+                        // if (!allStatusesCompleted)
+                        //   if (selectedJobStatus == "ASSIGNED")
+                        return Row(
+                          children: [
+                            Checkbox(
+                              value: isMarkAsRead,
+                              activeColor: Colors.green,
+                              onChanged: (value) {
+                                final polyline =
+                                    overHeadPolylines[selectedPolylineIndex!];
+
+                                setState(() {
+                                  isMarkAsRead = value ?? false;
+
+                                  if (isMarkAsRead) {
+                                    final maintTypes = polyline.maintType
+                                        .split(',')
+                                        .map((e) => e.trim())
+                                        .toList();
+
+                                    final maintStatuses = polyline.maintStatus
+                                        .split(',')
+                                        .map((e) => e.trim())
+                                        .toList();
+
+                                    final coordinateIds = polyline.coordinateIds
+                                        .split(',')
+                                        .map((e) => e.trim())
+                                        .toList();
+
+                                    for (
+                                      int i = 0;
+                                      i < maintTypes.length;
+                                      i++
+                                    ) {
+                                      final maintType = maintTypes[i];
+
+                                      final maintStatus =
+                                          i < maintStatuses.length
+                                          ? maintStatuses[i]
+                                          : "";
+
+                                      // Skip completed maintenance types
+                                      if (maintStatus.toLowerCase() ==
+                                          "completed") {
+                                        continue;
+                                      }
+
+                                      final parentFeatureId =
+                                          i < coordinateIds.length
+                                          ? coordinateIds[i]
+                                          : "";
+
+                                      final exists = lines.any(
+                                        (e) =>
+                                            e["parentFeatureId"] ==
+                                                parentFeatureId &&
+                                            e["maintTypes"] == maintType,
+                                      );
+
+                                      if (!exists) {
+                                        lines.add({
+                                          "mapId": polyline.oid.toString(),
+                                          "crewId": id.toString(),
+                                          "parentFeatureId": parentFeatureId,
+                                          "maintTypes": maintType,
+                                          "tokenNo": widget.jobNo,
+                                        });
+                                      }
+                                    }
+                                  } else {
+                                    // Remove only current span objects
+                                    lines.removeWhere(
+                                      (e) =>
+                                          e["mapId"] == polyline.oid.toString(),
+                                    );
+                                  }
+
+                                  print(lines);
+                                });
+                              },
+                            ),
+                            const SizedBox(width: 4),
+                            const Text(
+                              "Mark as Completed",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        );
+                      } else {
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Text(
+                            "Select Vegetation",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        );
+                      }
+                    },
+                  ),
                 ],
               ),
             ),
@@ -4144,179 +4181,201 @@ if (!allStatusesCompleted &&
                       //               "pending" ||
                       //           selectedMaintStatus.trim().toLowerCase() ==
                       //               "failed")
-                            // ?
-                           
-                           /////checkbox according to crew maintType initially                     
-                           Builder(
-                            builder: (context) {
-                            final userMaintTypes = maintType
-                             .split(',')
-                             .map((type) => type.trim().toUpperCase())
-                             .where((type) => type.isNotEmpty)
-                             .toSet();
+                      // ?
 
-                              final polyline = overHeadPolylines[index];
+                      /////checkbox according to crew maintType initially
+                      Builder(
+                        builder: (context) {
+                          final userMaintTypes = maintType
+                              .split(',')
+                              .map((type) => type.trim().toUpperCase())
+                              .where((type) => type.isNotEmpty)
+                              .toSet();
 
-                              final polylineMaintTypes = polyline.maintType
-                                                        .split(',')
-                                                        .map((type) => type.trim().toUpperCase())
-                                                        .toList();
+                          final polyline = overHeadPolylines[index];
 
-                              final polylineMaintStatuses = polyline.maintStatus
-                                                        .split(',')
-                                                        .map((status) => status.trim().toUpperCase())
-                                                        .toList();
+                          final polylineMaintTypes = polyline.maintType
+                              .split(',')
+                              .map((type) => type.trim().toUpperCase())
+                              .toList();
 
-                              // Find the status for the currently selected vegetation type.
-                              final selectedIndex = polylineMaintTypes.indexOf(
-                                                    selectedMaintType.trim().toUpperCase(),
-                                                    );
+                          final polylineMaintStatuses = polyline.maintStatus
+                              .split(',')
+                              .map((status) => status.trim().toUpperCase())
+                              .toList();
 
-                              final selectedStatus = selectedIndex >= 0 &&
-                              selectedIndex < polylineMaintStatuses.length
+                          // Find the status for the currently selected vegetation type.
+                          final selectedIndex = polylineMaintTypes.indexOf(
+                            selectedMaintType.trim().toUpperCase(),
+                          );
+
+                          final selectedStatus =
+                              selectedIndex >= 0 &&
+                                  selectedIndex < polylineMaintStatuses.length
                               ? polylineMaintStatuses[selectedIndex]
                               : '';
 
-                              // The selected type must belong to this user and have an
-                              // eligible status.
-                              final shouldShowRow =
-                              selectedJobStatus.trim().toUpperCase() == 'ASSIGNED' &&
+                          // The selected type must belong to this user and have an
+                          // eligible status.
+                          final shouldShowRow =
+                              selectedJobStatus.trim().toUpperCase() ==
+                                  'ASSIGNED' &&
                               userMaintTypes.contains(
-                              selectedMaintType.trim().toUpperCase(),
+                                selectedMaintType.trim().toUpperCase(),
                               ) &&
-                              {'REWORK', 'PENDING', 'FAILED'}.contains(selectedStatus);
+                              {
+                                'REWORK',
+                                'PENDING',
+                                'FAILED',
+                              }.contains(selectedStatus);
 
-                               print('selectedMaintType: $selectedMaintType');
-                               print('selectedStatus: $selectedStatus');
-                               print('shouldShowRow: $shouldShowRow');
+                          print('selectedMaintType: $selectedMaintType');
+                          print('selectedStatus: $selectedStatus');
+                          print('shouldShowRow: $shouldShowRow');
 
-                               if (!shouldShowRow) {
-                               return const SizedBox.shrink();
-                               }
+                          if (!shouldShowRow) {
+                            return const SizedBox.shrink();
+                          }
 
-                               return Row(
-                               mainAxisAlignment: MainAxisAlignment.start,
-                               children: [
-                               Checkbox(
-                               value: isMarkAsRead,
-                               activeColor: Colors.green,
-                               onChanged: (value) {
-                               setDialogState(() {
-                               isMarkAsRead = value ?? false;
+                          return Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Checkbox(
+                                value: isMarkAsRead,
+                                activeColor: Colors.green,
+                                onChanged: (value) {
+                                  setDialogState(() {
+                                    isMarkAsRead = value ?? false;
 
-                               final polyline = overHeadPolylines[index];
+                                    final polyline = overHeadPolylines[index];
 
-                               if (isMarkAsRead) {
-                               final maintTypes = polyline.maintType
-                               .split(',')
-                               .map((e) => e.trim())
-                               .toList();
+                                    if (isMarkAsRead) {
+                                      final maintTypes = polyline.maintType
+                                          .split(',')
+                                          .map((e) => e.trim())
+                                          .toList();
 
-                final maintStatuses = polyline.maintStatus
-                    .split(',')
-                    .map((e) => e.trim().toUpperCase())
-                    .toList();
+                                      final maintStatuses = polyline.maintStatus
+                                          .split(',')
+                                          .map((e) => e.trim().toUpperCase())
+                                          .toList();
 
-                final coordinateIds = polyline.coordinateIds
-                    .split(',')
-                    .map((e) => e.trim())
-                    .toList();
+                                      final coordinateIds = polyline
+                                          .coordinateIds
+                                          .split(',')
+                                          .map((e) => e.trim())
+                                          .toList();
 
-                for (int i = 0; i < maintTypes.length; i++) {
-                  final type = maintTypes[i].toUpperCase();
+                                      for (
+                                        int i = 0;
+                                        i < maintTypes.length;
+                                        i++
+                                      ) {
+                                        final type = maintTypes[i]
+                                            .toUpperCase();
 
-                  final status = i < maintStatuses.length
-                      ? maintStatuses[i]
-                      : '';
+                                        final status = i < maintStatuses.length
+                                            ? maintStatuses[i]
+                                            : '';
 
-                  // Only process the currently selected type,
-                  // and only if assigned to this user.
-                  if (type !=
-                          selectedMaintType.trim().toUpperCase() ||
-                      !userMaintTypes.contains(type)) {
-                    continue;
-                  }
+                                        // Only process the currently selected type,
+                                        // and only if assigned to this user.
+                                        if (type !=
+                                                selectedMaintType
+                                                    .trim()
+                                                    .toUpperCase() ||
+                                            !userMaintTypes.contains(type)) {
+                                          continue;
+                                        }
 
-                  // Skip completed maintenance types.
-                  if (status == 'COMPLETED') {
-                    continue;
-                  }
+                                        // Skip completed maintenance types.
+                                        if (status == 'COMPLETED') {
+                                          continue;
+                                        }
 
-                  final parentFeatureId = i < coordinateIds.length
-                      ? coordinateIds[i]
-                      : '';
+                                        final parentFeatureId =
+                                            i < coordinateIds.length
+                                            ? coordinateIds[i]
+                                            : '';
 
-                  final exists = lines.any(
-                    (e) =>
-                        e['mapId'] == polyline.oid.toString() &&
-                        e['parentFeatureId'] == parentFeatureId &&
-                        e['maintTypes'] == maintTypes[i],
-                  );
+                                        final exists = lines.any(
+                                          (e) =>
+                                              e['mapId'] ==
+                                                  polyline.oid.toString() &&
+                                              e['parentFeatureId'] ==
+                                                  parentFeatureId &&
+                                              e['maintTypes'] == maintTypes[i],
+                                        );
 
-                  if (!exists) {
-                    lines.add({
-                      'mapId': polyline.oid.toString(),
-                      'crewId': id.toString(),
-                      'parentFeatureId': parentFeatureId,
-                      'maintTypes': maintTypes[i],
-                      'tokenNo': widget.jobNo,
-                    });
-                  }
-                }
-              } else {
-                // Remove only the selected maintenance type.
-                lines.removeWhere(
-                  (e) =>
-                      e['mapId'] == polyline.oid.toString() &&
-                      e['maintTypes'].toString().toUpperCase() ==
-                          selectedMaintType.trim().toUpperCase(),
-                );
-              }
-            });
-          },
-        ),
-        const Text(
-          'Mark as Completed',
-          style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(width: 8),
-        InkWell(
-          onTap: isMarkAsRead
-              ? () async {
-                  _showSubmitProgressDialog();
-                }
-              : null,
-          borderRadius: BorderRadius.circular(8),
-          child: Opacity(
-            opacity: isMarkAsRead ? 1.0 : 0.4,
-            child: Container(
-              height: 30,
-              width: 64,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: Colors.green,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                'Submit',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  },
-),
+                                        if (!exists) {
+                                          lines.add({
+                                            'mapId': polyline.oid.toString(),
+                                            'crewId': id.toString(),
+                                            'parentFeatureId': parentFeatureId,
+                                            'maintTypes': maintTypes[i],
+                                            'tokenNo': widget.jobNo,
+                                          });
+                                        }
+                                      }
+                                    } else {
+                                      // Remove only the selected maintenance type.
+                                      lines.removeWhere(
+                                        (e) =>
+                                            e['mapId'] ==
+                                                polyline.oid.toString() &&
+                                            e['maintTypes']
+                                                    .toString()
+                                                    .toUpperCase() ==
+                                                selectedMaintType
+                                                    .trim()
+                                                    .toUpperCase(),
+                                      );
+                                    }
+                                  });
+                                },
+                              ),
+                              const Text(
+                                'Mark as Completed',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              InkWell(
+                                onTap: isMarkAsRead
+                                    ? () async {
+                                        _showSubmitProgressDialog();
+                                      }
+                                    : null,
+                                borderRadius: BorderRadius.circular(8),
+                                child: Opacity(
+                                  opacity: isMarkAsRead ? 1.0 : 0.4,
+                                  child: Container(
+                                    height: 30,
+                                    width: 64,
+                                    alignment: Alignment.center,
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Text(
+                                      'Submit',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
 
-                            // : SizedBox(),
+                      // : SizedBox(),
                       Padding(
                         padding: const EdgeInsets.only(left: 10.0),
                         child: Column(
@@ -4346,15 +4405,115 @@ if (!allStatusesCompleted &&
                                           //               .contains(entry.key),
                                           //     ) // Show only selected colors
                                           //     )
+                                          //                                               .map((entry) {
+                                          //                                                 final isSelected =
+                                          //                                                     selectedMaintType ==
+                                          //                                                     entry.key;
+                                          //                                                 return InkWell(
+                                          //                                                   onTap: () {
+                                          //                                                     setDialogState(() {
+                                          //                                                       selectedMaintType =
+                                          //                                                           entry.key;
+                                          //                                                       final maintTypes =
+                                          //                                                           overHeadPolylines[index]
+                                          //                                                               .maintType
+                                          //                                                               .split(',');
+                                          //                                                       final maintStatuses =
+                                          //                                                           overHeadPolylines[index]
+                                          //                                                               .maintStatus
+                                          //                                                               .split(',');
+                                          //                                                       final selectedIndex =
+                                          //                                                           maintTypes.indexWhere(
+                                          //                                                             (e) =>
+                                          //                                                                 e
+                                          //                                                                     .trim()
+                                          //                                                                     .toUpperCase() ==
+                                          //                                                                 entry.key
+                                          //                                                                     .toUpperCase(),
+                                          //                                                           );
+                                          //                                                       if (selectedIndex != -1 &&
+                                          //                                                           selectedIndex <
+                                          //                                                               maintStatuses
+                                          //                                                                   .length) {
+                                          //                                                         selectedMaintStatus =
+                                          //                                                             maintStatuses[selectedIndex]
+                                          //                                                                 .trim();
+                                          //                                                         // // If the selected value is empty, use "Pending"
+                                          //                                                         // if (selectedMaintStatus
+                                          //                                                         //     .isEmpty) {
+                                          //                                                         //   selectedMaintStatus =
+                                          //                                                         //       "Pending";
+                                          //                                                         // }
+                                          //                                                       } else {
+                                          //                                                         selectedMaintStatus =
+                                          //                                                             "";
+                                          //                                                       }
+                                          //                                                     });
+                                          //                                                   },
+                                          //                                                   child: Container(
+                                          //                                                     width: 28,
+                                          //                                                     height: 28,
+                                          //                                                     decoration: BoxDecoration(
+                                          //                                                       color: entry.value,
+                                          //                                                       border: Border.all(
+                                          //                                                         color: isSelected
+                                          //                                                             ? Colors.black
+                                          //                                                             : Colors.grey,
+                                          //                                                         width: isSelected
+                                          //                                                             ? 3
+                                          //                                                             : 1,
+                                          //                                                       ),
+                                          //                                                       borderRadius:
+                                          //                                                           BorderRadius.circular(
+                                          //                                                             4,
+                                          //                                                           ),
+                                          //                                                     ),
+                                          //                                                     child: isSelected
+                                          //                                                         ? const Icon(
+                                          //                                                             Icons.check,
+                                          //                                                             color: Colors.white,
+                                          //                                                             size: 18,
+                                          //                                                           )
+                                          //                                                         : null,
+                                          //                                                   ),
+                                          //                                                 );
+                                          //                                               })
+                                          //                                               .toList(),
                                           ////////checkbox according to crew maintType initially
-                                          (workTypeColors.entries.where(
-                                          (entry) => workLayerVisibility.entries.any(
-                                          (layer) =>
-                                          layer.value &&
-                                          layer.key.trim().toUpperCase() ==
-                                          entry.key.trim().toUpperCase(),
-                                          ),
-                                          ))
+                                          workTypeColors.entries
+                                              .where((entry) {
+                                                final type = entry.key
+                                                    .trim()
+                                                    .toUpperCase();
+
+                                                final isSelectedInWorkTypes =
+                                                    selectedWorkTypesUpdate.any(
+                                                      (selectedType) =>
+                                                          selectedType
+                                                              .trim()
+                                                              .toUpperCase() ==
+                                                          type,
+                                                    );
+
+                                                final isLayerVisible =
+                                                    workLayerVisibility.entries.any(
+                                                      (layer) =>
+                                                          layer.key
+                                                                  .trim()
+                                                                  .toUpperCase() ==
+                                                              type &&
+                                                          layer.value == true,
+                                                    );
+
+                                                debugPrint(
+                                                  'Type: $type | '
+                                                  'selectedWorkTypesUpdate: $isSelectedInWorkTypes | '
+                                                  'workLayerVisibility: $isLayerVisible',
+                                                );
+
+                                                return isSelectedInWorkTypes &&
+                                                    isLayerVisible;
+                                              })
                                               .map((entry) {
                                                 final isSelected =
                                                     selectedMaintType ==
@@ -4370,7 +4529,6 @@ if (!allStatusesCompleted &&
                                                           overHeadPolylines[index]
                                                               .maintType
                                                               .split(',');
-
                                                       final maintStatuses =
                                                           overHeadPolylines[index]
                                                               .maintStatus
@@ -4383,26 +4541,18 @@ if (!allStatusesCompleted &&
                                                                     .trim()
                                                                     .toUpperCase() ==
                                                                 entry.key
+                                                                    .trim()
                                                                     .toUpperCase(),
                                                           );
 
-                                                      if (selectedIndex != -1 &&
-                                                          selectedIndex <
-                                                              maintStatuses
-                                                                  .length) {
-                                                        selectedMaintStatus =
-                                                            maintStatuses[selectedIndex]
-                                                                .trim();
-                                                        // // If the selected value is empty, use "Pending"
-                                                        // if (selectedMaintStatus
-                                                        //     .isEmpty) {
-                                                        //   selectedMaintStatus =
-                                                        //       "Pending";
-                                                        // }
-                                                      } else {
-                                                        selectedMaintStatus =
-                                                            "";
-                                                      }
+                                                      selectedMaintStatus =
+                                                          selectedIndex != -1 &&
+                                                              selectedIndex <
+                                                                  maintStatuses
+                                                                      .length
+                                                          ? maintStatuses[selectedIndex]
+                                                                .trim()
+                                                          : '';
                                                     });
                                                   },
                                                   child: Container(
@@ -5883,55 +6033,52 @@ if (!allStatusesCompleted &&
     /////////////////////////
     ////////checkbox according to crew maintType initially
     final userMaintTypes = maintType
-      .split(',')
-      .map((type) => type.trim().toUpperCase())
-      .where((type) => type.isNotEmpty)
-      .toSet();
-
-  // Build the set of maintenance types that are not completed
-  // and are assigned to the current user.
-  final Set<String> allowedTypes = {};
-
-  for (final polyline in overHeadPolylines) {
-    final types = polyline.maintType
         .split(',')
-        .map((e) => e.trim())
-        .toList();
+        .map((type) => type.trim().toUpperCase())
+        .where((type) => type.isNotEmpty)
+        .toSet();
 
-    final statuses = polyline.maintStatus
-        .split(',')
-        .map((e) => e.trim())
-        .toList();
+    // Build the set of maintenance types that are not completed
+    // and are assigned to the current user.
+    final Set<String> allowedTypes = {};
 
-    for (int i = 0; i < types.length; i++) {
-      final type = types[i].toUpperCase();
-      final status =
-          i < statuses.length ? statuses[i].toUpperCase() : '';
+    for (final polyline in overHeadPolylines) {
+      final types = polyline.maintType.split(',').map((e) => e.trim()).toList();
 
-      if (userMaintTypes.contains(type) &&
-          type != 'NO SPRAY' &&
-          status != 'COMPLETED') {
-        allowedTypes.add(type);
+      final statuses = polyline.maintStatus
+          .split(',')
+          .map((e) => e.trim())
+          .toList();
+
+      for (int i = 0; i < types.length; i++) {
+        final type = types[i].toUpperCase();
+        final status = i < statuses.length ? statuses[i].toUpperCase() : '';
+
+        if (userMaintTypes.contains(type) &&
+            type != 'NO SPRAY' &&
+            status != 'COMPLETED') {
+          allowedTypes.add(type);
+        }
       }
     }
-  }
 
-  // Keep only eligible maintenance objects.
-  availableLines = lines.where((e) {
-    final type = e['maintTypes'].toString().trim().toUpperCase();
-    return allowedTypes.contains(type);
-  }).map((e) => Map<String, dynamic>.from(e)).toList();
+    // Keep only eligible maintenance objects.
+    availableLines = lines
+        .where((e) {
+          final type = e['maintTypes'].toString().trim().toUpperCase();
+          return allowedTypes.contains(type);
+        })
+        .map((e) => Map<String, dynamic>.from(e))
+        .toList();
 
-  // Display each maintenance type once.
-  final addedTypes = <String>{};
+    // Display each maintenance type once.
+    final addedTypes = <String>{};
 
-  final spanItems = availableLines.where((item) {
-    return addedTypes.add(
-      item['maintTypes'].toString().trim().toUpperCase(),
-    );
-  }).toList();
+    final spanItems = availableLines.where((item) {
+      return addedTypes.add(item['maintTypes'].toString().trim().toUpperCase());
+    }).toList();
 
-  List<String> tempSelectedTypes = [];
+    List<String> tempSelectedTypes = [];
 
     ////////////////////////////////////////////
     // availableLines = lines
@@ -5941,7 +6088,7 @@ if (!allStatusesCompleted &&
     //     .map((e) => Map<String, dynamic>.from(e))
     //     .toList();
     //////////////////////////////////////////////////////
-    
+
     // Selected list starts empty
     // lines.clear();
 
