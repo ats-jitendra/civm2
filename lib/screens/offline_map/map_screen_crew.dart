@@ -3341,36 +3341,52 @@ _isWorkLayerInitialized = true;
                     /////checkbox according to crew maintType initially
                     Builder(
   builder: (context) {
-                    final userMaintTypes = maintType
-    .split(',')
-    .map((type) => type.trim().toUpperCase())
-    .where((type) => type.isNotEmpty)
-    .toSet();
+                     final userMaintTypes = maintType
+        .split(',')
+        .map((type) => type.trim().toUpperCase())
+        .where((type) => type.isNotEmpty)
+        .toSet();
 
-final polyline = overHeadPolylines[selectedPolylineIndex!];
+    final polyline = overHeadPolylines[selectedPolylineIndex!];
 
-final maintTypes = polyline.maintType
-    .split(',')
-    .map((type) => type.trim())
-    .toList();
+    final maintTypes = polyline.maintType
+        .split(',')
+        .map((type) => type.trim().toUpperCase())
+        .toList();
 
-final maintStatuses = polyline.maintStatus
-    .split(',')
-    .map((status) => status.trim())
-    .toList();
+    final maintStatuses = polyline.maintStatus
+        .split(',')
+        .map((status) => status.trim().toUpperCase())
+        .toList();
 
-final hasAssignedIncompleteType = List.generate(
-  maintTypes.length,
-  (i) => i,
-).any((i) {
-  final type = maintTypes[i].toUpperCase();
+    // Only show the row if the user's assigned maintenance type
+    // has an eligible status.
+    final hasAssignedIncompleteType =
+        List.generate(maintTypes.length, (i) => i).any((i) {
+      final type = maintTypes[i];
 
-  final status = i < maintStatuses.length
-      ? maintStatuses[i].toUpperCase()
-      : '';
+      final status = i < maintStatuses.length
+          ? maintStatuses[i]
+          : '';
 
-  return userMaintTypes.contains(type) && status != 'COMPLETED';
-});
+      return userMaintTypes.contains(type) &&
+          {'REWORK', 'PENDING', 'FAILED'}.contains(status);
+    });
+
+    final shouldShowRow =
+        !allStatusesCompleted &&
+        selectedJobStatus.trim().toUpperCase() == 'ASSIGNED' &&
+        hasAssignedIncompleteType;
+
+    if (!shouldShowRow) {
+      return const Padding(
+        padding: EdgeInsets.only(left: 8.0),
+        child: Text(
+          "Select Vegetation",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+      );
+    }
 
 if (!allStatusesCompleted &&
     selectedJobStatus == "ASSIGNED" &&
@@ -4129,178 +4145,177 @@ if (!allStatusesCompleted &&
                       //           selectedMaintStatus.trim().toLowerCase() ==
                       //               "failed")
                             // ?
-                            /////checkbox according to crew maintType initially
-                            Builder(
-  builder: (context) {
-    final userMaintTypes = maintType
-        .split(',')
-        .map((type) => type.trim().toUpperCase())
-        .where((type) => type.isNotEmpty)
-        .toSet();
+                           
+                           /////checkbox according to crew maintType initially                     
+                           Builder(
+                            builder: (context) {
+                            final userMaintTypes = maintType
+                             .split(',')
+                             .map((type) => type.trim().toUpperCase())
+                             .where((type) => type.isNotEmpty)
+                             .toSet();
 
-    final polyline = overHeadPolylines[index];
+                              final polyline = overHeadPolylines[index];
 
-    final maintTypes = polyline.maintType
-        .split(',')
-        .map((e) => e.trim())
-        .toList();
+                              final polylineMaintTypes = polyline.maintType
+                                                        .split(',')
+                                                        .map((type) => type.trim().toUpperCase())
+                                                        .toList();
 
-    final maintStatuses = polyline.maintStatus
-        .split(',')
-        .map((e) => e.trim())
-        .toList();
+                              final polylineMaintStatuses = polyline.maintStatus
+                                                        .split(',')
+                                                        .map((status) => status.trim().toUpperCase())
+                                                        .toList();
 
-    final hasAssignedIncompleteType =
-        List.generate(maintTypes.length, (i) => i).any((i) {
-      final type = maintTypes[i].toUpperCase();
+                              // Find the status for the currently selected vegetation type.
+                              final selectedIndex = polylineMaintTypes.indexOf(
+                                                    selectedMaintType.trim().toUpperCase(),
+                                                    );
 
-      final status = i < maintStatuses.length
-          ? maintStatuses[i].toUpperCase()
-          : '';
+                              final selectedStatus = selectedIndex >= 0 &&
+                              selectedIndex < polylineMaintStatuses.length
+                              ? polylineMaintStatuses[selectedIndex]
+                              : '';
 
-      return userMaintTypes.contains(type) &&
-          status != 'COMPLETED';
-    });
+                              // The selected type must belong to this user and have an
+                              // eligible status.
+                              final shouldShowRow =
+                              selectedJobStatus.trim().toUpperCase() == 'ASSIGNED' &&
+                              userMaintTypes.contains(
+                              selectedMaintType.trim().toUpperCase(),
+                              ) &&
+                              {'REWORK', 'PENDING', 'FAILED'}.contains(selectedStatus);
 
-    final normalizedStatus =
-        selectedMaintStatus.trim().toLowerCase();
+                               print('selectedMaintType: $selectedMaintType');
+                               print('selectedStatus: $selectedStatus');
+                               print('shouldShowRow: $shouldShowRow');
 
-    final isAllowedStatus =
-        normalizedStatus == 'rework' ||
-        normalizedStatus == 'pending' ||
-        normalizedStatus == 'failed';
+                               if (!shouldShowRow) {
+                               return const SizedBox.shrink();
+                               }
 
-    if (selectedJobStatus != "ASSIGNED" ||
-        !isAllowedStatus ||
-        !hasAssignedIncompleteType) {
-      return const SizedBox.shrink();
-    }
-                            return Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Checkbox(
-                                    value: isMarkAsRead,
-                                    activeColor: Colors.green,
-                                    onChanged: (value) {
-                                      setDialogState(() {
-                                        isMarkAsRead = value ?? false;
+                               return Row(
+                               mainAxisAlignment: MainAxisAlignment.start,
+                               children: [
+                               Checkbox(
+                               value: isMarkAsRead,
+                               activeColor: Colors.green,
+                               onChanged: (value) {
+                               setDialogState(() {
+                               isMarkAsRead = value ?? false;
 
-                                        final polyline =
-                                            overHeadPolylines[index];
+                               final polyline = overHeadPolylines[index];
 
-                                        if (isMarkAsRead) {
-                                          final maintTypes = polyline.maintType
-                                              .split(',')
-                                              .map((e) => e.trim())
-                                              .toList();
+                               if (isMarkAsRead) {
+                               final maintTypes = polyline.maintType
+                               .split(',')
+                               .map((e) => e.trim())
+                               .toList();
 
-                                          final maintStatuses = polyline
-                                              .maintStatus
-                                              .split(',')
-                                              .map((e) => e.trim())
-                                              .toList();
+                final maintStatuses = polyline.maintStatus
+                    .split(',')
+                    .map((e) => e.trim().toUpperCase())
+                    .toList();
 
-                                          final coordinateIds = polyline
-                                              .coordinateIds
-                                              .split(',')
-                                              .map((e) => e.trim())
-                                              .toList();
+                final coordinateIds = polyline.coordinateIds
+                    .split(',')
+                    .map((e) => e.trim())
+                    .toList();
 
-                                          for (
-                                            int i = 0;
-                                            i < maintTypes.length;
-                                            i++
-                                          ) {
-                                            final maintType = maintTypes[i];
+                for (int i = 0; i < maintTypes.length; i++) {
+                  final type = maintTypes[i].toUpperCase();
 
-                                            final maintStatus =
-                                                i < maintStatuses.length
-                                                ? maintStatuses[i]
-                                                : "";
+                  final status = i < maintStatuses.length
+                      ? maintStatuses[i]
+                      : '';
 
-                                            // Skip completed maintenance types
-                                            if (maintStatus.toLowerCase() ==
-                                                "completed") {
-                                              continue;
-                                            }
+                  // Only process the currently selected type,
+                  // and only if assigned to this user.
+                  if (type !=
+                          selectedMaintType.trim().toUpperCase() ||
+                      !userMaintTypes.contains(type)) {
+                    continue;
+                  }
 
-                                            final parentFeatureId =
-                                                i < coordinateIds.length
-                                                ? coordinateIds[i]
-                                                : "";
+                  // Skip completed maintenance types.
+                  if (status == 'COMPLETED') {
+                    continue;
+                  }
 
-                                            final exists = lines.any(
-                                              (e) =>
-                                                  e["parentFeatureId"] ==
-                                                      parentFeatureId &&
-                                                  e["maintTypes"] == maintType,
-                                            );
+                  final parentFeatureId = i < coordinateIds.length
+                      ? coordinateIds[i]
+                      : '';
 
-                                            if (!exists) {
-                                              lines.add({
-                                                "mapId": polyline.oid
-                                                    .toString(),
-                                                "crewId": id.toString(),
-                                                "parentFeatureId":
-                                                    parentFeatureId,
-                                                "maintTypes": maintType,
-                                                "tokenNo": widget.jobNo,
-                                              });
-                                            }
-                                          }
-                                        } else {
-                                          lines.removeWhere(
-                                            (e) =>
-                                                e["mapId"] ==
-                                                polyline.oid.toString(),
-                                          );
-                                        }
-                                      });
-                                    },
-                                  ),
-                                  //  const SizedBox(width: 4),
-                                  const Text(
-                                    "Mark as Completed",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  InkWell(
-                                    onTap: isMarkAsRead
-                                        ? () async {
-                                            _showSubmitProgressDialog();
-                                          }
-                                        : null,
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Opacity(
-                                      opacity: isMarkAsRead ? 1.0 : 0.4,
-                                      child: Container(
-                                        height: 30,
-                                        width: 64,
-                                        alignment: Alignment.center,
-                                        decoration: BoxDecoration(
-                                          color: Colors.green,
-                                          borderRadius: BorderRadius.circular(
-                                            8,
-                                          ),
-                                        ),
-                                        child: const Text(
-                                          "Submit",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              );
-                               },
+                  final exists = lines.any(
+                    (e) =>
+                        e['mapId'] == polyline.oid.toString() &&
+                        e['parentFeatureId'] == parentFeatureId &&
+                        e['maintTypes'] == maintTypes[i],
+                  );
+
+                  if (!exists) {
+                    lines.add({
+                      'mapId': polyline.oid.toString(),
+                      'crewId': id.toString(),
+                      'parentFeatureId': parentFeatureId,
+                      'maintTypes': maintTypes[i],
+                      'tokenNo': widget.jobNo,
+                    });
+                  }
+                }
+              } else {
+                // Remove only the selected maintenance type.
+                lines.removeWhere(
+                  (e) =>
+                      e['mapId'] == polyline.oid.toString() &&
+                      e['maintTypes'].toString().toUpperCase() ==
+                          selectedMaintType.trim().toUpperCase(),
+                );
+              }
+            });
+          },
+        ),
+        const Text(
+          'Mark as Completed',
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(width: 8),
+        InkWell(
+          onTap: isMarkAsRead
+              ? () async {
+                  _showSubmitProgressDialog();
+                }
+              : null,
+          borderRadius: BorderRadius.circular(8),
+          child: Opacity(
+            opacity: isMarkAsRead ? 1.0 : 0.4,
+            child: Container(
+              height: 30,
+              width: 64,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: Colors.green,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text(
+                'Submit',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  },
 ),
+
                             // : SizedBox(),
                       Padding(
                         padding: const EdgeInsets.only(left: 10.0),
@@ -5856,26 +5871,82 @@ if (!allStatusesCompleted &&
     // Copy available maintenance objects
     //availableLines = lines.map((e) => Map<String, dynamic>.from(e)).toList();
     //removed NO SPRAY objects from  availableLines
-    availableLines = lines
-        .where(
-          (e) => e["maintTypes"].toString().trim().toUpperCase() != "NO SPRAY",
-        )
-        .map((e) => Map<String, dynamic>.from(e))
+    /////////////////////////
+    ////////checkbox according to crew maintType initially
+    final userMaintTypes = maintType
+      .split(',')
+      .map((type) => type.trim().toUpperCase())
+      .where((type) => type.isNotEmpty)
+      .toSet();
+
+  // Build the set of maintenance types that are not completed
+  // and are assigned to the current user.
+  final Set<String> allowedTypes = {};
+
+  for (final polyline in overHeadPolylines) {
+    final types = polyline.maintType
+        .split(',')
+        .map((e) => e.trim())
         .toList();
+
+    final statuses = polyline.maintStatus
+        .split(',')
+        .map((e) => e.trim())
+        .toList();
+
+    for (int i = 0; i < types.length; i++) {
+      final type = types[i].toUpperCase();
+      final status =
+          i < statuses.length ? statuses[i].toUpperCase() : '';
+
+      if (userMaintTypes.contains(type) &&
+          type != 'NO SPRAY' &&
+          status != 'COMPLETED') {
+        allowedTypes.add(type);
+      }
+    }
+  }
+
+  // Keep only eligible maintenance objects.
+  availableLines = lines.where((e) {
+    final type = e['maintTypes'].toString().trim().toUpperCase();
+    return allowedTypes.contains(type);
+  }).map((e) => Map<String, dynamic>.from(e)).toList();
+
+  // Display each maintenance type once.
+  final addedTypes = <String>{};
+
+  final spanItems = availableLines.where((item) {
+    return addedTypes.add(
+      item['maintTypes'].toString().trim().toUpperCase(),
+    );
+  }).toList();
+
+  List<String> tempSelectedTypes = [];
+
+    ////////////////////////////////////////////
+    // availableLines = lines
+    //     .where(
+    //       (e) => e["maintTypes"].toString().trim().toUpperCase() != "NO SPRAY",
+    //     )
+    //     .map((e) => Map<String, dynamic>.from(e))
+    //     .toList();
+    //////////////////////////////////////////////////////
+    
     // Selected list starts empty
     // lines.clear();
 
-    final List<Map<String, dynamic>> allLines = availableLines;
-    // Remove duplicate maintTypes for UI only
-    final addedTypes = <String>{};
+    // final List<Map<String, dynamic>> allLines = availableLines;
+    // // Remove duplicate maintTypes for UI only
+    // final addedTypes = <String>{};
 
-    final spanItems = allLines.where((item) {
-      return addedTypes.add(item["maintTypes"].toString());
-    }).toList();
-    // Clear current selection
-    // lines.clear();
-    // Initially everything is unchecked
-    List<String> tempSelectedTypes = [];
+    // final spanItems = allLines.where((item) {
+    //   return addedTypes.add(item["maintTypes"].toString());
+    // }).toList();
+    // // Clear current selection
+    // // lines.clear();
+    // // Initially everything is unchecked
+    // List<String> tempSelectedTypes = [];
     showDialog(
       context: context,
       builder: (dialogContext) {
@@ -8774,6 +8845,12 @@ if (!allStatusesCompleted &&
     }
 
     return progress;
+  }
+
+  Future<void> getMaintType() async {
+    final userPreferences = Provider.of<UserPref>(context, listen: false);
+    UserModel data = await userPreferences.getUser();
+    maintType = data.user!.maintType.toString();
   }
 
   // Widget _buildImageGrid() {
