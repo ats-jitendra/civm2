@@ -4340,12 +4340,21 @@ if (!allStatusesCompleted &&
                                       spacing: 8,
                                       runSpacing: 8,
                                       children:
+                                          // (workTypeColors.entries.where(
+                                          //       (entry) =>
+                                          //           selectedWorkTypesUpdate
+                                          //               .contains(entry.key),
+                                          //     ) // Show only selected colors
+                                          //     )
+                                          ////////checkbox according to crew maintType initially
                                           (workTypeColors.entries.where(
-                                                (entry) =>
-                                                    selectedWorkTypesUpdate
-                                                        .contains(entry.key),
-                                              ) // Show only selected colors
-                                              )
+                                          (entry) => workLayerVisibility.entries.any(
+                                          (layer) =>
+                                          layer.value &&
+                                          layer.key.trim().toUpperCase() ==
+                                          entry.key.trim().toUpperCase(),
+                                          ),
+                                          ))
                                               .map((entry) {
                                                 final isSelected =
                                                     selectedMaintType ==
