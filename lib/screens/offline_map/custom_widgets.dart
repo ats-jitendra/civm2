@@ -289,7 +289,7 @@ class NetworkImageGallery extends StatelessWidget {
   });
 
   static const String baseUrl =
-      'https://civm.ariespro.com/assets/clientuploads/';
+      'https://civm.ariespro.com/assets/clientuploadstest/';
 
   @override
   Widget build(BuildContext context) {

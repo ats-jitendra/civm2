@@ -258,7 +258,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
     WakelockPlus.enable();
     getUserType();
     /////
-    // cameraInit();
+    cameraInit();
     _startListeningToCompass();
   }
 

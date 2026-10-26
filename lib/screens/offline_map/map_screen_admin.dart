@@ -230,7 +230,7 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
     WakelockPlus.enable();
     _startListeningToCompass();
     /////
-    // cameraInit();
+    cameraInit();
   }
 
   @override

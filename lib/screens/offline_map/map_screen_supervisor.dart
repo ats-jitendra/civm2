@@ -229,7 +229,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     _initializeMap();
     WakelockPlus.enable();
     /////
-    // cameraInit();
+    cameraInit();
     _startListeningToCompass();
   }
 

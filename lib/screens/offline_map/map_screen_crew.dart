@@ -213,7 +213,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     _initializeMap();
     WakelockPlus.enable();
     /////
-    // ensureCameraInitialized();
+    ensureCameraInitialized();
     _startListeningToCompass();
   }
 
@@ -4345,7 +4345,7 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                               InkWell(
                                 onTap: isMarkAsRead
                                     ? () async {
-                                        _showSubmitProgressDialog();
+                                        _showSubmitProgressDialog(index);
                                       }
                                     : null,
                                 borderRadius: BorderRadius.circular(8),
@@ -6026,83 +6026,52 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     );
   }
 
-  void _showSubmitProgressDialog() {
-    // Copy available maintenance objects
-    //availableLines = lines.map((e) => Map<String, dynamic>.from(e)).toList();
-    //removed NO SPRAY objects from  availableLines
-    /////////////////////////
-    ////////checkbox according to crew maintType initially
-    final userMaintTypes = maintType
-        .split(',')
-        .map((type) => type.trim().toUpperCase())
-        .where((type) => type.isNotEmpty)
-        .toSet();
+  void _showSubmitProgressDialog(int index) {
+  final polyline = overHeadPolylines[index];
+  final userMaintTypes = maintType
+      .split(',')
+      .map((type) => type.trim().toUpperCase())
+      .where((type) => type.isNotEmpty)
+      .toSet();
 
-    // Build the set of maintenance types that are not completed
-    // and are assigned to the current user.
-    final Set<String> allowedTypes = {};
+  final Set<String> allowedTypes = {};
 
-    for (final polyline in overHeadPolylines) {
-      final types = polyline.maintType.split(',').map((e) => e.trim()).toList();
+  final types = polyline.maintType
+      .split(',')
+      .map((e) => e.trim())
+      .toList();
 
-      final statuses = polyline.maintStatus
-          .split(',')
-          .map((e) => e.trim())
-          .toList();
+  final statuses = polyline.maintStatus
+      .split(',')
+      .map((e) => e.trim())
+      .toList();
 
-      for (int i = 0; i < types.length; i++) {
-        final type = types[i].toUpperCase();
-        final status = i < statuses.length ? statuses[i].toUpperCase() : '';
+  for (int i = 0; i < types.length; i++) {
+    final type = types[i].toUpperCase();
+    final status =
+        i < statuses.length ? statuses[i].toUpperCase() : '';
 
-        if (userMaintTypes.contains(type) &&
-            type != 'NO SPRAY' &&
-            status != 'COMPLETED') {
-          allowedTypes.add(type);
-        }
-      }
+    if (userMaintTypes.contains(type) &&
+        type != 'NO SPRAY' &&
+        status != 'COMPLETED') {
+      allowedTypes.add(type);
     }
+  }
 
-    // Keep only eligible maintenance objects.
-    availableLines = lines
-        .where((e) {
-          final type = e['maintTypes'].toString().trim().toUpperCase();
-          return allowedTypes.contains(type);
-        })
-        .map((e) => Map<String, dynamic>.from(e))
-        .toList();
+  availableLines = lines.where((e) {
+    final type = e['maintTypes'].toString().trim().toUpperCase();
+    return allowedTypes.contains(type);
+  }).map((e) => Map<String, dynamic>.from(e)).toList();
 
-    // Display each maintenance type once.
-    final addedTypes = <String>{};
+  final spanItems = allowedTypes
+      .map((type) => <String, dynamic>{'maintTypes': type})
+      .toList()
+    ..sort(
+      (a, b) => (a['maintTypes'] as String)
+          .compareTo(b['maintTypes'] as String),
+    );
 
-    final spanItems = availableLines.where((item) {
-      return addedTypes.add(item['maintTypes'].toString().trim().toUpperCase());
-    }).toList();
-
-    List<String> tempSelectedTypes = [];
-
-    ////////////////////////////////////////////
-    // availableLines = lines
-    //     .where(
-    //       (e) => e["maintTypes"].toString().trim().toUpperCase() != "NO SPRAY",
-    //     )
-    //     .map((e) => Map<String, dynamic>.from(e))
-    //     .toList();
-    //////////////////////////////////////////////////////
-
-    // Selected list starts empty
-    // lines.clear();
-
-    // final List<Map<String, dynamic>> allLines = availableLines;
-    // // Remove duplicate maintTypes for UI only
-    // final addedTypes = <String>{};
-
-    // final spanItems = allLines.where((item) {
-    //   return addedTypes.add(item["maintTypes"].toString());
-    // }).toList();
-    // // Clear current selection
-    // // lines.clear();
-    // // Initially everything is unchecked
-    // List<String> tempSelectedTypes = [];
+  List<String> tempSelectedTypes = [];
     showDialog(
       context: context,
       builder: (dialogContext) {
@@ -6178,38 +6147,91 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
 
                         return InkWell(
                           borderRadius: BorderRadius.circular(8),
+                          // onTap: () {
+                          //   setDialogState(() {
+                          //     if (tempSelectedTypes.contains(type)) {
+                          //       // Uncheck
+                          //       tempSelectedTypes.remove(type);
+
+                          //       // Remove all selected objects having this maintType
+                          //       lines.removeWhere(
+                          //         (e) => e["maintTypes"] == type,
+                          //       );
+                          //     } else {
+                          //       // Check
+                          //       tempSelectedTypes.add(type);
+
+                          //       // Find every object having this maintType
+                          //       final items = availableLines.where(
+                          //         (e) => e["maintTypes"] == type,
+                          //       );
+
+                          //       for (final item in items) {
+                          //         lines.add(Map<String, dynamic>.from(item));
+                          //       }
+                          //     }
+
+                          //     print("Available : $availableLines");
+                          //     print("Selected : $tempSelectedTypes");
+                          //     print("Lines : $lines");
+                          //     if (tempSelectedTypes.isNotEmpty) {
+                          //       selectionError = null;
+                          //     }
+                          //   });
+                          // },
                           onTap: () {
-                            setDialogState(() {
-                              if (tempSelectedTypes.contains(type)) {
-                                // Uncheck
-                                tempSelectedTypes.remove(type);
+  setDialogState(() {
+    final normalizedType = type.trim().toUpperCase();
 
-                                // Remove all selected objects having this maintType
-                                lines.removeWhere(
-                                  (e) => e["maintTypes"] == type,
-                                );
-                              } else {
-                                // Check
-                                tempSelectedTypes.add(type);
+    final isCurrentlySelected = tempSelectedTypes.any(
+      (selected) => selected.trim().toUpperCase() == normalizedType,
+    );
 
-                                // Find every object having this maintType
-                                final items = availableLines.where(
-                                  (e) => e["maintTypes"] == type,
-                                );
+    if (isCurrentlySelected) {
+      // Uncheck this maintenance type.
+      tempSelectedTypes.removeWhere(
+        (selected) => selected.trim().toUpperCase() == normalizedType,
+      );
 
-                                for (final item in items) {
-                                  lines.add(Map<String, dynamic>.from(item));
-                                }
-                              }
+      lines.removeWhere(
+        (e) =>
+            e['maintTypes'].toString().trim().toUpperCase() ==
+            normalizedType,
+      );
+    } else {
+      // Check this maintenance type.
+      tempSelectedTypes.add(type);
 
-                              print("Available : $availableLines");
-                              print("Selected : $tempSelectedTypes");
-                              print("Lines : $lines");
-                              if (tempSelectedTypes.isNotEmpty) {
-                                selectionError = null;
-                              }
-                            });
-                          },
+      final matchingItems = availableLines.where(
+        (e) =>
+            e['maintTypes'].toString().trim().toUpperCase() ==
+            normalizedType,
+      );
+
+      for (final item in matchingItems) {
+        final alreadyExists = lines.any(
+          (existing) =>
+              existing['parentFeatureId'] == item['parentFeatureId'] &&
+              existing['maintTypes'].toString().trim().toUpperCase() ==
+                  normalizedType,
+        );
+
+        if (!alreadyExists) {
+          lines.add(Map<String, dynamic>.from(item));
+        }
+      }
+    }
+
+    if (tempSelectedTypes.isNotEmpty) {
+      selectionError = null;
+    }
+
+    debugPrint('Allowed types: $allowedTypes');
+    debugPrint('Available objects: ${availableLines.length}');
+    debugPrint('Selected types: $tempSelectedTypes');
+    debugPrint('Lines: $lines');
+  });
+},
 
                           child: Column(
                             mainAxisSize: MainAxisSize.min,
@@ -9009,116 +9031,6 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     maintType = data.user!.maintType.toString();
   }
 
-  // Widget _buildImageGrid() {
-  //   final images = imageViewModel.imageData.data?.images ?? [];
-
-  //   if (images.isEmpty) {
-  //     return const Center(
-  //       child: Text(
-  //         "No images found",
-  //         style: TextStyle(fontWeight: FontWeight.bold),
-  //       ),
-  //     );
-  //   }
-
-  //   return SizedBox(
-  //     height: 120,
-  //     child: ListView.builder(
-  //       scrollDirection: Axis.horizontal,
-  //       itemCount: images.length,
-  //       itemBuilder: (context, index) {
-  //         final fileLocation = images[index].imageLocation;
-
-  //         if (fileLocation == null || fileLocation.isEmpty) {
-  //           return const SizedBox();
-  //         }
-
-  //         return Padding(
-  //           padding: const EdgeInsets.only(right: 10),
-  //           child: InkWell(
-  //             onTap: () {
-  //               openFullSizeImageDialog(fileLocation);
-  //             },
-  //             child: ClipRRect(
-  //               borderRadius: BorderRadius.circular(10),
-  //               child: Image.network(
-  //                 'https://civm.ariespro.com/assets/clientuploads/$fileLocation',
-  //                 fit: BoxFit.cover,
-  //                 width: 120,
-  //                 height: 120,
-  //                 loadingBuilder: (context, child, loadingProgress) {
-  //                   if (loadingProgress == null) {
-  //                     return child;
-  //                   }
-
-  //                   return const SizedBox(
-  //                     width: 120,
-  //                     height: 120,
-  //                     child: Center(child: CircularProgressIndicator()),
-  //                   );
-  //                 },
-  //                 errorBuilder: (context, error, stackTrace) {
-  //                   return Container(
-  //                     width: 120,
-  //                     height: 120,
-  //                     color: Colors.grey.shade200,
-  //                     child: const Icon(
-  //                       Icons.broken_image_outlined,
-  //                       size: 40,
-  //                       color: Colors.grey,
-  //                     ),
-  //                   );
-  //                 },
-  //               ),
-  //             ),
-  //           ),
-  //         );
-  //       },
-  //     ),
-  //   );
-  // }
-
-  // void openFullSizeImageDialog(String imageUrl) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return Dialog(
-  //         insetPadding: EdgeInsets.zero,
-  //         child: Stack(
-  //           children: [
-  //             PhotoViewGallery(
-  //               pageController: PageController(),
-  //               backgroundDecoration: const BoxDecoration(color: Colors.black),
-  //               onPageChanged: (index) {},
-  //               scrollPhysics: const BouncingScrollPhysics(),
-  //               pageOptions: [
-  //                 PhotoViewGalleryPageOptions(
-  //                   imageProvider: NetworkImage(
-  //                     'https://civm.ariespro.com/assets/clientuploads/$imageUrl',
-  //                   ),
-  //                   minScale: PhotoViewComputedScale.contained * 0.5,
-  //                   maxScale: PhotoViewComputedScale.covered * 0.5,
-  //                 ),
-  //               ],
-  //             ),
-  //             Positioned(
-  //               top: 30,
-  //               right: 20,
-  //               child: IconButton(
-  //                 icon: const Icon(Icons.close, color: Colors.white, size: 30),
-  //                 onPressed: () {
-  //                   Navigator.pop(context);
-  //                 },
-  //               ),
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
-
-  //////////
 }
 
 class Substation {

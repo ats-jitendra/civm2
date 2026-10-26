@@ -200,7 +200,7 @@ class _MapScreenState extends State<MapScreen> {
     _initializeMap();
     WakelockPlus.enable();
     getUserType();
-    // ensureCameraInitialized();
+    ensureCameraInitialized();
     _startListeningToCompass();
     /////
   }
