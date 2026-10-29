@@ -10,6 +10,7 @@ import 'package:CIVM/screens/offline_map/map_data_base_helper.dart';
 import 'package:CIVM/utils/custom_toast_snackbar_progressdialog.dart';
 
 import 'package:CIVM/utils/user_pref.dart';
+import 'package:CIVM/view_model/image_code_view_model.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -37,14 +38,12 @@ class COMapScreenGf extends StatefulWidget {
   String jobNo;
   String substation;
   String feeder;
- 
 
   COMapScreenGf({
     super.key,
     required this.jobNo,
     required this.substation,
     required this.feeder,
-   
   });
 
   @override
@@ -209,6 +208,7 @@ class _COMapScreenGfState extends State<COMapScreenGf> {
   String selectedJobStatus = "";
   bool _isApproveLoading = false;
   bool _isCancelLoading = false;
+  ImageViewViewModel imageViewModel = ImageViewViewModel();
   @override
   void initState() {
     // TODO: implement initState
@@ -1682,6 +1682,7 @@ class _COMapScreenGfState extends State<COMapScreenGf> {
             coordinateIds: row["coordinateIds"]?.toString() ?? "",
             service: row["service"]?.toString() ?? "",
             jobStatus: row["jobStatus"]?.toString() ?? "",
+            completedByCrewName: row["completedByCrewName"]?.toString() ?? "",
           ),
           /////-------
         );
@@ -3073,13 +3074,14 @@ class _COMapScreenGfState extends State<COMapScreenGf> {
       "Total Distance = ${totalSelectedDistanceMiles.toStringAsFixed(2)} miles",
     );
   }
+
   bool _isPolylineModalOpen = false;
   void _showDetailsPopupUpdate(int index) async {
-     // Prevent opening multiple modals
+    // Prevent opening multiple modals
     if (_isPolylineModalOpen) {
       return;
     }
-        _isPolylineModalOpen = true;
+    _isPolylineModalOpen = true;
     bool isSendButton = false;
     chatController.clear();
     final screenHeight = MediaQuery.of(context).size.height;
@@ -3095,537 +3097,553 @@ class _COMapScreenGfState extends State<COMapScreenGf> {
       overHeadPolylines[index].coordinateIds.toString(),
     );
     showUpdateCardView = true;
+    await imageViewModel.fetchImageApi(context, widget.jobNo);
+    imagePaths.clear();
     try {
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Container(
-                // width: 450,
-                padding: const EdgeInsets.only(
-                  left: 10,
-                  right: 10,
-                  bottom: 10,
-                  top: 4,
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (context) {
+          return StatefulBuilder(
+            builder: (context, setDialogState) {
+              dialogSetState = setDialogState;
+              return Dialog(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
                 ),
-                child: SingleChildScrollView(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          const Expanded(
-                            child: Text(
-                              "",
-                              style: TextStyle(
-                                // fontWeight: FontWeight.bold,
-                                fontSize: 17,
-                              ),
-                            ),
-                          ),
-                          InkWell(
-                            onTap: () async {
-                              showConfirmDialog(
-                                status: "",
-                                message:
-                                    "Are you sure you want to remove this line?",
-                                context: context,
-                                yesButtonColor: Colors.orange,
-                                icon: Icons.warning_amber_rounded,
-                                onTapYes: () async {
-                                  await deleteChangeOrder(
-                                    workOrder: widget.jobNo,
-                                    userId: id,
-                                  );
-                                  if (context.mounted) {
-                                    Navigator.pop(context);
-                                  }
-                                },
-                              );
-                              // setDialogState(() {
-                              //   isLoadingDelete = true;
-                              // });
-
-                              // await deleteChangeOrder(
-                              //   workOrder: widget.jobNo,
-                              //   userId: id,
-                              // );
-
-                              // setDialogState(() {
-                              //   isLoadingDelete = false;
-                              // });
-                            },
-                            borderRadius: BorderRadius.circular(20),
-                            child: Padding(
-                              padding: const EdgeInsets.all(4),
-                              child: const Icon(
-                                Icons.delete,
-                                color: Colors.red,
-                                size: 22,
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(width: 4),
-                          // Close Button
-                          InkWell(
-                            onTap: () {
-                              Navigator.pop(context);
-                            },
-                            borderRadius: BorderRadius.circular(20),
-                            child: const Padding(
-                              padding: EdgeInsets.all(4),
-                              child: Icon(
-                                Icons.cancel_presentation_sharp,
-                                color: Colors.red,
-                                size: 22,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          "DANGER TREE REMOVAL",
-                          style: TextStyle(
-                            // fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: Container(
-                          width: 28,
-                          height: 28,
-                          decoration: BoxDecoration(
-                            color: const Color.fromRGBO(200, 184, 22, 1),
-
-                            borderRadius: BorderRadius.circular(5),
-                            border: Border.all(color: Colors.black, width: 1),
-
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.grey.withOpacity(.20),
-                                blurRadius: 2,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
-                      //  if (showUpdateCardView)
-                      LayoutBuilder(
-                        builder: (context, constraints) {
-                          final bool isTablet = constraints.maxWidth >= 600;
-
-                          final details = [
-                            _detailRow(
-                              "Maint Type",
-                              overHeadPolylines[index].type,
-                            ),
-                            _detailRow(
-                              "Job No",
-                              overHeadPolylines[index].jobNo,
-                            ),
-                            _detailRow(
-                              "Estimated Time",
-                              "${overHeadPolylines[index].estTime} hours",
-                            ),
-                            _detailRow(
-                              "Create Date",
-                              formatDate(
-                                overHeadPolylines[index].createDate,
-                              ),
-                            ),
-                            _detailRow(
-                              "Span Name",
-                              overHeadPolylines[index].elementName,
-                            ),
-                            _detailRow(
-                              "Status",
-                              overHeadPolylines[index].maintStatus,
-                            ),
-                          ];
-
-                          return Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(14),
-                              border: const Border(
-                                left: BorderSide(
-                                  color: Color.fromARGB(255, 7, 59, 120),
-                                  width: 5,
+                child: Container(
+                  // width: 450,
+                  padding: const EdgeInsets.only(
+                    left: 10,
+                    right: 10,
+                    bottom: 10,
+                    top: 4,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            const Expanded(
+                              child: Text(
+                                "",
+                                style: TextStyle(
+                                  // fontWeight: FontWeight.bold,
+                                  fontSize: 17,
                                 ),
                               ),
                             ),
-                            child: isTablet
-                                ? Column(
-                                    children: [
-                                      for (
-                                        int i = 0;
-                                        i < details.length;
-                                        i += 2
-                                      )
-                                        Row(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Expanded(child: details[i]),
-                                            const SizedBox(width: 8),
-                                            if (i + 1 < details.length)
-                                              Expanded(child: details[i + 1])
-                                            else
-                                              const Expanded(child: SizedBox()),
-                                          ],
-                                        ),
-                                    ],
-                                  )
-                                : Column(
-                                    children: details
-                                        .map(
-                                          (detail) => Padding(
-                                            padding: const EdgeInsets.only(
-                                              bottom: 4,
-                                            ),
-                                            child: SizedBox(
-                                              width: double.infinity,
-                                              child: detail,
-                                            ),
-                                          ),
-                                        )
-                                        .toList(),
-                                  ),
-                          );
-                        },
-                      ),
+                            InkWell(
+                              onTap: () async {
+                                showConfirmDialog(
+                                  status: "",
+                                  message:
+                                      "Are you sure you want to remove this line?",
+                                  context: context,
+                                  yesButtonColor: Colors.orange,
+                                  icon: Icons.warning_amber_rounded,
+                                  onTapYes: () async {
+                                    await deleteChangeOrder(
+                                      workOrder: widget.jobNo,
+                                      userId: id,
+                                    );
+                                    if (context.mounted) {
+                                      Navigator.pop(context);
+                                    }
+                                  },
+                                );
+                                // setDialogState(() {
+                                //   isLoadingDelete = true;
+                                // });
 
-                      if (selectedJobStatus.toString() ==
-                              "PENDING ZIELIES APPROVAL" ||
-                          selectedJobStatus.toString() == "PENDING APPROVAL")
-                        ///  ACTION BUTTONS
-                        Padding(
-                          padding: const EdgeInsets.only(
-                            top: 12,
-                            bottom: 12,
-                            left: 12,
-                            right: 12,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              GestureDetector(
-                                onTap: () async {
-                                  _notes.clear();
-                                  if (selectedJobStatus.toString() ==
-                                      "PENDING ZIELIES APPROVAL") {
-                                    openDailogPendingApproval(
-                                      widget.jobNo.toString(),
-                                      'PENDING LCP APPROVAL',
-                                      '',
-                                    );
-                                  }
-                                  if (selectedJobStatus.toString() ==
-                                      "PENDING APPROVAL") {
-                                    openDailogPendingApproval(
-                                      widget.jobNo.toString(),
-                                      'COMPLETED',
-                                      '',
-                                    );
-                                  }
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.green,
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.green.withOpacity(0.3),
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: const Text(
-                                    "APPROVE",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                // await deleteChangeOrder(
+                                //   workOrder: widget.jobNo,
+                                //   userId: id,
+                                // );
+
+                                // setDialogState(() {
+                                //   isLoadingDelete = false;
+                                // });
+                              },
+                              borderRadius: BorderRadius.circular(20),
+                              child: Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: const Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                  size: 22,
                                 ),
                               ),
-                              const SizedBox(width: 10),
-                              GestureDetector(
-                                onTap: () async {
-                                  _notes.clear();
-                                  if (selectedJobStatus.toString() ==
-                                      "PENDING ZIELIES APPROVAL") {
-                                    openDailogCancel(
-                                      widget.jobNo.toString(),
-                                      'CANCELLED',
-                                      '',
-                                    );
-                                  }
-                                  if (selectedJobStatus.toString() ==
-                                      "PENDING APPROVAL") {
-                                    openDailogCancel(
-                                      widget.jobNo.toString(),
-                                      'ASSIGNED',
-                                      'REWORK',
-                                    );
-                                  }
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    vertical: 8,
-                                    horizontal: 12,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.red,
-                                    borderRadius: BorderRadius.circular(12),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.red.withOpacity(0.3),
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 3),
-                                      ),
-                                    ],
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: const Text(
-                                    "REJECT",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                            ),
+
+                            const SizedBox(width: 4),
+                            // Close Button
+                            InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                              },
+                              borderRadius: BorderRadius.circular(20),
+                              child: const Padding(
+                                padding: EdgeInsets.all(4),
+                                child: Icon(
+                                  Icons.cancel_presentation_sharp,
+                                  color: Colors.red,
+                                  size: 22,
                                 ),
                               ),
-                            ],
+                            ),
+                          ],
+                        ),
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            "DANGER TREE REMOVAL",
+                            style: TextStyle(
+                              // fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
                           ),
                         ),
-                      if (selectedJobStatus.toString() ==
-                              "CANCELLED BY PLANNER" ||
-                          selectedJobStatus.toString() == "CANCELLED BY GF")
-                        GestureDetector(
-                          onTap: () async {
-                            openDailogSubmitApproval(widget.jobNo.toString());
-                          },
+                        SizedBox(height: 10),
+                        Align(
+                          alignment: Alignment.centerLeft,
                           child: Container(
-                            margin: const EdgeInsets.only(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: const Color.fromRGBO(200, 184, 22, 1),
+
+                              borderRadius: BorderRadius.circular(5),
+                              border: Border.all(color: Colors.black, width: 1),
+
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.withOpacity(.20),
+                                  blurRadius: 2,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        //  if (showUpdateCardView)
+                        LayoutBuilder(
+                          builder: (context, constraints) {
+                            final bool isTablet = constraints.maxWidth >= 600;
+
+                            final details = [
+                              _detailRow(
+                                "Maint Type",
+                                overHeadPolylines[index].type,
+                              ),
+                              _detailRow(
+                                "Job No",
+                                overHeadPolylines[index].jobNo,
+                              ),
+                              _detailRow(
+                                "Estimated Time",
+                                "${overHeadPolylines[index].estTime} hours",
+                              ),
+                              _detailRow(
+                                "Create Date",
+                                formatDate(overHeadPolylines[index].createDate),
+                              ),
+                              _detailRow(
+                                "Span Name",
+                                overHeadPolylines[index].elementName,
+                              ),
+                              _detailRow(
+                                "Status",
+                                overHeadPolylines[index].maintStatus,
+                              ),
+                              if (overHeadPolylines[index].maintStatus ==
+                                      "Completed" &&
+                                  overHeadPolylines[index].jobStatus ==
+                                      "PENDING APPROVAL")
+                                _detailRow(
+                                  "Completed by",
+                                  overHeadPolylines[index].completedByCrewName
+                                      .toString()
+                                      .split(',')
+                                      .first
+                                      .trim(),
+                                ),
+                            ];
+
+                            return Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(14),
+                                border: const Border(
+                                  left: BorderSide(
+                                    color: Color.fromARGB(255, 7, 59, 120),
+                                    width: 5,
+                                  ),
+                                ),
+                              ),
+                              child: isTablet
+                                  ? Column(
+                                      children: [
+                                        for (
+                                          int i = 0;
+                                          i < details.length;
+                                          i += 2
+                                        )
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Expanded(child: details[i]),
+                                              const SizedBox(width: 8),
+                                              if (i + 1 < details.length)
+                                                Expanded(child: details[i + 1])
+                                              else
+                                                const Expanded(
+                                                  child: SizedBox(),
+                                                ),
+                                            ],
+                                          ),
+                                      ],
+                                    )
+                                  : Column(
+                                      children: details
+                                          .map(
+                                            (detail) => Padding(
+                                              padding: const EdgeInsets.only(
+                                                bottom: 4,
+                                              ),
+                                              child: SizedBox(
+                                                width: double.infinity,
+                                                child: detail,
+                                              ),
+                                            ),
+                                          )
+                                          .toList(),
+                                    ),
+                            );
+                          },
+                        ),
+
+                        if (selectedJobStatus.toString() ==
+                                "PENDING ZIELIES APPROVAL" ||
+                            selectedJobStatus.toString() == "PENDING APPROVAL")
+                          ///  ACTION BUTTONS
+                          Padding(
+                            padding: const EdgeInsets.only(
                               top: 12,
                               bottom: 12,
                               left: 12,
                               right: 12,
                             ),
-                            width: 200,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 8,
-                              horizontal: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.green,
-                              borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.green.withOpacity(0.3),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 3),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                GestureDetector(
+                                  onTap: () async {
+                                    _notes.clear();
+                                    if (selectedJobStatus.toString() ==
+                                        "PENDING ZIELIES APPROVAL") {
+                                      openDailogPendingApproval(
+                                        widget.jobNo.toString(),
+                                        'PENDING LCP APPROVAL',
+                                        '',
+                                      );
+                                    }
+                                    if (selectedJobStatus.toString() ==
+                                        "PENDING APPROVAL") {
+                                      openDailogPendingApproval(
+                                        widget.jobNo.toString(),
+                                        'COMPLETED',
+                                        '',
+                                      );
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.green,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.green.withOpacity(0.3),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: const Text(
+                                      "APPROVE",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 10),
+                                GestureDetector(
+                                  onTap: () async {
+                                    _notes.clear();
+                                    if (selectedJobStatus.toString() ==
+                                        "PENDING ZIELIES APPROVAL") {
+                                      openDailogCancel(
+                                        widget.jobNo.toString(),
+                                        'CANCELLED',
+                                        '',
+                                      );
+                                    }
+                                    if (selectedJobStatus.toString() ==
+                                        "PENDING APPROVAL") {
+                                      openDailogCancel(
+                                        widget.jobNo.toString(),
+                                        'ASSIGNED',
+                                        'REWORK',
+                                      );
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red,
+                                      borderRadius: BorderRadius.circular(12),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.red.withOpacity(0.3),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 3),
+                                        ),
+                                      ],
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: const Text(
+                                      "REJECT",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
-                            alignment: Alignment.center,
-                            child: const Text(
-                              "RECALL",
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
                           ),
-                        ),
-                      const SizedBox(height: 8),
-
-                      Container(
-                        padding: const EdgeInsets.only(
-                          top: 8,
-                          left: 8,
-                          bottom: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: Colors.white,
-                          border: Border(
-                            top: BorderSide(color: Colors.grey.shade300),
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            ConstrainedBox(
-                              constraints: BoxConstraints(
-                                // maxHeight: 230, // maximum chat height
-                                maxHeight: maxChatHeight,
+                        if (selectedJobStatus.toString() ==
+                                "CANCELLED BY PLANNER" ||
+                            selectedJobStatus.toString() == "CANCELLED BY GF")
+                          GestureDetector(
+                            onTap: () async {
+                              openDailogSubmitApproval(widget.jobNo.toString());
+                            },
+                            child: Container(
+                              margin: const EdgeInsets.only(
+                                top: 12,
+                                bottom: 12,
+                                left: 12,
+                                right: 12,
                               ),
-                              child: Scrollbar(
-                                controller: chatScrollController,
-                                thumbVisibility: true,
-                                // trackVisibility:
-                                //     true, // Optional: shows the scrollbar track
-                                child: Padding(
-                                  padding: const EdgeInsets.only(right: 8),
-                                  child: ListView.builder(
-                                    controller: chatScrollController,
-                                    shrinkWrap: true,
-                                    reverse: true,
-                                    padding: const EdgeInsets.only(bottom: 10),
-                                    itemCount: messagesData.length,
-                                    itemBuilder: (context, index) {
-                                      final message = messagesData[index];
-
-                                      final bool isPlanner =
-                                          message["userName"]
-                                              .toString()
-                                              .toLowerCase() ==
-                                          userName.toLowerCase();
-
-                                      return _chatBubble(
-                                        isPlanner: isPlanner,
-                                        userName: message["userName"] ?? "",
-                                        date: formatChatDate(
-                                          message["createdDate"] ?? "",
-                                        ),
-                                        message: message["description"] ?? "",
-                                      );
-                                    },
-                                  ),
-                                ),
+                              width: 200,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 8,
+                                horizontal: 8,
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: TextFormField(
-                                      controller: chatController,
-                                      maxLines: null,
-                                      textInputAction: TextInputAction.done,
-                                      decoration: InputDecoration(
-                                        hintText: "Write Your Comments here...",
-
-                                        border: OutlineInputBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            5,
-                                          ),
-                                        ),
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                              horizontal: 10,
-                                              vertical: 10,
-                                            ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 8.0),
-                                    child: SizedBox(
-                                      height: 42,
-                                      child: ElevatedButton(
-                                        onPressed: isSendButton
-                                            ? null
-                                            : () async {
-                                                setDialogState(() {
-                                                  isSendButton = true;
-                                                });
-                                                try {
-                                                  if (chatController.text
-                                                      .trim()
-                                                      .isEmpty) {
-                                                    return;
-                                                  }
-
-                                                  final data = {
-                                                    "lineId":
-                                                        overHeadPolylines[index]
-                                                            .coordinateIds,
-                                                    "description":
-                                                        chatController.text
-                                                            .trim(),
-                                                    "userId": id.toString(),
-                                                  };
-                                                  // showLoader(context);
-                                                  await updateMessageData(
-                                                    data,
-                                                    () {
-                                                      setDialogState(() {});
-                                                    },
-                                                  );
-                                                } finally {
-                                                  if (mounted) {
-                                                    setDialogState(() {
-                                                      isSendButton = false;
-                                                    });
-                                                  }
-                                                }
-                                              },
-                                        style: ElevatedButton.styleFrom(
-                                          backgroundColor: Colors.teal,
-                                          foregroundColor: Colors.white,
-                                        ),
-                                        child: isSendButton
-                                            ? progressBar()
-                                            : const Text("Send"),
-                                      ),
-                                    ),
+                              decoration: BoxDecoration(
+                                color: Colors.green,
+                                borderRadius: BorderRadius.circular(12),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.green.withOpacity(0.3),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 3),
                                   ),
                                 ],
                               ),
+                              alignment: Alignment.center,
+                              child: const Text(
+                                "RECALL",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                            SizedBox(height: 10),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                          ),
+                        const SizedBox(height: 8),
+
+                        Container(
+                          padding: const EdgeInsets.only(
+                            top: 8,
+                            left: 8,
+                            bottom: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.white,
+                            border: Border(
+                              top: BorderSide(color: Colors.grey.shade300),
+                            ),
+                          ),
+                          child: Column(
+                            children: [
+                              ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  // maxHeight: 230, // maximum chat height
+                                  maxHeight: maxChatHeight,
+                                ),
+                                child: Scrollbar(
+                                  controller: chatScrollController,
+                                  thumbVisibility: true,
+                                  // trackVisibility:
+                                  //     true, // Optional: shows the scrollbar track
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(right: 8),
+                                    child: ListView.builder(
+                                      controller: chatScrollController,
+                                      shrinkWrap: true,
+                                      reverse: true,
+                                      padding: const EdgeInsets.only(
+                                        bottom: 10,
+                                      ),
+                                      itemCount: messagesData.length,
+                                      itemBuilder: (context, index) {
+                                        final message = messagesData[index];
+
+                                        final bool isPlanner =
+                                            message["userName"]
+                                                .toString()
+                                                .toLowerCase() ==
+                                            userName.toLowerCase();
+
+                                        return _chatBubble(
+                                          isPlanner: isPlanner,
+                                          userName: message["userName"] ?? "",
+                                          date: formatChatDate(
+                                            message["createdDate"] ?? "",
+                                          ),
+                                          message: message["description"] ?? "",
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0),
+                                child: Row(
                                   children: [
                                     Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 0,
+                                      child: TextFormField(
+                                        controller: chatController,
+                                        maxLines: null,
+                                        textInputAction: TextInputAction.done,
+                                        decoration: InputDecoration(
+                                          hintText:
+                                              "Write Your Comments here...",
+
+                                          border: OutlineInputBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              5,
+                                            ),
+                                          ),
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                                vertical: 10,
+                                              ),
                                         ),
-                                        child: InkWell(
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        right: 8.0,
+                                      ),
+                                      child: SizedBox(
+                                        height: 42,
+                                        child: ElevatedButton(
+                                          onPressed: isSendButton
+                                              ? null
+                                              : () async {
+                                                  setDialogState(() {
+                                                    isSendButton = true;
+                                                  });
+                                                  try {
+                                                    if (chatController.text
+                                                        .trim()
+                                                        .isEmpty) {
+                                                      return;
+                                                    }
+
+                                                    final data = {
+                                                      "lineId":
+                                                          overHeadPolylines[index]
+                                                              .coordinateIds,
+                                                      "description":
+                                                          chatController.text
+                                                              .trim(),
+                                                      "userId": id.toString(),
+                                                    };
+                                                    // showLoader(context);
+                                                    await updateMessageData(
+                                                      data,
+                                                      () {
+                                                        setDialogState(() {});
+                                                      },
+                                                    );
+                                                  } finally {
+                                                    if (mounted) {
+                                                      setDialogState(() {
+                                                        isSendButton = false;
+                                                      });
+                                                    }
+                                                  }
+                                                },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.teal,
+                                            foregroundColor: Colors.white,
+                                          ),
+                                          child: isSendButton
+                                              ? progressBar()
+                                              : const Text("Send"),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 10),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        final bool isTablet =
+                                            constraints.maxWidth >= 600;
+
+                                        final chooseFilesButton = InkWell(
                                           borderRadius: BorderRadius.circular(
                                             12,
                                           ),
-                                          onTap: () async {
-                                            //  await ensureCameraInitialized();
+                                          onTap: () {
                                             _takePictureDialog();
                                           },
                                           child: Container(
-                                            //  width: 200,
-                                            // width: double.infinity,
+                                            height: 55,
+                                            width: double.infinity,
                                             padding: const EdgeInsets.symmetric(
                                               horizontal: 16,
-                                              vertical: 14,
                                             ),
                                             decoration: BoxDecoration(
                                               color: Colors.white,
@@ -3638,15 +3656,12 @@ class _COMapScreenGfState extends State<COMapScreenGf> {
                                             ),
                                             child: Row(
                                               children: [
-                                                const Icon(
-                                                  Icons.upload_file_outlined,
-                                                  color: Color(0xFF073B78),
-                                                  size: 26,
-                                                ),
-                                                const SizedBox(width: 12),
                                                 const Expanded(
                                                   child: Text(
-                                                    "Choose Files",
+                                                    "Capture Photo",
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
                                                     style: TextStyle(
                                                       fontSize: 16,
                                                       fontWeight:
@@ -3654,6 +3669,7 @@ class _COMapScreenGfState extends State<COMapScreenGf> {
                                                     ),
                                                   ),
                                                 ),
+
                                                 if (imagePaths.isNotEmpty)
                                                   Container(
                                                     padding:
@@ -3681,7 +3697,9 @@ class _COMapScreenGfState extends State<COMapScreenGf> {
                                                       ),
                                                     ),
                                                   ),
+
                                                 const SizedBox(width: 8),
+
                                                 Icon(
                                                   Icons.chevron_right,
                                                   color: Colors.grey.shade600,
@@ -3689,229 +3707,205 @@ class _COMapScreenGfState extends State<COMapScreenGf> {
                                               ],
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        right: 8.0,
-                                        left: 8,
-                                      ),
-                                      child: SizedBox(
-                                        height: 42,
-                                        width: 80,
-                                        child: ElevatedButton(
-                                          onPressed: () async {
-                                            await submitImage(imagePaths, "");
-                                            setState(() {
-                                              isUploadLoading = true;
-                                            });
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Colors.teal,
-                                            foregroundColor: Colors.white,
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 6,
-                                            ), // Reduce padding
-                                          ),
-                                          child: isUploadLoading
-                                              ? progressBar()
-                                              : Text("Upload"),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 15),
+                                        );
 
-                                /// Selected Images Count
-                                if (imagePaths.isNotEmpty)
-                                  Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 20,
-                                    ),
-                                    child: Text(
-                                      "${imagePaths.length} file(s) selected",
-                                      style: TextStyle(
-                                        color: Colors.grey.shade700,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
+                                        final uploadButton = SizedBox(
+                                          height: 42,
+                                          width: double.infinity,
+                                          child: ElevatedButton(
+                                            onPressed: () async {
+                                              setDialogState(() {
+                                                isUploadLoading = true;
+                                              });
 
-                                const SizedBox(height: 10),
+                                              try {
+                                                await submitImage(
+                                                  imagePaths,
+                                                  widget.jobNo,
+                                                );
 
-                                /// Image Preview
-                                if (imagePaths.isNotEmpty)
-                                  SizedBox(
-                                    height: 125,
-                                    child: ListView.builder(
-                                      scrollDirection: Axis.horizontal,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 15,
-                                      ),
-                                      itemCount: imagePaths.length,
-                                      itemBuilder: (context, index) {
-                                        return Container(
-                                          width: 110,
-                                          margin: const EdgeInsets.symmetric(
-                                            horizontal: 6,
-                                          ),
-                                          child: Stack(
-                                            children: [
-                                              ClipRRect(
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
-                                                child: Container(
-                                                  decoration: BoxDecoration(
-                                                    border: Border.all(
-                                                      color:
-                                                          Colors.grey.shade300,
+                                                setDialogState(() {
+                                                  // imagePaths.clear();
+                                                  isUploadLoading = false;
+                                                });
+                                              } catch (e) {
+                                                setDialogState(() {
+                                                  isUploadLoading = false;
+                                                });
+
+                                                if (context.mounted) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        "Upload failed: $e",
+                                                      ),
                                                     ),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                          12,
-                                                        ),
-                                                  ),
-                                                  child: Image.file(
-                                                    File(imagePaths[index]),
-                                                    width: 110,
-                                                    height: 110,
-                                                    fit: BoxFit.cover,
-                                                  ),
-                                                ),
+                                                  );
+                                                }
+                                              }
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor: Colors.teal,
+                                              foregroundColor: Colors.white,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
+                                            ),
+                                            child: isUploadLoading
+                                                ? progressBar()
+                                                : const Text("Upload"),
+                                          ),
+                                        );
+
+                                        if (isTablet) {
+                                          // TABLET — same layout as your earlier design
+                                          return Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 5,
+                                                child: chooseFilesButton,
                                               ),
 
-                                              Positioned(
-                                                top: 6,
-                                                right: 6,
-                                                child: InkWell(
-                                                  onTap: () {
-                                                    dialogSetState?.call(() {
-                                                      imagePaths.removeAt(
-                                                        index,
-                                                      );
-                                                      images.removeAt(index);
-                                                    });
-                                                  },
-                                                  child: Container(
-                                                    padding:
-                                                        const EdgeInsets.all(4),
-                                                    decoration:
-                                                        const BoxDecoration(
-                                                          color: Colors.red,
-                                                          shape:
-                                                              BoxShape.circle,
-                                                        ),
-                                                    child: const Icon(
-                                                      Icons.close,
-                                                      color: Colors.white,
-                                                      size: 18,
-                                                    ),
-                                                  ),
-                                                ),
+                                              const SizedBox(width: 10),
+
+                                              Expanded(
+                                                flex: 1,
+                                                child: uploadButton,
                                               ),
                                             ],
-                                          ),
+                                          );
+                                        }
+
+                                        // MOBILE — stack the buttons
+                                        return Column(
+                                          children: [
+                                            chooseFilesButton,
+                                            const SizedBox(height: 10),
+                                            uploadButton,
+                                          ],
                                         );
                                       },
                                     ),
                                   ),
+                                  const SizedBox(height: 15),
 
-                                const SizedBox(height: 20),
+                                  /// Selected Images Count
+                                  if (imagePaths.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 20,
+                                      ),
+                                      child: Text(
+                                        "${imagePaths.length} file(s) selected",
+                                        style: TextStyle(
+                                          color: Colors.grey.shade700,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ),
 
-                                // /// Upload Button
-                                // Padding(
-                                //   padding: const EdgeInsets.symmetric(
-                                //     horizontal: 20,
-                                //   ),
-                                //   child: SizedBox(
-                                //     width: double.infinity,
-                                //     height: 50,
-                                //     child: ElevatedButton.icon(
-                                //       onPressed: imagePaths.isEmpty
-                                //           ? null
-                                //           : () {
-                                //               submitImage(
-                                //                 imagePaths,
-                                //                 widget.jobNo,
-                                //               );
-                                //             },
-                                //       style: ElevatedButton.styleFrom(
-                                //         backgroundColor: Colors.teal,
-                                //         foregroundColor: Colors.white,
-                                //         disabledBackgroundColor:
-                                //             Colors.grey.shade300,
-                                //         elevation: 5,
-                                //         shape: RoundedRectangleBorder(
-                                //           borderRadius: BorderRadius.circular(
-                                //             14,
-                                //           ),
-                                //         ),
-                                //       ),
-                                //       icon: const Icon(
-                                //         Icons.cloud_upload_rounded,
-                                //       ),
-                                //       label: const Text(
-                                //         "Upload Images",
-                                //         style: TextStyle(
-                                //           fontSize: 17,
-                                //           fontWeight: FontWeight.bold,
-                                //         ),
-                                //       ),
-                                //     ),
-                                //   ),
-                                // ),
-                              ],
-                            ),
-                            SizedBox(height: 0),
+                                  const SizedBox(height: 10),
 
-                            // SizedBox(height: 12),
-                            // Align(
-                            //   alignment: Alignment.center,
-                            //   child: InkWell(
-                            //     onTap: () async {
-                            //       showCreateChangeOrderDialog(index);
-                            //     },
-                            //     borderRadius: BorderRadius.circular(8),
-                            //     child: Container(
-                            //       height: 40,
-                            //       width: 180,
-                            //       alignment: Alignment.center,
-                            //       decoration: BoxDecoration(
-                            //         color: const Color.fromARGB(
-                            //           255,
-                            //           34,
-                            //           113,
-                            //           249,
-                            //         ),
-                            //         borderRadius: BorderRadius.circular(8),
-                            //       ),
-                            //       child: const Text(
-                            //         "Create Change Order",
-                            //         style: TextStyle(
-                            //           color: Colors.white,
-                            //           fontSize: 16,
-                            //           fontWeight: FontWeight.bold,
-                            //         ),
-                            //       ),
-                            //     ),
-                            //   ),
-                            // ),
-                          ],
+                                  /// Image Preview
+                                  if (imagePaths.isNotEmpty)
+                                    SizedBox(
+                                      height: 125,
+                                      child: ListView.builder(
+                                        scrollDirection: Axis.horizontal,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 15,
+                                        ),
+                                        itemCount: imagePaths.length,
+                                        itemBuilder: (context, index) {
+                                          return Container(
+                                            width: 110,
+                                            margin: const EdgeInsets.symmetric(
+                                              horizontal: 6,
+                                            ),
+                                            child: Stack(
+                                              children: [
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                  child: Container(
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(
+                                                        color: Colors
+                                                            .grey
+                                                            .shade300,
+                                                      ),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            12,
+                                                          ),
+                                                    ),
+                                                    child: Image.file(
+                                                      File(imagePaths[index]),
+                                                      width: 110,
+                                                      height: 110,
+                                                      fit: BoxFit.cover,
+                                                    ),
+                                                  ),
+                                                ),
+
+                                                Positioned(
+                                                  top: 6,
+                                                  right: 6,
+                                                  child: InkWell(
+                                                    onTap: () {
+                                                      dialogSetState?.call(() {
+                                                        imagePaths.removeAt(
+                                                          index,
+                                                        );
+                                                        images.removeAt(index);
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                      padding:
+                                                          const EdgeInsets.all(
+                                                            4,
+                                                          ),
+                                                      decoration:
+                                                          const BoxDecoration(
+                                                            color: Colors.red,
+                                                            shape:
+                                                                BoxShape.circle,
+                                                          ),
+                                                      child: const Icon(
+                                                        Icons.close,
+                                                        color: Colors.white,
+                                                        size: 18,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      ),
+                                    ),
+
+                                  ///  IMAGE GRID VIEW
+                                  _buildImageGrid(),
+                                ],
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          },
-        );
-      },
-    );
-   } finally {
+              );
+            },
+          );
+        },
+      );
+    } finally {
       _isPolylineModalOpen = false;
     }
   }
@@ -7524,6 +7518,17 @@ class _COMapScreenGfState extends State<COMapScreenGf> {
     }
   }
 
+  Widget _buildImageGrid() {
+    final images = imageViewModel.imageData.data?.images ?? [];
+
+    final imageLocations = images
+        .map((e) => e.imageLocation ?? '')
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    return NetworkImageGallery(imageLocations: imageLocations);
+  }
+
   //////////
 }
 
@@ -7565,6 +7570,7 @@ class OverHeadPolylineData {
   final String coordinateIds;
   final String service;
   final String jobStatus;
+  final String completedByCrewName;
 
   OverHeadPolylineData({
     required this.phase,
@@ -7594,6 +7600,7 @@ class OverHeadPolylineData {
     required this.coordinateIds,
     required this.service,
     required this.jobStatus,
+    required this.completedByCrewName,
   });
 }
 

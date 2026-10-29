@@ -10,6 +10,7 @@ import 'package:CIVM/screens/offline_map/map_data_base_helper.dart';
 import 'package:CIVM/utils/custom_toast_snackbar_progressdialog.dart';
 
 import 'package:CIVM/utils/user_pref.dart';
+import 'package:CIVM/view_model/image_code_view_model.dart';
 import 'package:camera/camera.dart';
 import 'package:flutter_compass/flutter_compass.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
@@ -207,6 +208,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
   String selectedJobStatus = "";
   bool _isApproveLoading = false;
   bool _isCancelLoading = false;
+  ImageViewViewModel imageViewModel = ImageViewViewModel();
   @override
   void initState() {
     // TODO: implement initState
@@ -3094,6 +3096,8 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
       overHeadPolylines[index].coordinateIds.toString(),
     );
     showUpdateCardView = true;
+    await imageViewModel.fetchImageApi(context, widget.jobNo);
+    imagePaths.clear();
     try {
       showDialog(
         context: context,
@@ -3101,6 +3105,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
         builder: (context) {
           return StatefulBuilder(
             builder: (context, setDialogState) {
+              dialogSetState = setDialogState;
               return Dialog(
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(15),
@@ -3242,9 +3247,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                               ),
                               _detailRow(
                                 "Create Date",
-                                formatDate(
-                                  overHeadPolylines[index].createDate,
-                                ),
+                                formatDate(overHeadPolylines[index].createDate),
                               ),
                               _detailRow(
                                 "Span Name",
@@ -3580,128 +3583,170 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Padding(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 0,
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: LayoutBuilder(
+                                      builder: (context, constraints) {
+                                        final bool isTablet =
+                                            constraints.maxWidth >= 600;
+
+                                        final chooseFilesButton = InkWell(
+                                          borderRadius: BorderRadius.circular(
+                                            12,
                                           ),
-                                          child: InkWell(
-                                            borderRadius: BorderRadius.circular(
-                                              12,
+                                          onTap: () {
+                                            _takePictureDialog();
+                                          },
+                                          child: Container(
+                                            height: 55,
+                                            width: double.infinity,
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 16,
                                             ),
-                                            onTap: () async {
-                                              //  await ensureCameraInitialized();
-                                              _takePictureDialog();
-                                            },
-                                            child: Container(
-                                              //  width: 200,
-                                              // width: double.infinity,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 16,
-                                                    vertical: 14,
-                                                  ),
-                                              decoration: BoxDecoration(
-                                                color: Colors.white,
-                                                border: Border.all(
-                                                  color: Colors.grey.shade400,
-                                                  width: 1.2,
-                                                ),
-                                                borderRadius:
-                                                    BorderRadius.circular(12),
+                                            decoration: BoxDecoration(
+                                              color: Colors.white,
+                                              border: Border.all(
+                                                color: Colors.grey.shade400,
+                                                width: 1.2,
                                               ),
-                                              child: Row(
-                                                children: [
-                                                  const Icon(
-                                                    Icons.upload_file_outlined,
-                                                    color: Color(0xFF073B78),
-                                                    size: 26,
-                                                  ),
-                                                  const SizedBox(width: 12),
-                                                  const Expanded(
-                                                    child: Text(
-                                                      "Choose Files",
-                                                      style: TextStyle(
-                                                        fontSize: 16,
-                                                        fontWeight:
-                                                            FontWeight.w600,
-                                                      ),
+                                              borderRadius:
+                                                  BorderRadius.circular(12),
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                const Expanded(
+                                                  child: Text(
+                                                    "Capture Photo",
+                                                    maxLines: 1,
+                                                    overflow:
+                                                        TextOverflow.ellipsis,
+                                                    style: TextStyle(
+                                                      fontSize: 16,
+                                                      fontWeight:
+                                                          FontWeight.w600,
                                                     ),
                                                   ),
-                                                  if (imagePaths.isNotEmpty)
-                                                    Container(
-                                                      padding:
-                                                          const EdgeInsets.symmetric(
-                                                            horizontal: 10,
-                                                            vertical: 4,
+                                                ),
+
+                                                if (imagePaths.isNotEmpty)
+                                                  Container(
+                                                    padding:
+                                                        const EdgeInsets.symmetric(
+                                                          horizontal: 10,
+                                                          vertical: 4,
+                                                        ),
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                          Colors.green.shade100,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            20,
                                                           ),
-                                                      decoration: BoxDecoration(
+                                                    ),
+                                                    child: Text(
+                                                      "${imagePaths.length}",
+                                                      style: TextStyle(
+                                                        fontSize: 13,
+                                                        fontWeight:
+                                                            FontWeight.bold,
                                                         color: Colors
                                                             .green
-                                                            .shade100,
-                                                        borderRadius:
-                                                            BorderRadius.circular(
-                                                              20,
-                                                            ),
-                                                      ),
-                                                      child: Text(
-                                                        "${imagePaths.length}",
-                                                        style: TextStyle(
-                                                          fontSize: 13,
-                                                          fontWeight:
-                                                              FontWeight.bold,
-                                                          color: Colors
-                                                              .green
-                                                              .shade800,
-                                                        ),
+                                                            .shade800,
                                                       ),
                                                     ),
-                                                  const SizedBox(width: 8),
-                                                  Icon(
-                                                    Icons.chevron_right,
-                                                    color: Colors.grey.shade600,
                                                   ),
-                                                ],
-                                              ),
+
+                                                const SizedBox(width: 8),
+
+                                                Icon(
+                                                  Icons.chevron_right,
+                                                  color: Colors.grey.shade600,
+                                                ),
+                                              ],
                                             ),
                                           ),
-                                        ),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          right: 8.0,
-                                          left: 8,
-                                        ),
-                                        child: SizedBox(
+                                        );
+
+                                        final uploadButton = SizedBox(
                                           height: 42,
-                                          width: 80,
+                                          width: double.infinity,
                                           child: ElevatedButton(
                                             onPressed: () async {
-                                              await submitImage(imagePaths, "");
-                                              setState(() {
+                                              setDialogState(() {
                                                 isUploadLoading = true;
                                               });
+
+                                              try {
+                                                await submitImage(
+                                                  imagePaths,
+                                                  widget.jobNo,
+                                                );
+
+                                                setDialogState(() {
+                                                  // imagePaths.clear();
+                                                  isUploadLoading = false;
+                                                });
+                                              } catch (e) {
+                                                setDialogState(() {
+                                                  isUploadLoading = false;
+                                                });
+
+                                                if (context.mounted) {
+                                                  ScaffoldMessenger.of(
+                                                    context,
+                                                  ).showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        "Upload failed: $e",
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              }
                                             },
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor: Colors.teal,
                                               foregroundColor: Colors.white,
-                                              padding:
-                                                  const EdgeInsets.symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 6,
-                                                  ), // Reduce padding
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
+                                              ),
                                             ),
                                             child: isUploadLoading
                                                 ? progressBar()
-                                                : Text("Upload"),
+                                                : const Text("Upload"),
                                           ),
-                                        ),
-                                      ),
-                                    ],
+                                        );
+
+                                        if (isTablet) {
+                                          // TABLET — same layout as your earlier design
+                                          return Row(
+                                            children: [
+                                              Expanded(
+                                                flex: 5,
+                                                child: chooseFilesButton,
+                                              ),
+
+                                              const SizedBox(width: 10),
+
+                                              Expanded(
+                                                flex: 1,
+                                                child: uploadButton,
+                                              ),
+                                            ],
+                                          );
+                                        }
+
+                                        // MOBILE — stack the buttons
+                                        return Column(
+                                          children: [
+                                            chooseFilesButton,
+                                            const SizedBox(height: 10),
+                                            uploadButton,
+                                          ],
+                                        );
+                                      },
+                                    ),
                                   ),
                                   const SizedBox(height: 15),
 
@@ -3802,86 +3847,10 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                                       ),
                                     ),
 
-                                  const SizedBox(height: 20),
-
-                                  // /// Upload Button
-                                  // Padding(
-                                  //   padding: const EdgeInsets.symmetric(
-                                  //     horizontal: 20,
-                                  //   ),
-                                  //   child: SizedBox(
-                                  //     width: double.infinity,
-                                  //     height: 50,
-                                  //     child: ElevatedButton.icon(
-                                  //       onPressed: imagePaths.isEmpty
-                                  //           ? null
-                                  //           : () {
-                                  //               submitImage(
-                                  //                 imagePaths,
-                                  //                 widget.jobNo,
-                                  //               );
-                                  //             },
-                                  //       style: ElevatedButton.styleFrom(
-                                  //         backgroundColor: Colors.teal,
-                                  //         foregroundColor: Colors.white,
-                                  //         disabledBackgroundColor:
-                                  //             Colors.grey.shade300,
-                                  //         elevation: 5,
-                                  //         shape: RoundedRectangleBorder(
-                                  //           borderRadius: BorderRadius.circular(
-                                  //             14,
-                                  //           ),
-                                  //         ),
-                                  //       ),
-                                  //       icon: const Icon(
-                                  //         Icons.cloud_upload_rounded,
-                                  //       ),
-                                  //       label: const Text(
-                                  //         "Upload Images",
-                                  //         style: TextStyle(
-                                  //           fontSize: 17,
-                                  //           fontWeight: FontWeight.bold,
-                                  //         ),
-                                  //       ),
-                                  //     ),
-                                  //   ),
-                                  // ),
+                                  ///  IMAGE GRID VIEW
+                                  _buildImageGrid(),
                                 ],
                               ),
-                              SizedBox(height: 0),
-
-                              // SizedBox(height: 12),
-                              // Align(
-                              //   alignment: Alignment.center,
-                              //   child: InkWell(
-                              //     onTap: () async {
-                              //       showCreateChangeOrderDialog(index);
-                              //     },
-                              //     borderRadius: BorderRadius.circular(8),
-                              //     child: Container(
-                              //       height: 40,
-                              //       width: 180,
-                              //       alignment: Alignment.center,
-                              //       decoration: BoxDecoration(
-                              //         color: const Color.fromARGB(
-                              //           255,
-                              //           34,
-                              //           113,
-                              //           249,
-                              //         ),
-                              //         borderRadius: BorderRadius.circular(8),
-                              //       ),
-                              //       child: const Text(
-                              //         "Create Change Order",
-                              //         style: TextStyle(
-                              //           color: Colors.white,
-                              //           fontSize: 16,
-                              //           fontWeight: FontWeight.bold,
-                              //         ),
-                              //       ),
-                              //     ),
-                              //   ),
-                              // ),
                             ],
                           ),
                         ),
@@ -7487,6 +7456,17 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
     } catch (e) {
       print('Error: $e');
     }
+  }
+
+  Widget _buildImageGrid() {
+    final images = imageViewModel.imageData.data?.images ?? [];
+
+    final imageLocations = images
+        .map((e) => e.imageLocation ?? '')
+        .where((e) => e.isNotEmpty)
+        .toList();
+
+    return NetworkImageGallery(imageLocations: imageLocations);
   }
 
   //////////

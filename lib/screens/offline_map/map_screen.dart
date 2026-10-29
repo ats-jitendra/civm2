@@ -441,57 +441,53 @@ class _MapScreenState extends State<MapScreen> {
                         BoxShadow(color: Colors.grey.shade300, blurRadius: 6),
                       ],
                     ),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child:
-                              _buildDropdown(
-                                "Select Type",
-                                selectedType,
-                                typeList,
-                                (value) {
-                                   if (value == "Change Order") {
-                                     Navigator.pushReplacement(
-                                       context,
-                                       MaterialPageRoute(
-                                       builder: (context) => COMapScreen(),
-                                      ),
-                                    );
-                                    } else {
-                                    setState(() {
-                                     selectedType = value;
-                                     });
-                                   }
-                                  // setState(() => selectedType = value);
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: _buildDropdown("Select Year", selectedYear, yearList, (
-                                value,
-                              ) async {
-                                setState(() {
-                                  selectedYear = value;
-                                });
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final bool isTablet = constraints.maxWidth >= 600;
 
-                                //  loadApiData();
-                                showLoader(context);
+                        final selectType = Expanded(
+                          flex: 2,
+                          child: _buildDropdown(
+                            "Select Type",
+                            selectedType,
+                            typeList,
+                            (value) {
+                              if (value == "Change Order") {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => COMapScreen(),
+                                  ),
+                                );
+                              } else {
+                                setState(() {
+                                  selectedType = value;
+                                });
+                              }
+                            },
+                          ),
+                        );
+
+                        final selectYear = Expanded(
+                          flex: 2,
+                          child: _buildDropdown(
+                            "Select Year",
+                            selectedYear,
+                            yearList,
+                            (value) async {
+                              setState(() {
+                                selectedYear = value;
+                              });
+
+                              showLoader(context);
+
+                              try {
                                 final connectivityResult = await Connectivity()
                                     .checkConnectivity();
 
                                 if (!connectivityResult.contains(
                                   ConnectivityResult.none,
                                 )) {
-                                  // Internet available
                                   await DatabaseHelper.instance
                                       .fetchAndSaveDropdownData(
                                         selectedYear.toString(),
@@ -506,10 +502,10 @@ class _MapScreenState extends State<MapScreen> {
                                     "Offline - Loading dropdown data from SQLite",
                                   );
                                 }
-                                // Load dropdown values from SQLite
+
                                 await loadDropdownData();
+
                                 setState(() {
-                                  // Reset substation if it is no longer available
                                   if (!substationList.any(
                                     (e) => e.subName == selectedSubstation,
                                   )) {
@@ -517,83 +513,242 @@ class _MapScreenState extends State<MapScreen> {
                                     selectedSubstationId = null;
                                   }
 
-                                  // Reset feeder if it is no longer available
                                   if (!feederList.contains(selectedFeeder)) {
                                     selectedFeeder = null;
                                   }
 
-                                  // Reset year if it is no longer available
                                   if (!yearList.contains(selectedYear)) {
                                     selectedYear = null;
                                   }
                                 });
+                              } finally {
                                 Navigator.pop(context);
-                                //////////////////////////////////
-                                // setState(() {
-                                //   if (!substationList.any(
-                                //       (e) => e.subName == selectedSubstation)) {
-                                //     selectedSubstation = substationList.isNotEmpty
-                                //         ? substationList.first.subName
-                                //         : null;
+                              }
+                            },
+                          ),
+                        );
 
-                                //     selectedSubstationId = substationList.isNotEmpty
-                                //         ? substationList.first.subId
-                                //         : null;
-                                //   }
+                        final selectSubstation = Expanded(
+                          flex: 3,
+                          child: _buildDropdown(
+                            "Select Substation",
+                            selectedSubstation,
+                            substationList.map((e) => e.subName).toList(),
+                            (value) {
+                              final selected = substationList.firstWhere(
+                                (e) => e.subName == value,
+                              );
 
-                                //   if (!feederList.contains(selectedFeeder)) {
-                                //     selectedFeeder = feederList.isNotEmpty
-                                //         ? feederList.first
-                                //         : null;
-                                //   }
+                              setState(() {
+                                selectedSubstation = value;
+                                selectedSubstationId = selected.subId;
+                              });
 
-                                //   if (!yearList.contains(selectedYear)) {
-                                //     selectedYear =
-                                //         yearList.isNotEmpty ? yearList.first : null;
-                                //   }
-                                // });
-                              }),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              flex: 3,
-                              child: _buildDropdown(
-                                "Select Substation",
-                                selectedSubstation,
-                                substationList.map((e) => e.subName).toList(),
-                                (value) {
-                                  final selected = substationList.firstWhere(
-                                    (e) => e.subName == value,
-                                  );
+                              loadApiData();
+                            },
+                          ),
+                        );
 
-                                  setState(() {
-                                    selectedSubstation = value;
-                                    selectedSubstationId = selected.subId;
-                                  });
+                        final selectFeeder = Expanded(
+                          flex: 2,
+                          child: _buildDropdown(
+                            "Select Feeder",
+                            selectedFeeder,
+                            feederList,
+                            (value) {
+                              setState(() {
+                                selectedFeeder = value;
+                              });
 
-                                  loadApiData();
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              flex: 2,
-                              child: _buildDropdown(
-                                "Select Feeder",
-                                selectedFeeder,
-                                feederList,
-                                (value) {
-                                  setState(() {
-                                    selectedFeeder = value;
-                                  });
-                                  loadApiData();
-                                },
-                              ),
+                              loadApiData();
+                            },
+                          ),
+                        );
+
+                        if (isTablet) {
+                          return Row(
+                            children: [
+                              selectType,
+                              const SizedBox(width: 8),
+                              selectYear,
+                              const SizedBox(width: 8),
+                              selectSubstation,
+                              const SizedBox(width: 8),
+                              selectFeeder,
+                            ],
+                          );
+                        }
+
+                        return Column(
+                          children: [
+                            Row(children: [selectType]),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                selectYear,
+                                const SizedBox(width: 8),
+                                selectSubstation,
+                                const SizedBox(width: 8),
+                                selectFeeder,
+                              ],
                             ),
                           ],
-                        ),
-                      ],
+                        );
+                      },
                     ),
+                    //  Column(
+                    //   children: [
+                    //     Row(
+                    //       children: [
+                    //         Expanded(
+                    //           child:
+                    //           _buildDropdown(
+                    //             "Select Type",
+                    //             selectedType,
+                    //             typeList,
+                    //             (value) {
+                    //                if (value == "Change Order") {
+                    //                  Navigator.pushReplacement(
+                    //                    context,
+                    //                    MaterialPageRoute(
+                    //                    builder: (context) => COMapScreen(),
+                    //                   ),
+                    //                 );
+                    //                 } else {
+                    //                 setState(() {
+                    //                  selectedType = value;
+                    //                  });
+                    //                }
+                    //               // setState(() => selectedType = value);
+                    //             },
+                    //           ),
+                    //         ),
+                    //       //  const SizedBox(width: 8),
+                    //       ],
+                    //     ),
+                    //     const SizedBox(height: 8),
+                    //     Row(
+                    //       children: [
+                    //         Expanded(
+                    //           flex: 2,
+                    //           child: _buildDropdown("Select Year", selectedYear, yearList, (
+                    //             value,
+                    //           ) async {
+                    //             setState(() {
+                    //               selectedYear = value;
+                    //             });
+
+                    //             //  loadApiData();
+                    //             showLoader(context);
+                    //             final connectivityResult = await Connectivity()
+                    //                 .checkConnectivity();
+
+                    //             if (!connectivityResult.contains(
+                    //               ConnectivityResult.none,
+                    //             )) {
+                    //               // Internet available
+                    //               await DatabaseHelper.instance
+                    //                   .fetchAndSaveDropdownData(
+                    //                     selectedYear.toString(),
+                    //                     selectedSubstationId.toString(),
+                    //                   );
+
+                    //               print(
+                    //                 "Fetched dropdown data from API and saved to SQLite",
+                    //               );
+                    //             } else {
+                    //               print(
+                    //                 "Offline - Loading dropdown data from SQLite",
+                    //               );
+                    //             }
+                    //             // Load dropdown values from SQLite
+                    //             await loadDropdownData();
+                    //             setState(() {
+                    //               // Reset substation if it is no longer available
+                    //               if (!substationList.any(
+                    //                 (e) => e.subName == selectedSubstation,
+                    //               )) {
+                    //                 selectedSubstation = null;
+                    //                 selectedSubstationId = null;
+                    //               }
+
+                    //               // Reset feeder if it is no longer available
+                    //               if (!feederList.contains(selectedFeeder)) {
+                    //                 selectedFeeder = null;
+                    //               }
+
+                    //               // Reset year if it is no longer available
+                    //               if (!yearList.contains(selectedYear)) {
+                    //                 selectedYear = null;
+                    //               }
+                    //             });
+                    //             Navigator.pop(context);
+                    //             //////////////////////////////////
+                    //             // setState(() {
+                    //             //   if (!substationList.any(
+                    //             //       (e) => e.subName == selectedSubstation)) {
+                    //             //     selectedSubstation = substationList.isNotEmpty
+                    //             //         ? substationList.first.subName
+                    //             //         : null;
+
+                    //             //     selectedSubstationId = substationList.isNotEmpty
+                    //             //         ? substationList.first.subId
+                    //             //         : null;
+                    //             //   }
+
+                    //             //   if (!feederList.contains(selectedFeeder)) {
+                    //             //     selectedFeeder = feederList.isNotEmpty
+                    //             //         ? feederList.first
+                    //             //         : null;
+                    //             //   }
+
+                    //             //   if (!yearList.contains(selectedYear)) {
+                    //             //     selectedYear =
+                    //             //         yearList.isNotEmpty ? yearList.first : null;
+                    //             //   }
+                    //             // });
+                    //           }),
+                    //         ),
+                    //         const SizedBox(width: 8),
+                    //         Expanded(
+                    //           flex: 3,
+                    //           child: _buildDropdown(
+                    //             "Select Substation",
+                    //             selectedSubstation,
+                    //             substationList.map((e) => e.subName).toList(),
+                    //             (value) {
+                    //               final selected = substationList.firstWhere(
+                    //                 (e) => e.subName == value,
+                    //               );
+
+                    //               setState(() {
+                    //                 selectedSubstation = value;
+                    //                 selectedSubstationId = selected.subId;
+                    //               });
+
+                    //               loadApiData();
+                    //             },
+                    //           ),
+                    //         ),
+                    //         const SizedBox(width: 8),
+                    //         Expanded(
+                    //           flex: 2,
+                    //           child: _buildDropdown(
+                    //             "Select Feeder",
+                    //             selectedFeeder,
+                    //             feederList,
+                    //             (value) {
+                    //               setState(() {
+                    //                 selectedFeeder = value;
+                    //               });
+                    //               loadApiData();
+                    //             },
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ],
+                    // ),
                   ),
                 ),
                 Expanded(
@@ -1596,7 +1751,7 @@ class _MapScreenState extends State<MapScreen> {
                                                   panelState(() {
                                                     expandWorkLayers =
                                                         !expandWorkLayers;
-                                                        subLayersText =
+                                                    subLayersText =
                                                         !subLayersText;
                                                   });
                                                 },
@@ -1640,32 +1795,44 @@ class _MapScreenState extends State<MapScreen> {
                                                     const SizedBox(width: 8),
 
                                                     if (overHeadPolylines.any(
-                                                    (item) => item.jobNo.toString().trim().isNotEmpty,
+                                                      (item) => item.jobNo
+                                                          .toString()
+                                                          .trim()
+                                                          .isNotEmpty,
                                                     ))
-                                                    Builder(
-                                                    builder: (context) {
-                                                    final jobItem = overHeadPolylines.firstWhere(
-                                                    (item) => item.jobNo.toString().trim().isNotEmpty,
-                                                    );
-                                                    return Text(
-                                                    '(${jobItem.completedMiles}/${jobItem.totalMilesApi})',
-                                                     style: const TextStyle(
-                                                     color: Colors.black,
-                                                     fontSize: 14,
-                                                     // fontWeight: FontWeight.w600,
-                                                     ),
-                                                    );
-                                                  },
-                                                   )else(
-                                                   Text(
-                                                   '(0.00/0.00)',
-                                                   style: const TextStyle(
-                                                   color: Colors.black,
-                                                   fontSize: 14,
-                                                   // fontWeight: FontWeight.w600,
-                                                   ),
-                                                   )
-                                                   ),
+                                                      Builder(
+                                                        builder: (context) {
+                                                          final jobItem =
+                                                              overHeadPolylines
+                                                                  .firstWhere(
+                                                                    (
+                                                                      item,
+                                                                    ) => item
+                                                                        .jobNo
+                                                                        .toString()
+                                                                        .trim()
+                                                                        .isNotEmpty,
+                                                                  );
+                                                          return Text(
+                                                            '(${jobItem.completedMiles}/${jobItem.totalMilesApi})',
+                                                            style: const TextStyle(
+                                                              color:
+                                                                  Colors.black,
+                                                              fontSize: 14,
+                                                              // fontWeight: FontWeight.w600,
+                                                            ),
+                                                          );
+                                                        },
+                                                      )
+                                                    else
+                                                      (Text(
+                                                        '(0.00/0.00)',
+                                                        style: const TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 14,
+                                                          // fontWeight: FontWeight.w600,
+                                                        ),
+                                                      )),
                                                     const SizedBox(width: 10),
                                                     Icon(
                                                       expandWorkLayers
@@ -1685,23 +1852,33 @@ class _MapScreenState extends State<MapScreen> {
                                                   ],
                                                 ),
                                               ),
-                                                const SizedBox(width: 6),
+                                              const SizedBox(width: 6),
 
-                                                if (subLayersText)
-                                                  Align(
-                                                  alignment: Alignment.centerLeft,
+                                              if (subLayersText)
+                                                Align(
+                                                  alignment:
+                                                      Alignment.centerLeft,
                                                   child: Padding(
-                                                  padding: const EdgeInsets.only(left:6.0),
-                                                  child: const Text(
-                                                  "Sub Layer",
-                                                  style: TextStyle(
-                                                  color: Color.fromARGB(255, 27, 116, 30),
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 16,
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                          left: 6.0,
+                                                        ),
+                                                    child: const Text(
+                                                      "Sub Layer",
+                                                      style: TextStyle(
+                                                        color: Color.fromARGB(
+                                                          255,
+                                                          27,
+                                                          116,
+                                                          30,
+                                                        ),
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
                                                   ),
-                                                 ),
-                                                 ),
-                                               ),
+                                                ),
                                               if (expandWorkLayers) ...[
                                                 const SizedBox(height: 5),
 
@@ -1792,7 +1969,7 @@ class _MapScreenState extends State<MapScreen> {
                                                             //         ),
                                                             //   ),
                                                             // ),
-                                                             ///progress value changes
+                                                            ///progress value changes
                                                             Expanded(
                                                               child: Builder(
                                                                 builder: (context) {

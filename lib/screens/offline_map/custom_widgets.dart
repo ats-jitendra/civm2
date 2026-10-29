@@ -299,13 +299,13 @@ class NetworkImageGallery extends StatelessWidget {
 
     if (images.isEmpty) {
       return const SizedBox(
-        height: 150,
-        child: Center(
-          child: Text(
-            "No images found",
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
+        // height: 150,
+        // child: Center(
+        //   child: Text(
+        //     "No images found",
+        //     style: TextStyle(fontWeight: FontWeight.bold),
+        //   ),
+        // ),
       );
     }
 

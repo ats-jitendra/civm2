@@ -427,57 +427,53 @@ class _COMapScreenState extends State<COMapScreen> {
                         BoxShadow(color: Colors.grey.shade300, blurRadius: 6),
                       ],
                     ),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child:
-                              _buildDropdown(
-                                "Select Type",
-                                selectedType,
-                                typeList,
-                                (value) {
-                                  if (value == "IVM") {
-                                     Navigator.pushReplacement(
-                                       context,
-                                       MaterialPageRoute(
-                                       builder: (context) => MapScreen(),
-                                      ),
-                                    );
-                                    } else {
-                                    setState(() {
-                                     selectedType = value;
-                                     });
-                                   }
-                                  // setState(() => selectedType = value);
-                                },
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Expanded(
-                              // flex: 2,
-                              child: _buildDropdown("Select Year", selectedYear, yearList, (
-                                value,
-                              ) async {
-                                setState(() {
-                                  selectedYear = value;
-                                });
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final bool isTablet = constraints.maxWidth >= 600;
 
-                                //  loadApiData();
-                                showLoader(context);
+                        final selectType = Expanded(
+                          flex: isTablet ? 3 : 2,
+                          child: _buildDropdown(
+                            "Select Type",
+                            selectedType,
+                            typeList,
+                            (value) {
+                              if (value == "IVM") {
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => MapScreen(),
+                                  ),
+                                );
+                              } else {
+                                setState(() {
+                                  selectedType = value;
+                                });
+                              }
+                            },
+                          ),
+                        );
+
+                        final selectYear = Expanded(
+                          flex: isTablet ? 2 : 2,
+                          child: _buildDropdown(
+                            "Select Year",
+                            selectedYear,
+                            yearList,
+                            (value) async {
+                              setState(() {
+                                selectedYear = value;
+                              });
+
+                              showLoader(context);
+
+                              try {
                                 final connectivityResult = await Connectivity()
                                     .checkConnectivity();
 
                                 if (!connectivityResult.contains(
                                   ConnectivityResult.none,
                                 )) {
-                                  // Internet available
                                   await DatabaseHelper.instance
                                       .fetchAndSaveDropdownData(
                                         selectedYear.toString(),
@@ -492,10 +488,10 @@ class _COMapScreenState extends State<COMapScreen> {
                                     "Offline - Loading dropdown data from SQLite",
                                   );
                                 }
-                                // Load dropdown values from SQLite
+
                                 await loadDropdownData();
+
                                 setState(() {
-                                  // Reset substation if it is no longer available
                                   if (!substationList.any(
                                     (e) => e.subName == selectedSubstation,
                                   )) {
@@ -503,149 +499,302 @@ class _COMapScreenState extends State<COMapScreen> {
                                     selectedSubstationId = null;
                                   }
 
-                                  // Reset feeder if it is no longer available
                                   if (!feederList.contains(selectedFeeder)) {
                                     selectedFeeder = null;
                                   }
 
-                                  // Reset year if it is no longer available
                                   if (!yearList.contains(selectedYear)) {
                                     selectedYear = null;
                                   }
                                 });
+                              } finally {
                                 Navigator.pop(context);
-                                //////////////////////////////////
-                                // setState(() {
-                                //   if (!substationList.any(
-                                //       (e) => e.subName == selectedSubstation)) {
-                                //     selectedSubstation = substationList.isNotEmpty
-                                //         ? substationList.first.subName
-                                //         : null;
+                              }
+                            },
+                          ),
+                        );
 
-                                //     selectedSubstationId = substationList.isNotEmpty
-                                //         ? substationList.first.subId
-                                //         : null;
-                                //   }
+                        final selectSubstation = Expanded(
+                          flex: isTablet ? 3 : 2,
+                          child: _buildDropdown(
+                            "Select Substation",
+                            selectedSubstation,
+                            substationList.map((e) => e.subName).toList(),
+                            (value) {
+                              final selected = substationList.firstWhere(
+                                (e) => e.subName == value,
+                              );
 
-                                //   if (!feederList.contains(selectedFeeder)) {
-                                //     selectedFeeder = feederList.isNotEmpty
-                                //         ? feederList.first
-                                //         : null;
-                                //   }
+                              setState(() {
+                                selectedSubstation = value;
+                                selectedSubstationId = selected.subId;
+                              });
 
-                                //   if (!yearList.contains(selectedYear)) {
-                                //     selectedYear =
-                                //         yearList.isNotEmpty ? yearList.first : null;
-                                //   }
-                                // });
-                              }),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              // flex: 3,
-                              child: _buildDropdown(
-                                "Select Substation",
-                                selectedSubstation,
-                                substationList.map((e) => e.subName).toList(),
-                                (value) {
-                                  final selected = substationList.firstWhere(
-                                    (e) => e.subName == value,
-                                  );
+                              loadApiData();
+                            },
+                          ),
+                        );
 
-                                  setState(() {
-                                    selectedSubstation = value;
-                                    selectedSubstationId = selected.subId;
-                                  });
+                        final selectFeeder = Expanded(
+                          flex: isTablet ? 2 : 2,
+                          child: _buildDropdown(
+                            "Select Feeder",
+                            selectedFeeder,
+                            feederList,
+                            (value) {
+                              setState(() {
+                                selectedFeeder = value;
+                              });
 
-                                  loadApiData();
-                                },
-                              ),
-                            ),
+                              loadApiData();
+                            },
+                          ),
+                        );
 
-                            // Expanded(
-                            //   flex: 2,
-                            //   child: _buildDropdown(
-                            //     "Select Feeder",
-                            //     selectedFeeder,
-                            //     feederList,
-                            //     (value) {
-                            //       setState(() {
-                            //         selectedFeeder = value;
-                            //       });
-                            //       loadApiData();
-                            //     },
-                            //   ),
-                            // ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        //  Row(
-                        //       children: [
-                        //                   Expanded(
-                        //         //  flex: 2,
-                        //           child: _buildDropdown(
-                        //             "Select Feeder",
-                        //             selectedFeeder,
-                        //             feederList,
-                        //             (value) {
-                        //               setState(() {
-                        //                 selectedFeeder = value;
-                        //               });
-                        //               loadApiData();
-                        //             },
-                        //           ),
-                        //         ),
-                        //      const SizedBox(width: 8),
-                        //         Expanded(
-                        //           child:
-                        //           _buildDropdown(
-                        //             "Select Job No",
-                        //             selectedType,
-                        //             typeList,
-                        //             (value) {
-                        //               setState(() => selectedType = value);
-                        //             },
-                        //           ),
-                        //         ),
-                        //         const SizedBox(width: 8),
-                        //       ],
-                        //     ),
-                        Row(
+                        final selectWorkOrder = Expanded(
+                          flex: isTablet ? 2 : 2,
+                          child: _buildMultiSelectDropdown(
+                            "Select Work Order",
+                            selectedTokenNos,
+                            workOrderList,
+                            (values) {
+                              setState(() {
+                                selectedTokenNos = values;
+                                coTokenNo = values.join(', ');
+                              });
+
+                              print("Selected Token Nos: $coTokenNo");
+                            },
+                          ),
+                        );
+
+                        if (isTablet) {
+                          return Row(
+                            children: [
+                              selectType,
+                              const SizedBox(width: 8),
+                              selectYear,
+                              const SizedBox(width: 8),
+                              selectSubstation,
+                              const SizedBox(width: 8),
+                              selectFeeder,
+                              const SizedBox(width: 8),
+                              selectWorkOrder,
+                            ],
+                          );
+                        }
+
+                        return Column(
                           children: [
-                            Expanded(
-                              child: _buildDropdown(
-                                "Select Feeder",
-                                selectedFeeder,
-                                feederList,
-                                (value) {
-                                  setState(() {
-                                    selectedFeeder = value;
-                                  });
-                                  loadApiData();
-                                },
-                              ),
+                            Row(children: [selectType]),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                selectYear,
+                                const SizedBox(width: 8),
+                                selectSubstation,
+                              ],
                             ),
-
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: _buildMultiSelectDropdown(
-                                "Select Work Order",
-                                selectedTokenNos,
-                                workOrderList,
-                                (values) {
-                                  setState(() {
-                                    selectedTokenNos = values;
-                                    coTokenNo = values.join(', ');
-                                  });
-
-                                  print("Selected Token Nos: $coTokenNo");
-                                },
-                              ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                selectFeeder,
+                                const SizedBox(width: 8),
+                                selectWorkOrder,
+                              ],
                             ),
                           ],
-                        ),
-                      ],
+                        );
+                      },
                     ),
+                    // Column(
+                    //   children: [
+                    //     Row(
+                    //       children: [
+                    //         Expanded(
+                    //           child:
+                    //           _buildDropdown(
+                    //             "Select Type",
+                    //             selectedType,
+                    //             typeList,
+                    //             (value) {
+                    //               if (value == "IVM") {
+                    //                  Navigator.pushReplacement(
+                    //                    context,
+                    //                    MaterialPageRoute(
+                    //                    builder: (context) => MapScreen(),
+                    //                   ),
+                    //                 );
+                    //                 } else {
+                    //                 setState(() {
+                    //                  selectedType = value;
+                    //                  });
+                    //                }
+                    //               // setState(() => selectedType = value);
+                    //             },
+                    //           ),
+                    //         ),
+                    //        // const SizedBox(width: 8),
+                    //       ],
+                    //     ),
+                    //     const SizedBox(height: 8),
+                    //     Row(
+                    //       children: [
+                    //         Expanded(
+                    //           // flex: 2,
+                    //           child: _buildDropdown("Select Year", selectedYear, yearList, (
+                    //             value,
+                    //           ) async {
+                    //             setState(() {
+                    //               selectedYear = value;
+                    //             });
+
+                    //             //  loadApiData();
+                    //             showLoader(context);
+                    //             final connectivityResult = await Connectivity()
+                    //                 .checkConnectivity();
+
+                    //             if (!connectivityResult.contains(
+                    //               ConnectivityResult.none,
+                    //             )) {
+                    //               // Internet available
+                    //               await DatabaseHelper.instance
+                    //                   .fetchAndSaveDropdownData(
+                    //                     selectedYear.toString(),
+                    //                     selectedSubstationId.toString(),
+                    //                   );
+
+                    //               print(
+                    //                 "Fetched dropdown data from API and saved to SQLite",
+                    //               );
+                    //             } else {
+                    //               print(
+                    //                 "Offline - Loading dropdown data from SQLite",
+                    //               );
+                    //             }
+                    //             // Load dropdown values from SQLite
+                    //             await loadDropdownData();
+                    //             setState(() {
+                    //               // Reset substation if it is no longer available
+                    //               if (!substationList.any(
+                    //                 (e) => e.subName == selectedSubstation,
+                    //               )) {
+                    //                 selectedSubstation = null;
+                    //                 selectedSubstationId = null;
+                    //               }
+
+                    //               // Reset feeder if it is no longer available
+                    //               if (!feederList.contains(selectedFeeder)) {
+                    //                 selectedFeeder = null;
+                    //               }
+
+                    //               // Reset year if it is no longer available
+                    //               if (!yearList.contains(selectedYear)) {
+                    //                 selectedYear = null;
+                    //               }
+                    //             });
+                    //             Navigator.pop(context);
+                    //             //////////////////////////////////
+                    //             // setState(() {
+                    //             //   if (!substationList.any(
+                    //             //       (e) => e.subName == selectedSubstation)) {
+                    //             //     selectedSubstation = substationList.isNotEmpty
+                    //             //         ? substationList.first.subName
+                    //             //         : null;
+
+                    //             //     selectedSubstationId = substationList.isNotEmpty
+                    //             //         ? substationList.first.subId
+                    //             //         : null;
+                    //             //   }
+
+                    //             //   if (!feederList.contains(selectedFeeder)) {
+                    //             //     selectedFeeder = feederList.isNotEmpty
+                    //             //         ? feederList.first
+                    //             //         : null;
+                    //             //   }
+
+                    //             //   if (!yearList.contains(selectedYear)) {
+                    //             //     selectedYear =
+                    //             //         yearList.isNotEmpty ? yearList.first : null;
+                    //             //   }
+                    //             // });
+                    //           }),
+                    //         ),
+                    //         const SizedBox(width: 8),
+                    //         Expanded(
+                    //           // flex: 3,
+                    //           child: _buildDropdown(
+                    //             "Select Substation",
+                    //             selectedSubstation,
+                    //             substationList.map((e) => e.subName).toList(),
+                    //             (value) {
+                    //               final selected = substationList.firstWhere(
+                    //                 (e) => e.subName == value,
+                    //               );
+
+                    //               setState(() {
+                    //                 selectedSubstation = value;
+                    //                 selectedSubstationId = selected.subId;
+                    //               });
+
+                    //               loadApiData();
+                    //             },
+                    //           ),
+                    //         ),
+
+                    //         // Expanded(
+                    //         //   flex: 2,
+                    //         //   child: _buildDropdown(
+                    //         //     "Select Feeder",
+                    //         //     selectedFeeder,
+                    //         //     feederList,
+                    //         //     (value) {
+                    //         //       setState(() {
+                    //         //         selectedFeeder = value;
+                    //         //       });
+                    //         //       loadApiData();
+                    //         //     },
+                    //         //   ),
+                    //         // ),
+                    //       ],
+                    //     ),
+                    //     const SizedBox(height: 8),
+                    //  Row(
+                    //       children: [
+                    //         Expanded(
+                    //           child: _buildDropdown(
+                    //             "Select Feeder",
+                    //             selectedFeeder,
+                    //             feederList,
+                    //             (value) {
+                    //               setState(() {
+                    //                 selectedFeeder = value;
+                    //               });
+                    //               loadApiData();
+                    //             },
+                    //           ),
+                    //         ),
+
+                    //         const SizedBox(width: 8),
+                    //         Expanded(
+                    //           child: _buildMultiSelectDropdown(
+                    //             "Select Work Order",
+                    //             selectedTokenNos,
+                    //             workOrderList,
+                    //             (values) {
+                    //               setState(() {
+                    //                 selectedTokenNos = values;
+                    //                 coTokenNo = values.join(', ');
+                    //               });
+
+                    //               print("Selected Token Nos: $coTokenNo");
+                    //             },
+                    //           ),
+                    //         ),
+                    //       ],
+                    //     ),
+                    //   ],
+                    // ),
                   ),
                 ),
 
@@ -2325,15 +2474,15 @@ class _COMapScreenState extends State<COMapScreen> {
     final prefs = await SharedPreferences.getInstance();
 
     if (selectedSubstation != null) {
-      await prefs.setString("lastSelectedSubstation", selectedSubstation!);
+      await prefs.setString("lastSelectedSubstationCO", selectedSubstation!);
     }
 
     if (selectedSubstationId != null) {
-      await prefs.setInt("lastSelectedSubstationId", selectedSubstationId!);
+      await prefs.setInt("lastSelectedSubstationIdCO", selectedSubstationId!);
     }
 
     if (selectedFeeder != null) {
-      await prefs.setString("lastSelectedFeeder", selectedFeeder!);
+      await prefs.setString("lastSelectedFeederCO", selectedFeeder!);
     }
 
     print("Saved Substation: $selectedSubstation");
@@ -2344,11 +2493,11 @@ class _COMapScreenState extends State<COMapScreen> {
   Future<void> restoreSelectedLocation() async {
     final prefs = await SharedPreferences.getInstance();
 
-    final savedSubstation = prefs.getString("lastSelectedSubstation");
+    final savedSubstation = prefs.getString("lastSelectedSubstationCO");
 
-    final savedSubstationId = prefs.getInt("lastSelectedSubstationId");
+    final savedSubstationId = prefs.getInt("lastSelectedSubstationIdCO");
 
-    final savedFeeder = prefs.getString("lastSelectedFeeder");
+    final savedFeeder = prefs.getString("lastSelectedFeederCO");
 
     if (!mounted) return;
 
@@ -2534,7 +2683,12 @@ class _COMapScreenState extends State<COMapScreen> {
         ),
         icon: const Icon(Icons.keyboard_arrow_down),
         items: items
-            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+            .map(
+              (e) => DropdownMenuItem(
+                value: e,
+                child: Text(e, maxLines: 1, overflow: TextOverflow.ellipsis),
+              ),
+            )
             .toList(),
         onChanged: onChanged,
       ),
