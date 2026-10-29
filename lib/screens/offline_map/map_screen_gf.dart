@@ -255,7 +255,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
     _initializeMap();
     WakelockPlus.enable();
     /////
-    // cameraInit();
+    cameraInit();
     getUserType();
     _startListeningToCompass();
   }
