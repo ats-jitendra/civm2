@@ -28,7 +28,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 23,
+      version: 24,
       onCreate: _createDB,
       onUpgrade: (db, oldVersion, newVersion) async {
         // Future database migrations go here.
@@ -303,6 +303,14 @@ class DatabaseHelper {
             "ALTER TABLE overHeadChangeOrderTable ADD COLUMN completedMiles TEXT",
           );
         }
+        if (oldVersion < 24) {
+          await db.execute(
+            "ALTER TABLE overHeadTable ADD COLUMN sharedCrewIds TEXT",
+          );
+          await db.execute(
+            "ALTER TABLE overHeadChangeOrderTable ADD COLUMN sharedCrewIds TEXT",
+          );
+        }
       },
     );
   }
@@ -347,7 +355,8 @@ class DatabaseHelper {
       createdAt INTEGER,
       fetchId INTEGER,
       jobStatus TEXT,
-      completedMiles TEXT
+      completedMiles TEXT,
+      sharedCrewIds TEXT
       )
     ''');
     await db.execute('''
@@ -389,7 +398,8 @@ class DatabaseHelper {
       createdAt INTEGER,
       fetchId INTEGER,
        jobStatus TEXT,
-       completedMiles TEXT
+       completedMiles TEXT,
+        sharedCrewIds TEXT
       )
     ''');
 
@@ -713,6 +723,7 @@ CREATE TABLE inspectionListTable(
           "fetchId": fetchId,
           "jobStatus": item["jobStatus"],
           "completedMiles": item["completedMiles"] ?? "",
+          "sharedCrewIds": item["sharedCrewIds"] ?? "",
         }, conflictAlgorithm: ConflictAlgorithm.replace);
       }
       //Poles

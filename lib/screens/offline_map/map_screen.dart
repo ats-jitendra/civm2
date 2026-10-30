@@ -212,13 +212,20 @@ class _MapScreenState extends State<MapScreen> {
     }
   }
 
-  Future<void> disposeCamera() async {
-    if (_camerasController!.value.isInitialized) {
-      await _camerasController!.dispose();
-      // _camerasController = null;
-    }
-  }
+  // Future<void> disposeCamera() async {
+  //   if (_camerasController!.value.isInitialized) {
+  //     await _camerasController!.dispose();
+  //     // _camerasController = null;
+  //   }
+  // }
+Future<void> disposeCamera() async {
+  final controller = _camerasController;
 
+  if (controller != null) {
+    _camerasController = null;
+    await controller.dispose();
+  }
+}
   @override
   void dispose() {
     // TODO: implement dispose
@@ -451,8 +458,10 @@ class _MapScreenState extends State<MapScreen> {
                             "Select Type",
                             selectedType,
                             typeList,
-                            (value) {
+                            (value) async{
                               if (value == "Change Order") {
+                                  await disposeCamera();
+                                   if (!mounted) return;
                                 Navigator.pushReplacement(
                                   context,
                                   MaterialPageRoute(
