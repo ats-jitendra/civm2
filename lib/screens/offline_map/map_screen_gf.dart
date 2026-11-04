@@ -42,6 +42,7 @@ class MapScreenGF extends StatefulWidget {
   String type;
   String sourcePage;
   String crew;
+  String masterJobNo;
   MapScreenGF({
     super.key,
     required this.jobNo,
@@ -51,6 +52,7 @@ class MapScreenGF extends StatefulWidget {
     required this.type,
     required this.sourcePage,
     required this.crew,
+    required this.masterJobNo,
   });
 
   @override
@@ -409,23 +411,24 @@ class _MapScreenGFState extends State<MapScreenGF> {
         : screenHeight < 900
         ? screenHeight * 0.60
         : screenHeight * 0.80;
+    final isTabletView = MediaQuery.of(context).size.width >= 600;
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
-          "IVM Sytem Map",
+          "IVM System Map",
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color.fromARGB(255, 7, 59, 120),
         actions: [
           widget.sourcePage == 'maintenanceReportView'
               ? const SizedBox.shrink()
-              : 
-              // (widget
-              //           .visibilityFlag /////visibilityFlag
-              //           .toString() ==
-              //       '2')
-              (selectedJobStatus=='ASSIGNED')
+              :
+                // (widget
+                //           .visibilityFlag /////visibilityFlag
+                //           .toString() ==
+                //       '2')
+                (selectedJobStatus == 'ASSIGNED')
               ? IconButton(
                   icon: const Icon(Icons.share, color: Colors.green),
                   onPressed: () {
@@ -437,7 +440,8 @@ class _MapScreenGFState extends State<MapScreenGF> {
                     );
                   },
                 )
-              : (selectedJobStatus=='PENDING ZIELIES ASSIGNMENT')?IconButton(
+              : (selectedJobStatus == 'PENDING ZIELIES ASSIGNMENT')
+              ? IconButton(
                   icon: const Icon(Icons.share, color: Colors.blue),
                   onPressed: () {
                     showCrewDialogIVM(
@@ -447,7 +451,8 @@ class _MapScreenGFState extends State<MapScreenGF> {
                       widget.crew.toString(),
                     );
                   },
-                ):SizedBox(),
+                )
+              : SizedBox(),
           IconButton(
             icon: const Icon(Icons.visibility),
             onPressed: () {
@@ -468,18 +473,18 @@ class _MapScreenGFState extends State<MapScreenGF> {
             icon: const Icon(Icons.refresh),
             onPressed: () {
               loadApiData();
-               showLayerPanel = false;
-                 expandWorkLayers = true;
-                 showSubstationLayer = true;
-                 showPrimaryLayer = true;
-                 showPrimaryOverHeadLayer = true;
-                 showPrimaryUnderGroundLayer = true;
-                 showSecondaryLayer = true;
-                 showSecondaryOverHeadLayer = true;
-                 showSecondaryUnderGroundLayer = true;
-                 showConsumerLayer = true;
-                 showPoleLayer = true;
-                 showMaintLayer = true;
+              showLayerPanel = false;
+              expandWorkLayers = true;
+              showSubstationLayer = true;
+              showPrimaryLayer = true;
+              showPrimaryOverHeadLayer = true;
+              showPrimaryUnderGroundLayer = true;
+              showSecondaryLayer = true;
+              showSecondaryOverHeadLayer = true;
+              showSecondaryUnderGroundLayer = true;
+              showConsumerLayer = true;
+              showPoleLayer = true;
+              showMaintLayer = true;
             },
           ),
         ],
@@ -507,45 +512,58 @@ class _MapScreenGFState extends State<MapScreenGF> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          /// Job No
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 8,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.shade100,
-                              borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Colors.orange.shade700),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(
-                                  Icons.badge,
-                                  color: Colors.deepOrange,
-                                  size: 18,
-                                ),
-                                const SizedBox(width: 8),
-                                const Text(
-                                  "Job No : ",
-                                  style: TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
+                          LayoutBuilder(
+                            builder: (context, constraints) {
+                              final isTablet = constraints.maxWidth >= 600;
+
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Row(
+                                    children: [
+                                      /// Master Job No
+                                      if (widget.masterJobNo != "N/A" &&
+                                          widget.masterJobNo
+                                              .toString()
+                                              .trim()
+                                              .isNotEmpty) ...[
+                                        Expanded(
+                                          flex: 3,
+                                          child: buildResponsiveInfo(
+                                            Icons.assignment,
+                                            "Master Job No",
+                                            widget.masterJobNo.toString(),
+
+                                            isTablet,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 8),
+                                      ],
+
+                                      /// Job No
+                                      Expanded(
+                                        flex: 2,
+                                        child: buildResponsiveInfo(
+                                          Icons.badge,
+                                          "Job No",
+                                          widget.jobNo,
+
+                                          isTablet,
+                                          isMasterJobNo:
+                                              (widget.masterJobNo != "N/A" &&
+                                                  widget.masterJobNo
+                                                      .toString()
+                                                      .trim()
+                                                      .isNotEmpty)
+                                              ? false
+                                              : true,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
-                                Expanded(
-                                  child: Text(
-                                    widget.jobNo,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Colors.deepOrange,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                                ],
+                              );
+                            },
                           ),
 
                           const SizedBox(height: 8),
@@ -554,15 +572,17 @@ class _MapScreenGFState extends State<MapScreenGF> {
                           Row(
                             children: [
                               Expanded(
-                                child: _infoTile(
+                                flex: 3,
+                                child: infoTile(
                                   Icons.location_city,
                                   "Substation",
                                   selectedSubstation ?? "-",
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Expanded(
-                                child: _infoTile(
+                              SizedBox(
+                                width: isTabletView ? 280 : 150,
+                                child: infoTile(
                                   Icons.alt_route,
                                   "Feeder",
                                   selectedFeeder ?? "-",
@@ -633,34 +653,39 @@ class _MapScreenGFState extends State<MapScreenGF> {
                               ),
                               ////////////poly line on tap---------
                               onTap: (tapPosition, latLng) {
-                                _onPolylineTap(latLng);
+                                ///old Approximate meters code changes--------
+                                // _onPolylineTap(latLng);
+                                ///new Pixels code changes----------
+                                if (tapPosition.relative != null) {
+                                  _onPolylineTap(tapPosition.relative!, latLng);
+                                }
                               },
                               onPositionChanged: (position, hasGesture) {
                                 final zoom = position.zoom
-                                .clamp(1.0, 22.0)
-                                .toDouble();
-                          //to hide poles and consumers when extream zoom in
-                            final bool wasZoomLevel = _currentZoom >= 15.0;
-                            final bool isZoomLevel = zoom >= 15.0;
+                                    .clamp(1.0, 22.0)
+                                    .toDouble();
+                                //to hide poles and consumers when extream zoom in
+                                final bool wasZoomLevel = _currentZoom >= 15.0;
+                                final bool isZoomLevel = zoom >= 15.0;
 
-                            _currentZoom = zoom;
+                                _currentZoom = zoom;
 
-                            if (showPopup) {
-                              _updatePopupPosition();
-                            }
-
-                            // Only change layer visibility when zoom crosses 15
-                            if (wasZoomLevel != isZoomLevel) {
-                              setState(() {
-                                if (_currentZoom < 15.0) {
-                                  showPoleLayer = false;
-                                  showConsumerLayer = false;
-                                } else {
-                                  showPoleLayer = true;
-                                  showConsumerLayer = true;
+                                if (showPopup) {
+                                  _updatePopupPosition();
                                 }
-                              });
-                            }
+
+                                // Only change layer visibility when zoom crosses 15
+                                if (wasZoomLevel != isZoomLevel) {
+                                  setState(() {
+                                    if (_currentZoom < 15.0) {
+                                      showPoleLayer = false;
+                                      showConsumerLayer = false;
+                                    } else {
+                                      showPoleLayer = true;
+                                      showConsumerLayer = true;
+                                    }
+                                  });
+                                }
                               },
 
                               ////////--------------
@@ -905,7 +930,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                           status == "completed" ||
                                               status == "rework completed" ||
                                               status == "final completed" ||
-                                          status == "passed"
+                                              status == "passed"
                                           ? Colors.grey
                                           : getColorFromName(
                                               type,
@@ -1467,7 +1492,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                                                 false,
                                                           );
                                                     }
-                                                     _buildStatusMarkers();
+                                                    _buildStatusMarkers();
                                                   });
                                                   setState(() {});
                                                 },
@@ -1507,7 +1532,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                                       //       (key, value) =>
                                                       //           showPrimaryOverHeadLayer,
                                                       //     );
-                                                       _buildStatusMarkers();
+                                                      _buildStatusMarkers();
                                                     });
                                                   },
                                                 ),
@@ -1619,7 +1644,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                                   panelState(() {
                                                     expandWorkLayers =
                                                         !expandWorkLayers;
-                                                        subLayersText =
+                                                    subLayersText =
                                                         !subLayersText;
                                                   });
                                                 },
@@ -1660,36 +1685,48 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                                         });
                                                       },
                                                     ),
-                                                      const SizedBox(width: 8),
+                                                    const SizedBox(width: 8),
 
                                                     if (overHeadPolylines.any(
-                                                    (item) => item.jobNo.toString().trim().isNotEmpty,
+                                                      (item) => item.jobNo
+                                                          .toString()
+                                                          .trim()
+                                                          .isNotEmpty,
                                                     ))
-                                                    Builder(
-                                                    builder: (context) {
-                                                    final jobItem = overHeadPolylines.firstWhere(
-                                                    (item) => item.jobNo.toString().trim().isNotEmpty,
-                                                    );
-                                                    return Text(
-                                                    '(${jobItem.completedMiles}/${jobItem.totalMilesApi})',
-                                                     style: const TextStyle(
-                                                     color: Colors.black,
-                                                     fontSize: 14,
-                                                     // fontWeight: FontWeight.w600,
-                                                     ),
-                                                    );
-                                                  },
-                                                   )else(
-                                                   Text(
-                                                   '(0.00/0.00)',
-                                                   style: const TextStyle(
-                                                   color: Colors.black,
-                                                   fontSize: 14,
-                                                   // fontWeight: FontWeight.w600,
-                                                   ),
-                                                   )
-                                                   ),
-                                                    
+                                                      Builder(
+                                                        builder: (context) {
+                                                          final jobItem =
+                                                              overHeadPolylines
+                                                                  .firstWhere(
+                                                                    (
+                                                                      item,
+                                                                    ) => item
+                                                                        .jobNo
+                                                                        .toString()
+                                                                        .trim()
+                                                                        .isNotEmpty,
+                                                                  );
+                                                          return Text(
+                                                            '(${jobItem.completedMiles}/${jobItem.totalMilesApi})',
+                                                            style: const TextStyle(
+                                                              color:
+                                                                  Colors.black,
+                                                              fontSize: 14,
+                                                              // fontWeight: FontWeight.w600,
+                                                            ),
+                                                          );
+                                                        },
+                                                      )
+                                                    else
+                                                      (Text(
+                                                        '(0.00/0.00)',
+                                                        style: const TextStyle(
+                                                          color: Colors.black,
+                                                          fontSize: 14,
+                                                          // fontWeight: FontWeight.w600,
+                                                        ),
+                                                      )),
+
                                                     const SizedBox(width: 10),
                                                     Icon(
                                                       expandWorkLayers
@@ -1709,23 +1746,33 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                                   ],
                                                 ),
                                               ),
-                                                const SizedBox(width: 6),
+                                              const SizedBox(width: 6),
 
-      if (subLayersText)
-        Align(
-          alignment: Alignment.centerLeft,
-          child: Padding(
-            padding: const EdgeInsets.only(left:6.0),
-            child: const Text(
-              "Sub Layer",
-              style: TextStyle(
-                color: Color.fromARGB(255, 27, 116, 30),
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-              ),
-            ),
-          ),
-        ),
+                                              if (subLayersText)
+                                                Align(
+                                                  alignment:
+                                                      Alignment.centerLeft,
+                                                  child: Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                          left: 6.0,
+                                                        ),
+                                                    child: const Text(
+                                                      "Sub Layer",
+                                                      style: TextStyle(
+                                                        color: Color.fromARGB(
+                                                          255,
+                                                          27,
+                                                          116,
+                                                          30,
+                                                        ),
+                                                        fontWeight:
+                                                            FontWeight.bold,
+                                                        fontSize: 16,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
                                               if (expandWorkLayers) ...[
                                                 const SizedBox(height: 5),
 
@@ -1742,10 +1789,16 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                                         panelState(() {
                                                           workLayerVisibility[name] =
                                                               !workLayerVisibility[name]!;
-                                                               //////for atleast one work type selected///////
-                                                               showMaintLayer = workLayerVisibility.values.any(
-                                                                (isSelected) => isSelected,
-                                                               );
+                                                          //////for atleast one work type selected///////
+                                                          showMaintLayer =
+                                                              workLayerVisibility
+                                                                  .values
+                                                                  .any(
+                                                                    (
+                                                                      isSelected,
+                                                                    ) =>
+                                                                        isSelected,
+                                                                  );
                                                         });
                                                         setState(() {
                                                           _buildStatusMarkers();
@@ -1781,10 +1834,16 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                                                 panelState(() {
                                                                   workLayerVisibility[name] =
                                                                       value!;
-                                                                                                                                            //////for atleast one work type selected///////
-                                                                showMaintLayer = workLayerVisibility.values.any(
-                                                                (isSelected) => isSelected,
-                                                                );
+                                                                  //////for atleast one work type selected///////
+                                                                  showMaintLayer =
+                                                                      workLayerVisibility
+                                                                          .values
+                                                                          .any(
+                                                                            (
+                                                                              isSelected,
+                                                                            ) =>
+                                                                                isSelected,
+                                                                          );
                                                                 });
                                                                 setState(() {
                                                                   _buildStatusMarkers();
@@ -1804,7 +1863,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                                             //         ),
                                                             //   ),
                                                             // ),
-                                                              ///progress value changes
+                                                            ///progress value changes
                                                             Expanded(
                                                               child: Builder(
                                                                 builder: (context) {
@@ -1862,7 +1921,6 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                                                 },
                                                               ),
                                                             ),
-                                                         
                                                           ],
                                                         ),
                                                       ),
@@ -1870,7 +1928,6 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                                   );
                                                 }).toList(),
                                               ],
-                                          
                                             ],
                                           ),
                                         ),
@@ -2144,7 +2201,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
       selectedSubstation.toString(),
       selectedFeeder.toString(),
     );
-     ////job Status--------
+    ////job Status--------
     selectedJobStatus = "";
 
     for (var row in overHeadData) {
@@ -2157,7 +2214,8 @@ class _MapScreenGFState extends State<MapScreenGF> {
         break;
       }
     }
-///---------------------
+
+    ///---------------------
     print("Overhead rows: ${overHeadData.length}");
     overHeadPolylines.clear();
 
@@ -2704,9 +2762,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
       return availableWorkTypes.contains(key.toUpperCase());
     });
     // atleast one child work layer is selected.
-  showMaintLayer = workLayerVisibility.values.any(
-    (isSelected) => isSelected,
-  );
+    showMaintLayer = workLayerVisibility.values.any((isSelected) => isSelected);
 
     print('availableWorkTypes: $availableWorkTypes');
     print('workLayerVisibility: $workLayerVisibility');
@@ -2942,64 +2998,182 @@ class _MapScreenGFState extends State<MapScreenGF> {
   String selectedSpanName = "";
 
   ///polyline on tap-----------------------
-  Future<void> _onPolylineTap(LatLng tapPoint) async {
+  // Future<void> _onPolylineTap(LatLng tapPoint) async {
+  //   print("Map tapped");
+  //   double nearestDistance = double.infinity;
+  //   int? nearestIndex;
+
+  //   for (int i = 0; i < overHeadPolylines.length; i++) {
+  //     final distance = _distanceToPolyline(
+  //       tapPoint,
+  //       overHeadPolylines[i].points,
+  //     );
+  //     // print("Polyline $i : $distance");
+  //     if (distance < nearestDistance) {
+  //       nearestDistance = distance;
+  //       nearestIndex = i;
+  //     }
+  //   }
+  //   print("Nearest Distance = $nearestDistance");
+  //   if (nearestIndex != null && nearestDistance <= 5) {
+  //     final screenPoint = _mapController.camera.latLngToScreenOffset(tapPoint);
+  //     // Store the selected polyline
+  //     selectedPolylineIndex = nearestIndex;
+
+  //     final jobNo = overHeadPolylines[nearestIndex].jobNo;
+  //     if ((jobNo ?? "").trim().isEmpty) {
+  //       setState(() {
+  //         // selectedPolylineIndexes.add(nearestIndex!);
+  //         // Store the currently selected polyline
+  //         selectedPolylineIndex = nearestIndex;
+  //         if (!selectedPolylineIndexes.contains(nearestIndex)) {
+  //           selectedPolylineIndexes.add(nearestIndex!);
+
+  //           currentSelectedDistanceMiles =
+  //               overHeadPolylines[nearestIndex].distanceMiles;
+
+  //           totalSelectedDistanceMiles +=
+  //               overHeadPolylines[nearestIndex].distanceMiles;
+  //         } else {
+  //           // Already selected, just show its distance in the popup
+  //           currentSelectedDistanceMiles =
+  //               overHeadPolylines[nearestIndex!].distanceMiles;
+  //         }
+
+  //         ////
+  //         selectedPopupLatLng = tapPoint;
+  //         selectedWkt = overHeadPolylines[nearestIndex].wkt;
+  //         selectedSubstation = overHeadPolylines[nearestIndex].substation;
+  //         selectedSpanName = overHeadPolylines[nearestIndex].elementName;
+  //         popupOffset = screenPoint;
+  //         showPopup = true;
+  //       });
+  //       //////////////create objects
+  //       final prefs = await SharedPreferences.getInstance();
+  //       final workTypes = prefs.getStringList("selectedWorkTypes") ?? [];
+
+  //       // if (workTypes.isNotEmpty) {
+  //       final polyline = overHeadPolylines[nearestIndex];
+
+  //       final exists = selectedMapObjects.any((e) => e["oId"] == polyline.oid);
+  //       print("Tapped OID: ${polyline.oid}");
+  //       print(jsonEncode(selectedMapObjects));
+  //       print("Exists: $exists");
+
+  //       if (!exists) {
+  //         selectedMapObjects.add({
+  //           "createdById": id,
+  //           "contractorId": polyline.contractorId,
+  //           "substationId": polyline.substationId,
+  //           "feederName": polyline.feederName,
+  //           "totalMiles": totalSelectedDistanceMiles.toStringAsFixed(2),
+  //           "maintType": workTypes.join(","),
+  //           "wkt": polyline.wkt,
+  //           "elementName": polyline.elementName,
+  //           "opacity": "0.7",
+  //           "spanDistance": currentSelectedDistanceMiles.toStringAsFixed(2),
+  //           "oId": polyline.oid,
+  //           "jobNo": "",
+  //           "comments": "",
+  //         });
+  //         print("111111 ${jsonEncode(selectedMapObjects)}");
+  //       }
+  //     }
+  //     // else {
+  //     //   // Hide popup and open details dialog
+  //     //   setState(() {
+  //     //     showPopup = false;
+  //     //   });
+  //     //   _showDetailsPopupUpdate(nearestIndex);
+  //     // }
+  //     else {
+  //       setState(() {
+  //         selectedPolylineIndex = nearestIndex;
+  //         selectedPopupLatLng = tapPoint;
+  //         popupOffset = screenPoint;
+  //         showPopup = false;
+  //       });
+  //       _showDetailsPopupUpdate(nearestIndex);
+  //       //_updatePopupPosition();
+  //     }
+  //     // }
+  //     ////////////////
+  //     _updatePopupPosition();
+  //     print("===============");
+  //     print("NEW WKT");
+  //     print(overHeadPolylines[nearestIndex].wkt);
+  //     print("Substation : ${overHeadPolylines[nearestIndex].substation}");
+
+  //     print("===============");
+  //     print("ALL SELECTED WKTs");
+  //     print(selectedPolylineIndexes);
+  //     for (int index in selectedPolylineIndexes) {
+  //       print(overHeadPolylines[index].wkt);
+  //       print(overHeadPolylines[index].substation);
+  //     }
+  //   }
+  // }
+  Future<void> _onPolylineTap(Offset tapPoint, LatLng tapLatLng) async {
     print("Map tapped");
+
     double nearestDistance = double.infinity;
     int? nearestIndex;
 
     for (int i = 0; i < overHeadPolylines.length; i++) {
-      final distance = _distanceToPolyline(
-        tapPoint,
-        overHeadPolylines[i].points,
-      );
-      // print("Polyline $i : $distance");
-      if (distance < nearestDistance) {
-        nearestDistance = distance;
-        nearestIndex = i;
+      final points = overHeadPolylines[i].points;
+
+      for (int j = 0; j < points.length - 1; j++) {
+        final a = _mapController.camera.latLngToScreenOffset(points[j]);
+        final b = _mapController.camera.latLngToScreenOffset(points[j + 1]);
+
+        final distance = _distanceBetweenPointAndSegment(tapPoint, a, b);
+
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestIndex = i;
+        }
       }
     }
-    print("Nearest Distance = $nearestDistance");
-    if (nearestIndex != null && nearestDistance <= 5) {
-      final screenPoint = _mapController.camera.latLngToScreenOffset(tapPoint);
-      // Store the selected polyline
-      selectedPolylineIndex = nearestIndex;
 
-      final jobNo = overHeadPolylines[nearestIndex].jobNo;
-      if ((jobNo ?? "").trim().isEmpty) {
+    print("Nearest Distance in pixels = $nearestDistance");
+
+    final index = nearestIndex;
+
+    if (index != null && nearestDistance <= 25) {
+      final polyline = overHeadPolylines[index];
+
+      final screenPoint = tapPoint;
+
+      selectedPolylineIndex = index;
+
+      if ((polyline.jobNo ?? "").trim().isEmpty) {
         setState(() {
-          // selectedPolylineIndexes.add(nearestIndex!);
-          // Store the currently selected polyline
-          selectedPolylineIndex = nearestIndex;
-          if (!selectedPolylineIndexes.contains(nearestIndex)) {
-            selectedPolylineIndexes.add(nearestIndex!);
+          selectedPolylineIndex = index;
 
-            currentSelectedDistanceMiles =
-                overHeadPolylines[nearestIndex].distanceMiles;
+          if (!selectedPolylineIndexes.contains(index)) {
+            selectedPolylineIndexes.add(index);
 
-            totalSelectedDistanceMiles +=
-                overHeadPolylines[nearestIndex].distanceMiles;
+            currentSelectedDistanceMiles = polyline.distanceMiles;
+
+            totalSelectedDistanceMiles += polyline.distanceMiles;
           } else {
-            // Already selected, just show its distance in the popup
-            currentSelectedDistanceMiles =
-                overHeadPolylines[nearestIndex!].distanceMiles;
+            currentSelectedDistanceMiles = polyline.distanceMiles;
           }
 
-          ////
-          selectedPopupLatLng = tapPoint;
-          selectedWkt = overHeadPolylines[nearestIndex].wkt;
-          selectedSubstation = overHeadPolylines[nearestIndex].substation;
-          selectedSpanName = overHeadPolylines[nearestIndex].elementName;
+          selectedPopupLatLng = tapLatLng;
+          selectedWkt = polyline.wkt;
+          selectedSubstation = polyline.substation;
+          selectedSpanName = polyline.elementName;
+
           popupOffset = screenPoint;
           showPopup = true;
         });
-        //////////////create objects
+
         final prefs = await SharedPreferences.getInstance();
         final workTypes = prefs.getStringList("selectedWorkTypes") ?? [];
 
-        // if (workTypes.isNotEmpty) {
-        final polyline = overHeadPolylines[nearestIndex];
-
         final exists = selectedMapObjects.any((e) => e["oId"] == polyline.oid);
+
         print("Tapped OID: ${polyline.oid}");
         print(jsonEncode(selectedMapObjects));
         print("Exists: $exists");
@@ -3020,86 +3194,99 @@ class _MapScreenGFState extends State<MapScreenGF> {
             "jobNo": "",
             "comments": "",
           });
+
           print("111111 ${jsonEncode(selectedMapObjects)}");
         }
-      }
-      // else {
-      //   // Hide popup and open details dialog
-      //   setState(() {
-      //     showPopup = false;
-      //   });
-      //   _showDetailsPopupUpdate(nearestIndex);
-      // }
-      else {
+      } else {
         setState(() {
-          selectedPolylineIndex = nearestIndex;
-          selectedPopupLatLng = tapPoint;
+          selectedPolylineIndex = index;
+          selectedPopupLatLng = tapLatLng;
           popupOffset = screenPoint;
           showPopup = false;
         });
-        _showDetailsPopupUpdate(nearestIndex);
-        //_updatePopupPosition();
+
+        _showDetailsPopupUpdate(index);
       }
-      // }
-      ////////////////
+
       _updatePopupPosition();
+
       print("===============");
       print("NEW WKT");
-      print(overHeadPolylines[nearestIndex].wkt);
-      print("Substation : ${overHeadPolylines[nearestIndex].substation}");
+      print(polyline.wkt);
+      print("Substation : ${polyline.substation}");
 
       print("===============");
       print("ALL SELECTED WKTs");
       print(selectedPolylineIndexes);
-      for (int index in selectedPolylineIndexes) {
-        print(overHeadPolylines[index].wkt);
-        print(overHeadPolylines[index].substation);
+
+      for (int selectedIndex in selectedPolylineIndexes) {
+        print(overHeadPolylines[selectedIndex].wkt);
+        print(overHeadPolylines[selectedIndex].substation);
       }
     }
   }
 
-  double _distanceToPolyline(LatLng point, List<LatLng> polyline) {
-    double minDistance = double.infinity;
-
-    for (int i = 0; i < polyline.length - 1; i++) {
-      final distance = _distanceToSegment(point, polyline[i], polyline[i + 1]);
-
-      if (distance < minDistance) {
-        minDistance = distance;
-      }
-    }
-
-    return minDistance;
-  }
-
-  double _distanceToSegment(LatLng p, LatLng a, LatLng b) {
-    const meterPerDegree = 111320.0;
-
-    final px = p.longitude * meterPerDegree;
-    final py = p.latitude * meterPerDegree;
-
-    final ax = a.longitude * meterPerDegree;
-    final ay = a.latitude * meterPerDegree;
-
-    final bx = b.longitude * meterPerDegree;
-    final by = b.latitude * meterPerDegree;
-
-    final dx = bx - ax;
-    final dy = by - ay;
+  ///new Pixels code changes----------
+  double _distanceBetweenPointAndSegment(Offset p, Offset a, Offset b) {
+    final dx = b.dx - a.dx;
+    final dy = b.dy - a.dy;
 
     if (dx == 0 && dy == 0) {
-      return sqrt(pow(px - ax, 2) + pow(py - ay, 2));
+      return (p - a).distance;
     }
 
-    double t = ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy);
+    double t = ((p.dx - a.dx) * dx + (p.dy - a.dy) * dy) / (dx * dx + dy * dy);
 
     t = t.clamp(0.0, 1.0);
 
-    final nearestX = ax + t * dx;
-    final nearestY = ay + t * dy;
+    final nearestPoint = Offset(a.dx + t * dx, a.dy + t * dy);
 
-    return sqrt(pow(px - nearestX, 2) + pow(py - nearestY, 2));
+    return (p - nearestPoint).distance;
   }
+
+  ///old Approximate meters code changes--------
+  // double _distanceToPolyline(LatLng point, List<LatLng> polyline) {
+  //   double minDistance = double.infinity;
+
+  //   for (int i = 0; i < polyline.length - 1; i++) {
+  //     final distance = _distanceToSegment(point, polyline[i], polyline[i + 1]);
+
+  //     if (distance < minDistance) {
+  //       minDistance = distance;
+  //     }
+  //   }
+
+  //   return minDistance;
+  // }
+
+  // double _distanceToSegment(LatLng p, LatLng a, LatLng b) {
+  //   const meterPerDegree = 111320.0;
+
+  //   final px = p.longitude * meterPerDegree;
+  //   final py = p.latitude * meterPerDegree;
+
+  //   final ax = a.longitude * meterPerDegree;
+  //   final ay = a.latitude * meterPerDegree;
+
+  //   final bx = b.longitude * meterPerDegree;
+  //   final by = b.latitude * meterPerDegree;
+
+  //   final dx = bx - ax;
+  //   final dy = by - ay;
+
+  //   if (dx == 0 && dy == 0) {
+  //     return sqrt(pow(px - ax, 2) + pow(py - ay, 2));
+  //   }
+
+  //   double t = ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy);
+
+  //   t = t.clamp(0.0, 1.0);
+
+  //   final nearestX = ax + t * dx;
+  //   final nearestY = ay + t * dy;
+
+  //   return sqrt(pow(px - nearestX, 2) + pow(py - nearestY, 2));
+  // }
 
   //------------------------------------
   Color lightenColor(Color color, [double amount = 0.5]) {
@@ -3750,24 +3937,28 @@ class _MapScreenGFState extends State<MapScreenGF> {
                               flex: 1,
                               child: InkWell(
                                 onTap: isSaveLoading
-        ? null
-        : () async {
-            setDialogState(() {
-              isSaveLoading = true;
-            });
+                                    ? null
+                                    : () async {
+                                        setDialogState(() {
+                                          isSaveLoading = true;
+                                        });
 
-            try {
-              await submitMapData(selectedMapObjects);
-            } catch (e) {
-              debugPrint('Error saving map data: $e');
-            } finally {
-              if (mounted) {
-                setDialogState(() {
-                  isSaveLoading = false;
-                });
-              }
-            }
-          },
+                                        try {
+                                          await submitMapData(
+                                            selectedMapObjects,
+                                          );
+                                        } catch (e) {
+                                          debugPrint(
+                                            'Error saving map data: $e',
+                                          );
+                                        } finally {
+                                          if (mounted) {
+                                            setDialogState(() {
+                                              isSaveLoading = false;
+                                            });
+                                          }
+                                        }
+                                      },
                                 // () async {
                                 //   await submitMapData(selectedMapObjects);
                                 //   // Navigator.pop(context);
@@ -3787,22 +3978,22 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                     borderRadius: BorderRadius.circular(8),
                                   ),
                                   child: isSaveLoading
-          ? const SizedBox(
-              height: 22,
-              width: 22,
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 2.5,
-              ),
-            )
-          : const Text(
-                                    "Save",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
+                                      ? const SizedBox(
+                                          height: 22,
+                                          width: 22,
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 2.5,
+                                          ),
+                                        )
+                                      : const Text(
+                                          "Save",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
                                 ),
                               ),
                             ),
@@ -3870,7 +4061,8 @@ class _MapScreenGFState extends State<MapScreenGF> {
     final maxChatHeight = screenHeight * 0.30;
     final connectivityResult = await Connectivity().checkConnectivity();
     if (!connectivityResult.contains(ConnectivityResult.none)) {
-      await DatabaseHelper.instance.fetchAndSaveMessages(
+      // fix: Removed await to reduce the modal opening time.
+      DatabaseHelper.instance.fetchAndSaveMessages(
         overHeadPolylines[index].oid.toString(),
       );
     }
@@ -4101,17 +4293,17 @@ class _MapScreenGFState extends State<MapScreenGF> {
                           ),
                         ),
                         SizedBox(height: 10),
-   if(overHeadPolylines[index].service=="1")
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: Text(
-                            "✔️Service Line",
-                            style: TextStyle(
-                              // fontWeight: FontWeight.bold,
-                              fontSize: 14,
+                        if (overHeadPolylines[index].service == "1")
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: Text(
+                              "✔️Service Line",
+                              style: TextStyle(
+                                // fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
                             ),
                           ),
-                        ),
                         // if (isEditModeColors)
                         //   Column(
                         //     children: [
@@ -4652,14 +4844,26 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                   overHeadPolylines[index].elementName,
                                 ),
                                 _detailRow("Status", selectedMaintStatus),
-                                _detailRow(
-                                  "Completed by",
-                                  overHeadPolylines[index].completedByCrewName
-                                      .toString()
-                                      .split(',')
-                                      .first
-                                      .trim(),
-                                ),
+                                if (overHeadPolylines[index].maintStatus
+                                            .toLowerCase() ==
+                                        "completed" ||
+                                    overHeadPolylines[index].maintStatus
+                                            .toLowerCase() ==
+                                        "rework completed" ||
+                                    overHeadPolylines[index].maintStatus
+                                            .toLowerCase() ==
+                                        "final completed" ||
+                                    overHeadPolylines[index].maintStatus
+                                            .toLowerCase() ==
+                                        "passed")
+                                  _detailRow(
+                                    "Completed by",
+                                    overHeadPolylines[index].completedByCrewName
+                                        .toString()
+                                        .split(',')
+                                        .first
+                                        .trim(),
+                                  ),
                               ];
 
                               return Container(
@@ -6268,60 +6472,6 @@ class _MapScreenGFState extends State<MapScreenGF> {
     );
   }
 
-  Widget _infoTile(IconData icon, String title, String value) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.blueGrey.shade100),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.08),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: const Color(0xFF073B78).withOpacity(0.1),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Icon(icon, size: 16, color: const Color(0xFF073B78)),
-          ),
-          const SizedBox(width: 8),
-
-          Text(
-            "$title : ",
-            style: TextStyle(
-              fontSize: 13,
-              color: Colors.grey.shade700,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-
-          Expanded(
-            child: Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF073B78),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   /////////images
   Future<void> cameraInit() async {
     _cameras = await availableCameras();
@@ -6704,7 +6854,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
       i++
     ) {
       if (maintStatusList[i].toUpperCase() == "COMPLETED" ||
-      maintStatusList[i].toUpperCase() == "REWORK COMPLETED") {
+          maintStatusList[i].toUpperCase() == "REWORK COMPLETED") {
         completedMaintTypes.add(maintTypeList[i]);
       }
     }
@@ -6896,7 +7046,12 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                 132,
                                 19,
                               ),
-                              disabledBackgroundColor: const Color.fromARGB(255, 207, 132, 19),
+                              disabledBackgroundColor: const Color.fromARGB(
+                                255,
+                                207,
+                                132,
+                                19,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(
                                   6,
@@ -6950,137 +7105,146 @@ class _MapScreenGFState extends State<MapScreenGF> {
                             //     );
                             //   }
                             // },
-                            onPressed:  _isReworkCompletedLoading
-                                        ? null
-                                        : () async {
-                              // Get only the work types that the user selected
-                              final selectedTypes = selectedWorkTypes.entries
-                                  .where((entry) => entry.value == true)
-                                  .map((entry) => entry.key.trim())
-                                  .toList();
+                            onPressed: _isReworkCompletedLoading
+                                ? null
+                                : () async {
+                                    // Get only the work types that the user selected
+                                    final selectedTypes = selectedWorkTypes
+                                        .entries
+                                        .where((entry) => entry.value == true)
+                                        .map((entry) => entry.key.trim())
+                                        .toList();
 
-                              // Validate that at least one work type is selected
-                              if (selectedTypes.isEmpty) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text(
-                                      "Please select at least one work type.",
-                                    ),
-                                  ),
-                                );
-                                return;
-                              }
+                                    // Validate that at least one work type is selected
+                                    if (selectedTypes.isEmpty) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            "Please select at least one work type.",
+                                          ),
+                                        ),
+                                      );
+                                      return;
+                                    }
 
-                              // Validate crew selection for every selected work type
-                              for (final type in selectedTypes) {
-                                if (selectedCrew[type] == null ||
-                                    selectedCrew[type]
-                                        .toString()
-                                        .trim()
-                                        .isEmpty) {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        "Please select crew for $type",
+                                    // Validate crew selection for every selected work type
+                                    for (final type in selectedTypes) {
+                                      if (selectedCrew[type] == null ||
+                                          selectedCrew[type]
+                                              .toString()
+                                              .trim()
+                                              .isEmpty) {
+                                        ScaffoldMessenger.of(
+                                          context,
+                                        ).showSnackBar(
+                                          SnackBar(
+                                            content: Text(
+                                              "Please select crew for $type",
+                                            ),
+                                          ),
+                                        );
+
+                                        return;
+                                      }
+                                    }
+
+                                    final maintTypeList = maintTypes
+                                        .split(",")
+                                        .map((e) => e.trim())
+                                        .toList();
+
+                                    final lineIdList = coordinateIds
+                                        .split(",")
+                                        .map((e) => e.trim())
+                                        .toList();
+
+                                    selectedMapObjectsReworkOrCompleted.clear();
+
+                                    // IMPORTANT:
+                                    // Loop through selectedTypes, not workTypes
+                                    for (final type in selectedTypes) {
+                                      final int pos = maintTypeList.indexWhere(
+                                        (e) =>
+                                            e.trim().toUpperCase() ==
+                                            type.toUpperCase(),
+                                      );
+
+                                      print("Selected type: $type");
+                                      print("Position: $pos");
+                                      print(
+                                        "Selected crew: ${selectedCrew[type]}",
+                                      );
+
+                                      if (pos == -1) {
+                                        print(
+                                          "WARNING: $type not found in maintTypeList",
+                                        );
+                                        continue;
+                                      }
+
+                                      if (pos >= lineIdList.length) {
+                                        print(
+                                          "WARNING: lineId missing for $type at position $pos",
+                                        );
+                                        continue;
+                                      }
+
+                                      selectedMapObjectsReworkOrCompleted.add({
+                                        "status": "REWORK",
+                                        "tokenNo": widget.jobNo,
+                                        "userId": id,
+                                        "lineId": lineIdList[pos],
+                                        "crewId": selectedCrew[type],
+                                        "maintType": type,
+                                      });
+                                    }
+
+                                    print(
+                                      'selectedMapObjectsReworkOrCompleted:: '
+                                      '$selectedMapObjectsReworkOrCompleted',
+                                    );
+                                    setDialogState(() {
+                                      _isReworkCompletedLoading = true;
+                                    });
+                                    try {
+                                      await reworkORCompletedMapData(
+                                        selectedMapObjectsReworkOrCompleted,
+                                      );
+                                    } catch (e) {
+                                      debugPrint(
+                                        "Rework submission failed: $e",
+                                      );
+                                    } finally {
+                                      if (mounted) {
+                                        setDialogState(() {
+                                          _isReworkCompletedLoading = false;
+                                        });
+                                      }
+                                    }
+                                    // if (selectedMapObjectsReworkOrCompleted
+                                    //     .isNotEmpty) {
+                                    //   reworkORCompletedMapData(
+                                    //     selectedMapObjectsReworkOrCompleted,
+                                    //   );
+                                    // }
+                                  },
+                            child: _isReworkCompletedLoading
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor: AlwaysStoppedAnimation<Color>(
+                                        Colors.white,
                                       ),
                                     ),
-                                  );
-
-                                  return;
-                                }
-                              }
-
-                              final maintTypeList = maintTypes
-                                  .split(",")
-                                  .map((e) => e.trim())
-                                  .toList();
-
-                              final lineIdList = coordinateIds
-                                  .split(",")
-                                  .map((e) => e.trim())
-                                  .toList();
-
-                              selectedMapObjectsReworkOrCompleted.clear();
-
-                              // IMPORTANT:
-                              // Loop through selectedTypes, not workTypes
-                              for (final type in selectedTypes) {
-                                final int pos = maintTypeList.indexWhere(
-                                  (e) =>
-                                      e.trim().toUpperCase() ==
-                                      type.toUpperCase(),
-                                );
-
-                                print("Selected type: $type");
-                                print("Position: $pos");
-                                print("Selected crew: ${selectedCrew[type]}");
-
-                                if (pos == -1) {
-                                  print(
-                                    "WARNING: $type not found in maintTypeList",
-                                  );
-                                  continue;
-                                }
-
-                                if (pos >= lineIdList.length) {
-                                  print(
-                                    "WARNING: lineId missing for $type at position $pos",
-                                  );
-                                  continue;
-                                }
-
-                                selectedMapObjectsReworkOrCompleted.add({
-                                  "status": "REWORK",
-                                  "tokenNo": widget.jobNo,
-                                  "userId": id,
-                                  "lineId": lineIdList[pos],
-                                  "crewId": selectedCrew[type],
-                                  "maintType": type,
-                                });
-                              }
-
-                              print(
-                                'selectedMapObjectsReworkOrCompleted:: '
-                                '$selectedMapObjectsReworkOrCompleted',
-                              );
-                              setDialogState(() {
-                              _isReworkCompletedLoading = true;
-                               });              
-                               try {
-                               await reworkORCompletedMapData(
-                               selectedMapObjectsReworkOrCompleted,
-                               );
-                               } catch (e) {
-                               debugPrint("Rework submission failed: $e");
-                               } finally {
-                               if (mounted) {
-                               setDialogState(() {
-                               _isReworkCompletedLoading = false;
-                              });
-                             }
-                           }
-                              // if (selectedMapObjectsReworkOrCompleted
-                              //     .isNotEmpty) {
-                              //   reworkORCompletedMapData(
-                              //     selectedMapObjectsReworkOrCompleted,
-                              //   );
-                              // }
-                            },
-                            child:  _isReworkCompletedLoading
-                            ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                           Colors.white,
-                             ),
-                            ),
-                            )
-                           : const Text(
-                              "Yes, Rework",
-                              style: TextStyle(color: Colors.white),
-                            ),
+                                  )
+                                : const Text(
+                                    "Yes, Rework",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                           ),
 
                           const SizedBox(width: 10),
@@ -7154,8 +7318,8 @@ class _MapScreenGFState extends State<MapScreenGF> {
       i < maintTypeList.length && i < maintStatusList.length;
       i++
     ) {
-      if (maintStatusList[i].toUpperCase() == "COMPLETED"||
-      maintStatusList[i].toUpperCase() == "REWORK COMPLETED") {
+      if (maintStatusList[i].toUpperCase() == "COMPLETED" ||
+          maintStatusList[i].toUpperCase() == "REWORK COMPLETED") {
         completedMaintTypes.add(maintTypeList[i]);
       }
     }
@@ -7271,7 +7435,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                   159,
                                   24,
                                 ),
-                                disabledBackgroundColor:  const Color.fromARGB(
+                                disabledBackgroundColor: const Color.fromARGB(
                                   255,
                                   19,
                                   159,
@@ -7363,22 +7527,22 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                   "selectedMapObjectsReworkOrCompleted:: "
                                   "$selectedMapObjectsReworkOrCompleted",
                                 );
-                                 setDialogState(() {
-                                _isReworkCompletedLoading = true;
-                                 });
-                                 try {
-                                 await  reworkORCompletedMapData(
+                                setDialogState(() {
+                                  _isReworkCompletedLoading = true;
+                                });
+                                try {
+                                  await reworkORCompletedMapData(
                                     selectedMapObjectsReworkOrCompleted,
                                   );
-                                 } catch (e) {
-                                 debugPrint("Complete submission failed: $e");
-                                 } finally {
-                                 if (mounted) {
-                                  setState(() {
-                                   _isReworkCompletedLoading = false;
-                                  });
-                                     }
-                                 }
+                                } catch (e) {
+                                  debugPrint("Complete submission failed: $e");
+                                } finally {
+                                  if (mounted) {
+                                    setState(() {
+                                      _isReworkCompletedLoading = false;
+                                    });
+                                  }
+                                }
                                 // if (selectedMapObjectsReworkOrCompleted
                                 //     .isNotEmpty) {
                                 //   reworkORCompletedMapData(
@@ -7435,24 +7599,25 @@ class _MapScreenGFState extends State<MapScreenGF> {
                               //     selectedMapObjectsReworkOrCompleted,
                               //   );
                               // },
-                              child:  _isReworkCompletedLoading
-                                   ? const SizedBox(
-                                    height: 20,
-                                    width: 20,
-                                    child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                  Colors.white,
-                                     ),
+                              child: _isReworkCompletedLoading
+                                  ? const SizedBox(
+                                      height: 20,
+                                      width: 20,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        valueColor:
+                                            AlwaysStoppedAnimation<Color>(
+                                              Colors.white,
+                                            ),
+                                      ),
+                                    )
+                                  : const Text(
+                                      "Complete",
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                  )
-                                 : const Text(
-                                "Complete",
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
                             ),
                           ),
 
@@ -7592,6 +7757,9 @@ class _MapScreenGFState extends State<MapScreenGF> {
                                       style: const TextStyle(
                                         fontSize: 15,
                                         fontWeight: FontWeight.bold,
+                                        color: Colors.blue,
+                                        decoration: TextDecoration.underline,
+                                        decorationColor: Colors.blue,
                                       ),
                                     ),
                                   ),
@@ -7994,6 +8162,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
   Color getCardColor(String status) {
     switch (status.toLowerCase()) {
       case "completed":
+      case "final completed":
         return Colors.green.shade50;
 
       case "rework":
@@ -8013,6 +8182,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
   Color getBorderColor(String status) {
     switch (status.toLowerCase()) {
       case "completed":
+      case "final completed":
         return Colors.green;
 
       case "rework":
@@ -8035,6 +8205,7 @@ class _MapScreenGFState extends State<MapScreenGF> {
 
     switch (status.toLowerCase()) {
       case "completed":
+      case "final completed":
         color = Colors.green;
         icon = Icons.check_circle;
         break;

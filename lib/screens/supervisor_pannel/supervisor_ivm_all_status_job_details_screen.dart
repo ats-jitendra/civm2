@@ -250,6 +250,7 @@ class _SupervisorIvmAllStatusJobDetailsScreenState
                                                 .split('(')
                                                 .first
                                                 .trim(),
+                                                 masterJobNo:item!.masterJobNo.toString()
                                           ),
                                         ),
                                       );

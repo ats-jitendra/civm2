@@ -385,6 +385,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
         : screenHeight < 900
         ? screenHeight * 0.60
         : screenHeight * 0.80;
+    final isTabletView = MediaQuery.of(context).size.width >= 600;
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
@@ -526,15 +527,16 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                           Row(
                             children: [
                               Expanded(
-                                child: _infoTile(
+                                child: infoTile(
                                   Icons.location_city,
                                   "Substation",
                                   selectedSubstation ?? "-",
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Expanded(
-                                child: _infoTile(
+                              SizedBox(
+                                width: isTabletView ? 280 : 150,
+                                child: infoTile(
                                   Icons.alt_route,
                                   "Feeder",
                                   selectedFeeder ?? "-",
@@ -570,9 +572,12 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
                               ),
                               ////////////poly line on tap---------
                               onTap: (tapPosition, latLng) {
-                                _onPolylineTap(latLng);
-
-                                // showPopup = false;
+                                ///old Approximate meters code changes--------
+                                // _onPolylineTap(latLng);
+                                ///new Pixels code changes----------
+                                if (tapPosition.relative != null) {
+                                  _onPolylineTap(tapPosition.relative!, latLng);
+                                }
                               },
                               onPositionChanged: (position, hasGesture) {
                                 final zoom = position.zoom
@@ -2656,64 +2661,172 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
   String selectedSpanName = "";
 
   ///polyline on tap-----------------------
-  Future<void> _onPolylineTap(LatLng tapPoint) async {
+  // Future<void> _onPolylineTap(LatLng tapPoint) async {
+  //   print("Map tapped");
+  //   double nearestDistance = double.infinity;
+  //   int? nearestIndex;
+
+  //   for (int i = 0; i < overHeadPolylines.length; i++) {
+  //     final distance = _distanceToPolyline(
+  //       tapPoint,
+  //       overHeadPolylines[i].points,
+  //     );
+  //     // print("Polyline $i : $distance");
+  //     if (distance < nearestDistance) {
+  //       nearestDistance = distance;
+  //       nearestIndex = i;
+  //     }
+  //   }
+  //   print("Nearest Distance = $nearestDistance");
+  //   if (nearestIndex != null && nearestDistance <= 5) {
+  //     final screenPoint = _mapController.camera.latLngToScreenOffset(tapPoint);
+  //     // Store the selected polyline
+  //     selectedPolylineIndex = nearestIndex;
+
+  //     final jobNo = overHeadPolylines[nearestIndex].jobNo;
+  //     if ((jobNo ?? "").trim().isEmpty) {
+  //       setState(() {
+  //         // selectedPolylineIndexes.add(nearestIndex!);
+  //         // Store the currently selected polyline
+  //         selectedPolylineIndex = nearestIndex;
+  //         if (!selectedPolylineIndexes.contains(nearestIndex)) {
+  //           selectedPolylineIndexes.add(nearestIndex!);
+
+  //           currentSelectedDistanceMiles =
+  //               overHeadPolylines[nearestIndex].distanceMiles;
+
+  //           totalSelectedDistanceMiles +=
+  //               overHeadPolylines[nearestIndex].distanceMiles;
+  //         } else {
+  //           // Already selected, just show its distance in the popup
+  //           currentSelectedDistanceMiles =
+  //               overHeadPolylines[nearestIndex!].distanceMiles;
+  //         }
+
+  //         ////
+  //         selectedPopupLatLng = tapPoint;
+  //         selectedWkt = overHeadPolylines[nearestIndex].wkt;
+  //         selectedSubstation = overHeadPolylines[nearestIndex].substation;
+  //         selectedSpanName = overHeadPolylines[nearestIndex].elementName;
+  //         popupOffset = screenPoint;
+  //         showPopup = true;
+  //       });
+  //       //////////////create objects
+  //       final prefs = await SharedPreferences.getInstance();
+  //       final workTypes = prefs.getStringList("selectedWorkTypes") ?? [];
+
+  //       // if (workTypes.isNotEmpty) {
+  //       final polyline = overHeadPolylines[nearestIndex];
+
+  //       final exists = selectedMapObjects.any((e) => e["oId"] == polyline.oid);
+  //       print("Tapped OID: ${polyline.oid}");
+  //       print(jsonEncode(selectedMapObjects));
+  //       print("Exists: $exists");
+
+  //       if (!exists) {
+  //         selectedMapObjects.add({
+  //           "createdById": id,
+  //           "contractorId": selectedForemanId,
+  //           "substationId": selectedSubstationId,
+  //           "feederName": polyline.feederName,
+  //           "totalMiles": totalSelectedDistanceMiles.toStringAsFixed(2),
+  //           "maintType": workTypes.join(","),
+  //           "wkt": polyline.wkt,
+  //           "elementName": polyline.elementName,
+  //           "opacity": "0.7",
+  //           "spanDistance": currentSelectedDistanceMiles.toStringAsFixed(2),
+  //           "oId": polyline.oid,
+  //           "jobNo": "",
+  //           "comments": "",
+  //         });
+  //         print("111111 ${jsonEncode(selectedMapObjects)}");
+  //       }
+  //     } else {
+  //       // Hide popup and open details dialog
+  //       setState(() {
+  //         showPopup = false;
+  //       });
+
+  //       _showDetailsPopupUpdate(nearestIndex);
+  //     }
+
+  //     // }
+  //     ////////////////
+  //     _updatePopupPosition();
+  //     print("===============");
+  //     print("NEW WKT");
+  //     print(overHeadPolylines[nearestIndex].wkt);
+  //     print("Substation : ${overHeadPolylines[nearestIndex].substation}");
+
+  //     print("===============");
+  //     print("ALL SELECTED WKTs");
+  //     print(selectedPolylineIndexes);
+  //     for (int index in selectedPolylineIndexes) {
+  //       print(overHeadPolylines[index].wkt);
+  //       print(overHeadPolylines[index].substation);
+  //     }
+  //   }
+  // }
+  Future<void> _onPolylineTap(Offset tapPoint, LatLng tapLatLng) async {
     print("Map tapped");
+
     double nearestDistance = double.infinity;
     int? nearestIndex;
 
     for (int i = 0; i < overHeadPolylines.length; i++) {
-      final distance = _distanceToPolyline(
-        tapPoint,
-        overHeadPolylines[i].points,
-      );
-      // print("Polyline $i : $distance");
-      if (distance < nearestDistance) {
-        nearestDistance = distance;
-        nearestIndex = i;
+      final points = overHeadPolylines[i].points;
+
+      for (int j = 0; j < points.length - 1; j++) {
+        final a = _mapController.camera.latLngToScreenOffset(points[j]);
+        final b = _mapController.camera.latLngToScreenOffset(points[j + 1]);
+
+        final distance = _distanceBetweenPointAndSegment(tapPoint, a, b);
+
+        if (distance < nearestDistance) {
+          nearestDistance = distance;
+          nearestIndex = i;
+        }
       }
     }
-    print("Nearest Distance = $nearestDistance");
-    if (nearestIndex != null && nearestDistance <= 5) {
-      final screenPoint = _mapController.camera.latLngToScreenOffset(tapPoint);
-      // Store the selected polyline
-      selectedPolylineIndex = nearestIndex;
 
-      final jobNo = overHeadPolylines[nearestIndex].jobNo;
+    print("Nearest Distance in pixels = $nearestDistance");
+
+    final index = nearestIndex;
+
+    if (index != null && nearestDistance <= 25) {
+      final polyline = overHeadPolylines[index];
+
+      selectedPolylineIndex = index;
+
+      final jobNo = polyline.jobNo;
+
       if ((jobNo ?? "").trim().isEmpty) {
         setState(() {
-          // selectedPolylineIndexes.add(nearestIndex!);
-          // Store the currently selected polyline
-          selectedPolylineIndex = nearestIndex;
-          if (!selectedPolylineIndexes.contains(nearestIndex)) {
-            selectedPolylineIndexes.add(nearestIndex!);
+          selectedPolylineIndex = index;
 
-            currentSelectedDistanceMiles =
-                overHeadPolylines[nearestIndex].distanceMiles;
+          if (!selectedPolylineIndexes.contains(index)) {
+            selectedPolylineIndexes.add(index);
 
-            totalSelectedDistanceMiles +=
-                overHeadPolylines[nearestIndex].distanceMiles;
+            currentSelectedDistanceMiles = polyline.distanceMiles;
+
+            totalSelectedDistanceMiles += polyline.distanceMiles;
           } else {
-            // Already selected, just show its distance in the popup
-            currentSelectedDistanceMiles =
-                overHeadPolylines[nearestIndex!].distanceMiles;
+            currentSelectedDistanceMiles = polyline.distanceMiles;
           }
 
-          ////
-          selectedPopupLatLng = tapPoint;
-          selectedWkt = overHeadPolylines[nearestIndex].wkt;
-          selectedSubstation = overHeadPolylines[nearestIndex].substation;
-          selectedSpanName = overHeadPolylines[nearestIndex].elementName;
-          popupOffset = screenPoint;
+          selectedPopupLatLng = tapLatLng;
+          selectedWkt = polyline.wkt;
+          selectedSubstation = polyline.substation;
+          selectedSpanName = polyline.elementName;
+          popupOffset = tapPoint;
           showPopup = true;
         });
-        //////////////create objects
+
         final prefs = await SharedPreferences.getInstance();
         final workTypes = prefs.getStringList("selectedWorkTypes") ?? [];
 
-        // if (workTypes.isNotEmpty) {
-        final polyline = overHeadPolylines[nearestIndex];
-
         final exists = selectedMapObjects.any((e) => e["oId"] == polyline.oid);
+
         print("Tapped OID: ${polyline.oid}");
         print(jsonEncode(selectedMapObjects));
         print("Exists: $exists");
@@ -2734,77 +2847,96 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
             "jobNo": "",
             "comments": "",
           });
+
           print("111111 ${jsonEncode(selectedMapObjects)}");
         }
       } else {
-        // Hide popup and open details dialog
         setState(() {
           showPopup = false;
         });
 
-        _showDetailsPopupUpdate(nearestIndex);
+        _showDetailsPopupUpdate(index);
       }
 
-      // }
-      ////////////////
       _updatePopupPosition();
+
       print("===============");
       print("NEW WKT");
-      print(overHeadPolylines[nearestIndex].wkt);
-      print("Substation : ${overHeadPolylines[nearestIndex].substation}");
+      print(polyline.wkt);
+      print("Substation : ${polyline.substation}");
 
       print("===============");
       print("ALL SELECTED WKTs");
       print(selectedPolylineIndexes);
-      for (int index in selectedPolylineIndexes) {
-        print(overHeadPolylines[index].wkt);
-        print(overHeadPolylines[index].substation);
+
+      for (int selectedIndex in selectedPolylineIndexes) {
+        print(overHeadPolylines[selectedIndex].wkt);
+        print(overHeadPolylines[selectedIndex].substation);
       }
     }
   }
 
-  double _distanceToPolyline(LatLng point, List<LatLng> polyline) {
-    double minDistance = double.infinity;
-
-    for (int i = 0; i < polyline.length - 1; i++) {
-      final distance = _distanceToSegment(point, polyline[i], polyline[i + 1]);
-
-      if (distance < minDistance) {
-        minDistance = distance;
-      }
-    }
-
-    return minDistance;
-  }
-
-  double _distanceToSegment(LatLng p, LatLng a, LatLng b) {
-    const meterPerDegree = 111320.0;
-
-    final px = p.longitude * meterPerDegree;
-    final py = p.latitude * meterPerDegree;
-
-    final ax = a.longitude * meterPerDegree;
-    final ay = a.latitude * meterPerDegree;
-
-    final bx = b.longitude * meterPerDegree;
-    final by = b.latitude * meterPerDegree;
-
-    final dx = bx - ax;
-    final dy = by - ay;
+  ///new Pixels code changes----------
+  double _distanceBetweenPointAndSegment(Offset p, Offset a, Offset b) {
+    final dx = b.dx - a.dx;
+    final dy = b.dy - a.dy;
 
     if (dx == 0 && dy == 0) {
-      return sqrt(pow(px - ax, 2) + pow(py - ay, 2));
+      return (p - a).distance;
     }
 
-    double t = ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy);
+    double t = ((p.dx - a.dx) * dx + (p.dy - a.dy) * dy) / (dx * dx + dy * dy);
 
     t = t.clamp(0.0, 1.0);
 
-    final nearestX = ax + t * dx;
-    final nearestY = ay + t * dy;
+    final nearestPoint = Offset(a.dx + t * dx, a.dy + t * dy);
 
-    return sqrt(pow(px - nearestX, 2) + pow(py - nearestY, 2));
+    return (p - nearestPoint).distance;
   }
+
+  ///old Approximate meters code changes--------
+  // double _distanceToPolyline(LatLng point, List<LatLng> polyline) {
+  //   double minDistance = double.infinity;
+
+  //   for (int i = 0; i < polyline.length - 1; i++) {
+  //     final distance = _distanceToSegment(point, polyline[i], polyline[i + 1]);
+
+  //     if (distance < minDistance) {
+  //       minDistance = distance;
+  //     }
+  //   }
+
+  //   return minDistance;
+  // }
+
+  // double _distanceToSegment(LatLng p, LatLng a, LatLng b) {
+  //   const meterPerDegree = 111320.0;
+
+  //   final px = p.longitude * meterPerDegree;
+  //   final py = p.latitude * meterPerDegree;
+
+  //   final ax = a.longitude * meterPerDegree;
+  //   final ay = a.latitude * meterPerDegree;
+
+  //   final bx = b.longitude * meterPerDegree;
+  //   final by = b.latitude * meterPerDegree;
+
+  //   final dx = bx - ax;
+  //   final dy = by - ay;
+
+  //   if (dx == 0 && dy == 0) {
+  //     return sqrt(pow(px - ax, 2) + pow(py - ay, 2));
+  //   }
+
+  //   double t = ((px - ax) * dx + (py - ay) * dy) / (dx * dx + dy * dy);
+
+  //   t = t.clamp(0.0, 1.0);
+
+  //   final nearestX = ax + t * dx;
+  //   final nearestY = ay + t * dy;
+
+  //   return sqrt(pow(px - nearestX, 2) + pow(py - nearestY, 2));
+  // }
 
   //------------------------------------
   Color lightenColor(Color color, [double amount = 0.5]) {
@@ -3087,7 +3219,8 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
     final maxChatHeight = screenHeight * 0.30;
     final connectivityResult = await Connectivity().checkConnectivity();
     if (!connectivityResult.contains(ConnectivityResult.none)) {
-      await DatabaseHelper.instance.fetchAndSaveMessages(
+      // fix: Removed await to reduce the modal opening time.
+       DatabaseHelper.instance.fetchAndSaveMessages(
         overHeadPolylines[index].coordinateIds.toString(),
       );
     }

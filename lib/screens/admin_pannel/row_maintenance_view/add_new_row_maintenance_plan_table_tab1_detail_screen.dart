@@ -310,6 +310,7 @@ class _AddNewRowMaintenancePlanDetailsScreenState
                                                 .split('(')
                                                 .first
                                                 .trim(),
+                                                 masterJobNo:item!.masterJobNo.toString()
                                           ),
                                         ),
                                       );

@@ -237,6 +237,7 @@ class _CrewIVMmAINTENANCEpLanJobDetailsScreenState
                                                     nextMaintDue: item!
                                                         .nextMaintDue
                                                         .toString(),
+                                                         masterJobNo:item!.masterJobNo.toString()
                                                   ),
                                             ),
                                           );
@@ -288,6 +289,7 @@ class _CrewIVMmAINTENANCEpLanJobDetailsScreenState
                                             year: getYearOrNA(
                                               item!.nextMaintDue.toString(),
                                             ),
+                                             masterJobNo:item!.masterJobNo.toString()
                                           ),
                                         ),
                                       );

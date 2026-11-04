@@ -42,6 +42,7 @@ class CrewTempRowMaintenanceProgressContractorNew extends StatefulWidget {
   String feederId;
   String maintenanceType;
   String nextMaintDue;
+  String masterJobNo;
   CrewTempRowMaintenanceProgressContractorNew({
     Key? key,
     required this.jobNo,
@@ -51,6 +52,7 @@ class CrewTempRowMaintenanceProgressContractorNew extends StatefulWidget {
     required this.feederId,
     required this.maintenanceType,
     required this.nextMaintDue,
+     required this.masterJobNo,
   }) : super(key: key);
   @override
   State<CrewTempRowMaintenanceProgressContractorNew> createState() =>
@@ -3681,6 +3683,7 @@ class _CrewTempRowMaintenanceProgressContractorNewState
                                             year: getYearOrNA(
                                               widget.nextMaintDue,
                                             ),
+                                             masterJobNo:widget.masterJobNo.toString()
                                           ),
                                         ),
                                       );

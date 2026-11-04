@@ -450,6 +450,7 @@ class _GFIvmAllStatusJobDetailsScreenState
                                                 type: item!.type.toString(),
                                                 sourcePage: '',
                                                 crew: item!.crew.toString(),
+                                                 masterJobNo:item!.masterJobNo.toString()
                                               ),
                                         ),
                                       );

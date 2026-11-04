@@ -112,9 +112,9 @@ class _SupervisorAddNewRowMaintenancePlanDetailsScreenState
       imageViewModel.fetchImageApi(context, widget.tokenNo),
     ]);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-    //  loadData();
+      //  loadData();
       fetchMaintenanceReport(context);
-     _initializeScreen();
+      _initializeScreen();
     });
   }
 
@@ -222,7 +222,6 @@ class _SupervisorAddNewRowMaintenancePlanDetailsScreenState
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  
                                   Row(
                                     children: [
                                       const Align(
@@ -270,41 +269,45 @@ class _SupervisorAddNewRowMaintenancePlanDetailsScreenState
                                   ),
                                   InkWell(
                                     onTap: () async {
-                                    //  String id = '';
-                                    // final userPreferences1 =
-                                    //     Provider.of<UserPref>(
-                                    //       context,
-                                    //       listen: false,
-                                    //     );
-                                    // UserModel data = await userPreferences1
-                                    //     .getUser();
-                                    // id = data.user!.id.toString();
+                                      //  String id = '';
+                                      // final userPreferences1 =
+                                      //     Provider.of<UserPref>(
+                                      //       context,
+                                      //       listen: false,
+                                      //     );
+                                      // UserModel data = await userPreferences1
+                                      //     .getUser();
+                                      // id = data.user!.id.toString();
 
-                                    // await browser.open(
-                                    //   url: WebUri(
-                                    //     MapUrl.getSupervisorEndPoint(
-                                    //       item!.tokenNo.toString(),
-                                    //       id,
-                                    //     ),
-                                    //   ),
-                                    //   // "https://mapapi.ariespro.com/main/supervisor/CIVM_Map/${lCPDocumentApprovalPendingViewModel.lcpDocumentApprovalPendingGetTabularData.data!.findAllTableData![index].tokenNo.toString()}/USRQWXH589Z"),
-                                    //   settings: ChromeSafariBrowserSettings(
-                                    //     shareState: CustomTabsShareState
-                                    //         .SHARE_STATE_OFF,
-                                    //     barCollapsingEnabled: true,
-                                    //   ),
-                                    // );
+                                      // await browser.open(
+                                      //   url: WebUri(
+                                      //     MapUrl.getSupervisorEndPoint(
+                                      //       item!.tokenNo.toString(),
+                                      //       id,
+                                      //     ),
+                                      //   ),
+                                      //   // "https://mapapi.ariespro.com/main/supervisor/CIVM_Map/${lCPDocumentApprovalPendingViewModel.lcpDocumentApprovalPendingGetTabularData.data!.findAllTableData![index].tokenNo.toString()}/USRQWXH589Z"),
+                                      //   settings: ChromeSafariBrowserSettings(
+                                      //     shareState: CustomTabsShareState
+                                      //         .SHARE_STATE_OFF,
+                                      //     barCollapsingEnabled: true,
+                                      //   ),
+                                      // );
                                       Navigator.push(
                                         context,
                                         MaterialPageRoute(
-                                          builder: (context) => MapScreenSupervisor(
-                                            jobNo: "${item!.tokenNo}",
-                                            substation: "${item!.substation}",
-                                            feeder: item!.feeder!
-                                                .split('(')
-                                                .first
-                                                .trim(),
-                                          ),
+                                          builder: (context) =>
+                                              MapScreenSupervisor(
+                                                jobNo: "${item!.tokenNo}",
+                                                substation:
+                                                    "${item!.substation}",
+                                                feeder: item!.feeder!
+                                                    .split('(')
+                                                    .first
+                                                    .trim(),
+                                                masterJobNo: item!.masterJobNo
+                                                    .toString(),
+                                              ),
                                         ),
                                       );
                                     },
@@ -400,8 +403,6 @@ class _SupervisorAddNewRowMaintenancePlanDetailsScreenState
                                 ],
                               ),
                             ),
-
-                            
                           ],
                         ),
                       ),
@@ -492,12 +493,15 @@ class _SupervisorAddNewRowMaintenancePlanDetailsScreenState
                             _buildDetailCard(
                               icon: Icons.date_range_rounded,
                               title: "Maint Year",
-                              value: getYearOrNA(item?.nextMaintDue.toString() ?? ""),
-                              textColor: maintYear != "N/A" &&
-          int.tryParse(maintYear) != null &&
-          int.parse(maintYear) > DateTime.now().year
-      ? Colors.red
-      : Colors.black,
+                              value: getYearOrNA(
+                                item?.nextMaintDue.toString() ?? "",
+                              ),
+                              textColor:
+                                  maintYear != "N/A" &&
+                                      int.tryParse(maintYear) != null &&
+                                      int.parse(maintYear) > DateTime.now().year
+                                  ? Colors.red
+                                  : Colors.black,
                             ),
                             _buildDetailCard(
                               icon: Icons.chat,
@@ -516,11 +520,9 @@ class _SupervisorAddNewRowMaintenancePlanDetailsScreenState
                               },
                             ),
 
-                           
                             RowMethodProgressWidget(tokenNo: widget.tokenNo),
                             WorkProgressSpanWidget(tokenNo: widget.tokenNo),
-                           
-                           
+
                             Padding(
                               padding: const EdgeInsets.only(bottom: 8.0),
                               child: Container(
@@ -970,10 +972,7 @@ class _SupervisorAddNewRowMaintenancePlanDetailsScreenState
 
     if (length == 0) {
       return const Center(
-        child: Text(
-          "",
-          style: TextStyle(fontWeight: FontWeight.bold),
-        ),
+        child: Text("", style: TextStyle(fontWeight: FontWeight.bold)),
       );
     }
 
@@ -2343,7 +2342,6 @@ class _SupervisorAddNewRowMaintenancePlanDetailsScreenState
                         padding: const EdgeInsets.all(16),
                         itemCount: logs.length,
                         itemBuilder: (context, index) {
-
                           return historyCard(logs[index], index);
                         },
                       );
@@ -2859,8 +2857,7 @@ class _SupervisorAddNewRowMaintenancePlanDetailsScreenState
     }
   }
 
-  
- Future<void> checkCurrentUser() async {
+  Future<void> checkCurrentUser() async {
     print('planner authentication');
 
     try {
@@ -2938,7 +2935,6 @@ class _SupervisorAddNewRowMaintenancePlanDetailsScreenState
     await checkCurrentUser();
   }
 
-
   // Future<void> loadPrimarySecondaryMiles() async {
   //   try {
   //     primarySecondaryMileModel =
@@ -3000,5 +2996,4 @@ class _SupervisorAddNewRowMaintenancePlanDetailsScreenState
   //     debugPrint(e.toString());
   //   }
   // }
-
 }

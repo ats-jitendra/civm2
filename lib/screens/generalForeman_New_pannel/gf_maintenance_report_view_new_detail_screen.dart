@@ -1018,8 +1018,7 @@ class _GFMaintenanceReportViewDetailsScreenState
                                                           sourcePage:
                                                               "maintenanceReportView",
                                                           crew: "",
-                                                          // crew: item!.crew
-                                                          //     .toString(),
+                                                         masterJobNo:reportList[0]["masterJobNo"]??""
                                                         ),
                                                       ),
                                                     );
