@@ -875,8 +875,10 @@ Future<bool> showExitPopup(
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
                                 color: isYes
-                                    ? Colors.red.shade300
-                                    : Colors.red.shade800,
+                                    ? Colors.green.shade300
+                                    : Colors.green,
+                                // ? Colors.red.shade300
+                                // : Colors.red.shade800,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: isYes
@@ -908,7 +910,7 @@ Future<bool> showExitPopup(
                               width: 100,
                               alignment: Alignment.center,
                               decoration: BoxDecoration(
-                                color: Colors.green,
+                                color: Colors.red.shade800,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: const Text(

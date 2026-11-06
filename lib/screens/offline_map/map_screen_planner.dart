@@ -261,7 +261,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
     WakelockPlus.enable();
     getUserType();
     /////
-   cameraInit();
+    cameraInit();
     _startListeningToCompass();
   }
 
@@ -419,7 +419,9 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-  print("selectedMapObjectsUpdate1---------------- $selectedMapObjectsUpdate");
+        print(
+          "selectedMapObjectsUpdate1---------------- $selectedMapObjectsUpdate",
+        );
         bool hasValidMapObjects = selectedMapObjects.any(
           (item) => (item['maintType'] ?? '').toString().trim().isNotEmpty,
         );
@@ -439,7 +441,9 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
             }
 
             if (hasValidMapObjectsUpdate) {
-                  print("selectedMapObjectsUpdate2---------------- $selectedMapObjectsUpdate");
+              print(
+                "selectedMapObjectsUpdate2---------------- $selectedMapObjectsUpdate",
+              );
               await submitMapData(selectedMapObjectsUpdate);
             }
           });
@@ -4377,6 +4381,17 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                                   });
                                                 } else {
                                                   // Edit mode - Multiple selection
+                                                  //bug fix for saving work alert for selectedMapObjectsUpdate list
+                                                  // setDialogState(() {
+                                                  //   if (selectedEditMaintTypes
+                                                  //       .contains(entry.key)) {
+                                                  //     selectedEditMaintTypes
+                                                  //         .remove(entry.key);
+                                                  //   } else {
+                                                  //     selectedEditMaintTypes
+                                                  //         .add(entry.key);
+                                                  //   }
+                                                  // });
                                                   setDialogState(() {
                                                     if (selectedEditMaintTypes
                                                         .contains(entry.key)) {
@@ -4386,6 +4401,61 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                                       selectedEditMaintTypes
                                                           .add(entry.key);
                                                     }
+
+                                                    selectedMapObjectsUpdate
+                                                        .clear();
+
+                                                    selectedMapObjectsUpdate.add({
+                                                      "createdById": id,
+                                                      "contractorId":
+                                                          overHeadPolylines[index]
+                                                              .contractorId,
+                                                      "substationId":
+                                                          overHeadPolylines[index]
+                                                              .substationId,
+                                                      "feederName":
+                                                          overHeadPolylines[index]
+                                                              .feederName,
+                                                      "totalMiles":
+                                                          overHeadPolylines[index]
+                                                              .totalMilesApi,
+                                                      "maintType":
+                                                          selectedEditMaintTypes
+                                                              .join(","),
+                                                      "wkt":
+                                                          overHeadPolylines[index]
+                                                              .wkt,
+                                                      "elementName":
+                                                          overHeadPolylines[index]
+                                                              .elementName,
+                                                      "opacity": "0.7",
+                                                      "spanDistance":
+                                                          overHeadPolylines[index]
+                                                              .spanDistanceApi,
+                                                      "oId":
+                                                          overHeadPolylines[index]
+                                                              .oid,
+                                                      "jobNo":
+                                                          overHeadPolylines[index]
+                                                              .jobNo,
+                                                    });
+
+                                                    print(
+                                                      "========== MAINT TYPE SELECTION ==========",
+                                                    );
+                                                    print(
+                                                      "Selected Maint Types: $selectedEditMaintTypes",
+                                                    );
+                                                    print(
+                                                      const JsonEncoder.withIndent(
+                                                        '  ',
+                                                      ).convert(
+                                                        selectedMapObjectsUpdate,
+                                                      ),
+                                                    );
+                                                    print(
+                                                      "==========================================",
+                                                    );
                                                   });
                                                 }
                                               },
