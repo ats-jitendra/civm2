@@ -159,6 +159,7 @@ class _PreLoginScreenState extends State<PreLoginScreen> {
   onSelected: (String suggestion) {
     _typeAheadController.text = suggestion;
     setState(() => isSelected = true);
+     FocusScope.of(context).unfocus();
   },
 
   /// ✅ replacement for suggestionsBoxDecoration
