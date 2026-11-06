@@ -245,7 +245,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
   String imageSource = '';
   String selectedJobStatus = '';
   bool isSaveLoading = false;
-
+  bool isYes = false;
   @override
   void initState() {
     // TODO: implement initState
@@ -261,7 +261,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
     WakelockPlus.enable();
     getUserType();
     /////
-    cameraInit();
+   cameraInit();
     _startListeningToCompass();
   }
 
@@ -415,1095 +415,1105 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
         ? screenHeight * 0.60
         : screenHeight * 0.80;
     final isTabletView = MediaQuery.of(context).size.width >= 600;
-    return Scaffold(
-      appBar: AppBar(
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          "IVM System Map",
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: const Color.fromARGB(255, 7, 59, 120),
-        actions: [
-          // (widget.visibilityFlag.toString() == '1' ||
-          //         widget.visibilityFlag.toString() == '2')
-          (selectedJobStatus == 'PENDING ZIELIES ASSIGNMENT' ||
-                  selectedJobStatus == 'ASSIGNED')
-              ? IconButton(
-                  icon: const Icon(Icons.share, color: Colors.green),
-                  onPressed: () {
-                    showCrewDialogIVM(
-                      context,
-                      widget.jobNo.toString(),
-                      widget.type.toString(),
-                      widget.crew.toString(),
-                    );
-                  },
-                )
-              : (selectedJobStatus == 'PENDING')
-              ? IconButton(
-                  icon: const Icon(Icons.share, color: Colors.blue),
-                  onPressed: () {
-                    showCrewDialogIVM(
-                      context,
-                      widget.jobNo.toString(),
-                      widget.type.toString(),
-                      widget.crew.toString(),
-                    );
-                  },
-                )
-              : SizedBox(),
-          IconButton(
-            icon: const Icon(Icons.visibility),
-            onPressed: () {
-              setState(() {
-                showDetails = !showDetails;
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.search),
-            onPressed: () {
-              setState(() {
-                _isVisibleSearchByLocation = !_isVisibleSearchByLocation;
-              });
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: () {
-              loadApiData();
-              showLayerPanel = false;
-              expandWorkLayers = true;
-              showSubstationLayer = true;
-              showPrimaryLayer = true;
-              showPrimaryOverHeadLayer = true;
-              showPrimaryUnderGroundLayer = true;
-              showSecondaryLayer = true;
-              showSecondaryOverHeadLayer = true;
-              showSecondaryUnderGroundLayer = true;
-              showConsumerLayer = true;
-              showPoleLayer = true;
-              showMaintLayer = true;
-            },
-          ),
-        ],
-      ),
-      body: _currentLocation == null
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Visibility(
-                  visible: showDetails,
-                  child: Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF073B78),
-                      boxShadow: [
-                        BoxShadow(color: Colors.black12, blurRadius: 5),
-                      ],
-                    ),
-                    child: Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          LayoutBuilder(
-                            builder: (context, constraints) {
-                              final isTablet = constraints.maxWidth >= 600;
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) async {
+        if (didPop) return;
+  print("selectedMapObjectsUpdate1---------------- $selectedMapObjectsUpdate");
+        bool hasValidMapObjects = selectedMapObjects.any(
+          (item) => (item['maintType'] ?? '').toString().trim().isNotEmpty,
+        );
 
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Row(
-                                    children: [
-                                      /// Master Job No
-                                      if (widget.masterJobNo != "N/A" &&
-                                          widget.masterJobNo
-                                              .toString()
-                                              .trim()
-                                              .isNotEmpty) ...[
+        bool hasValidMapObjectsUpdate = selectedMapObjectsUpdate.any(
+          (item) => (item['maintType'] ?? '').toString().trim().isNotEmpty,
+        );
+
+        if (hasValidMapObjects || hasValidMapObjectsUpdate) {
+          setState(() {
+            isYes = true;
+          });
+          bool shouldExit = await showExitPopup(context, () async {
+            if (hasValidMapObjects) {
+              print("selectedMapObjects---------------- $selectedMapObjects");
+              await submitMapData(selectedMapObjects);
+            }
+
+            if (hasValidMapObjectsUpdate) {
+                  print("selectedMapObjectsUpdate2---------------- $selectedMapObjectsUpdate");
+              await submitMapData(selectedMapObjectsUpdate);
+            }
+          });
+
+          if (shouldExit && context.mounted) {
+            Navigator.of(context).pop();
+          }
+        } else {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          iconTheme: const IconThemeData(color: Colors.white),
+          title: const Text(
+            "IVM System Map",
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: const Color.fromARGB(255, 7, 59, 120),
+          actions: [
+            // (widget.visibilityFlag.toString() == '1' ||
+            //         widget.visibilityFlag.toString() == '2')
+            (selectedJobStatus == 'PENDING ZIELIES ASSIGNMENT' ||
+                    selectedJobStatus == 'ASSIGNED')
+                ? IconButton(
+                    icon: const Icon(Icons.share, color: Colors.green),
+                    onPressed: () {
+                      showCrewDialogIVM(
+                        context,
+                        widget.jobNo.toString(),
+                        widget.type.toString(),
+                        widget.crew.toString(),
+                      );
+                    },
+                  )
+                : (selectedJobStatus == 'PENDING')
+                ? IconButton(
+                    icon: const Icon(Icons.share, color: Colors.blue),
+                    onPressed: () {
+                      showCrewDialogIVM(
+                        context,
+                        widget.jobNo.toString(),
+                        widget.type.toString(),
+                        widget.crew.toString(),
+                      );
+                    },
+                  )
+                : SizedBox(),
+            IconButton(
+              icon: const Icon(Icons.visibility),
+              onPressed: () {
+                setState(() {
+                  showDetails = !showDetails;
+                });
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: () {
+                setState(() {
+                  _isVisibleSearchByLocation = !_isVisibleSearchByLocation;
+                });
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              onPressed: () {
+                loadApiData();
+                showLayerPanel = false;
+                expandWorkLayers = true;
+                showSubstationLayer = true;
+                showPrimaryLayer = true;
+                showPrimaryOverHeadLayer = true;
+                showPrimaryUnderGroundLayer = true;
+                showSecondaryLayer = true;
+                showSecondaryOverHeadLayer = true;
+                showSecondaryUnderGroundLayer = true;
+                showConsumerLayer = true;
+                showPoleLayer = true;
+                showMaintLayer = true;
+              },
+            ),
+          ],
+        ),
+        body: _currentLocation == null
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  Visibility(
+                    visible: showDetails,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF073B78),
+                        boxShadow: [
+                          BoxShadow(color: Colors.black12, blurRadius: 5),
+                        ],
+                      ),
+                      child: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            LayoutBuilder(
+                              builder: (context, constraints) {
+                                final isTablet = constraints.maxWidth >= 600;
+
+                                return Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        /// Master Job No
+                                        if (widget.masterJobNo != "N/A" &&
+                                            widget.masterJobNo
+                                                .toString()
+                                                .trim()
+                                                .isNotEmpty) ...[
+                                          Expanded(
+                                            flex: 3,
+                                            child: buildResponsiveInfo(
+                                              Icons.assignment,
+                                              "Master Job No",
+                                              widget.masterJobNo.toString(),
+
+                                              isTablet,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                        ],
+
+                                        /// Job No
                                         Expanded(
-                                          flex: 3,
+                                          flex: 2,
                                           child: buildResponsiveInfo(
-                                            Icons.assignment,
-                                            "Master Job No",
-                                            widget.masterJobNo.toString(),
+                                            Icons.badge,
+                                            "Job No",
+                                            widget.jobNo,
 
                                             isTablet,
+                                            isMasterJobNo:
+                                                (widget.masterJobNo != "N/A" &&
+                                                    widget.masterJobNo
+                                                        .toString()
+                                                        .trim()
+                                                        .isNotEmpty)
+                                                ? false
+                                                : true,
                                           ),
                                         ),
-                                        const SizedBox(width: 8),
                                       ],
-
-                                      /// Job No
-                                      Expanded(
-                                        flex: 2,
-                                        child: buildResponsiveInfo(
-                                          Icons.badge,
-                                          "Job No",
-                                          widget.jobNo,
-
-                                          isTablet,
-                                          isMasterJobNo:
-                                              (widget.masterJobNo != "N/A" &&
-                                                  widget.masterJobNo
-                                                      .toString()
-                                                      .trim()
-                                                      .isNotEmpty)
-                                              ? false
-                                              : true,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              );
-                            },
-                          ),
-
-                          const SizedBox(height: 8),
-
-                          /// Substation & Feeder
-                          Row(
-                            children: [
-                              Expanded(
-                                flex: 3,
-                                child: infoTile(
-                                  Icons.location_city,
-                                  "Substation",
-                                  selectedSubstation ?? "-",
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              SizedBox(
-                                width: isTabletView ? 280 : 150,
-                                child: infoTile(
-                                  Icons.alt_route,
-                                  "Feeder",
-                                  selectedFeeder ?? "-",
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Visibility(
-                //   visible: showDetails,
-                //   child: Container(
-                //     padding: const EdgeInsets.all(12),
-                //     decoration: BoxDecoration(
-                //       color: const Color.fromARGB(255, 7, 59, 120),
-                //       boxShadow: [
-                //         BoxShadow(color: Colors.grey.shade300, blurRadius: 6),
-                //       ],
-                //     ),
-                //     child: Container(
-                //       width: double.infinity,
-                //       padding: const EdgeInsets.all(12),
-                //       decoration: BoxDecoration(
-                //         color: Colors.white,
-                //         borderRadius: BorderRadius.circular(8),
-                //       ),
-                //       child: Column(
-                //         crossAxisAlignment: CrossAxisAlignment.start,
-                //         children: [
-                //           _buildInfoRow("Job No", widget.jobNo),
-                //           const Divider(height: 20),
-
-                //           _buildInfoRow(
-                //             "Substation",
-                //             selectedSubstation.toString(),
-                //           ),
-                //           const Divider(height: 20),
-
-                //           _buildInfoRow("Feeder", selectedFeeder.toString()),
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                Expanded(
-                  child: Stack(
-                    children: [
-                      Stack(
-                        children: [
-                          FlutterMap(
-                            mapController: _mapController,
-                            options: MapOptions(
-                              initialCenter:
-                                  _currentLocation ?? const LatLng(0.0, 0.0),
-                              // LatLng(17.3850, 78.4867), // Hyderabad
-                              initialZoom: _currentZoom,
-                              maxZoom: 22,
-                              minZoom: 0.0,
-
-                              // Disable map rotation
-                              interactionOptions: const InteractionOptions(
-                                flags:
-                                    InteractiveFlag.all &
-                                    ~InteractiveFlag.rotate,
-                                // pinchZoomWinGestures: MultiFingerGesture.all,
-                              ),
-                              ////////////poly line on tap---------
-                              onTap: (tapPosition, latLng) {
-                                ///old Approximate meters code changes--------
-                                // _onPolylineTap(latLng);
-                                ///new Pixels code changes----------
-                                if (tapPosition.relative != null) {
-                                  _onPolylineTap(tapPosition.relative!, latLng);
-                                }
-                              },
-
-                              onPositionChanged: (position, hasGesture) {
-                                final zoom = position.zoom
-                                    .clamp(1.0, 22.0)
-                                    .toDouble();
-                                //to hide poles and consumers when extream zoom in
-                                final bool wasZoomLevel = _currentZoom >= 15.0;
-                                final bool isZoomLevel = zoom >= 15.0;
-
-                                _currentZoom = zoom;
-
-                                if (showPopup) {
-                                  _updatePopupPosition();
-                                }
-
-                                // Only change layer visibility when zoom crosses 15
-                                if (wasZoomLevel != isZoomLevel) {
-                                  setState(() {
-                                    if (_currentZoom < 15.0) {
-                                      showPoleLayer = false;
-                                      showConsumerLayer = false;
-                                    } else {
-                                      showPoleLayer = true;
-                                      showConsumerLayer = true;
-                                    }
-                                  });
-                                }
-                              },
-                              ////////--------------
-                            ),
-                            children: [
-                              TileLayer(
-                                urlTemplate: mapStyle == "street"
-                                    ? "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-                                    //"https://tile.openstreetmap.de/{z}/{x}/{y}.png"
-                                    : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-
-                                userAgentPackageName: "com.ariespro.civm2",
-                              ),
-                              if (showSubstationLayer)
-                                PolygonLayer(
-                                  polygons: substationBoundaryPolygons,
-                                ),
-
-                              /////
-                              //  PolylineLayer(
-                              //   polylines: overHeadPolylines,
-                              // ),
-
-                              ///plylin ontap--------
-                              // if (showOverHeadLayer)
-                              //   PolylineLayer(
-                              //     polylines: overHeadPolylines
-                              //         .asMap()
-                              //         .entries
-                              //         .expand((entry) {
-                              //           final index = entry.key;
-                              //           final polyline = entry.value;
-
-                              //           final maintTypes = polyline.maintType
-                              //               .split(",")
-                              //               .map((e) => e.trim())
-                              //               .where((e) => e.isNotEmpty)
-                              //               .toList();
-
-                              //           final maintStatuses = polyline
-                              //               .maintStatus
-                              //               .split(",")
-                              //               .map((e) => e.trim())
-                              //               .toList();
-
-                              //           final visibleMaintTypes = <String>[];
-                              //           final colors = <Color>[];
-
-                              //           for (
-                              //             int i = 0;
-                              //             i < maintTypes.length;
-                              //             i++
-                              //           ) {
-                              //             final type = maintTypes[i];
-
-                              //             // Layer visibility
-                              //             if (!(workLayerVisibility[type] ??
-                              //                 true)) {
-                              //               continue;
-                              //             }
-
-                              //             final status =
-                              //                 i < maintStatuses.length
-                              //                 ? maintStatuses[i].toLowerCase()
-                              //                 : "";
-
-                              //             visibleMaintTypes.add(type);
-
-                              //             // Completed maintenance = Grey
-                              //             if (status == "completed" ||
-                              //                 status == "rework completed" ||
-                              //                 status == "final completed") {
-                              //               colors.add(Colors.grey);
-                              //             } else {
-                              //               colors.add(getColorFromName(type));
-                              //             }
-                              //           }
-
-                              //           // All maintenance types are hidden
-                              //           if (polyline.maintType
-                              //                   .trim()
-                              //                   .isNotEmpty &&
-                              //               colors.isEmpty) {
-                              //             return <Polyline>[];
-                              //           }
-
-                              //           // No maintenance type
-                              //           if (colors.isEmpty) {
-                              //             return [
-                              //               Polyline(
-                              //                 points: polyline.points,
-                              //                 strokeWidth: 12,
-                              //                 color:
-                              //                     selectedPolylineIndexes
-                              //                         .contains(index)
-                              //                     ? lightenColor(
-                              //                         polyline.originalColor,
-                              //                       )
-                              //                     : polyline.originalColor,
-                              //               ),
-                              //             ];
-                              //           }
-
-                              //           // Only one maintenance type
-                              //           if (colors.length == 1) {
-                              //             return [
-                              //               Polyline(
-                              //                 points: polyline.points,
-                              //                 strokeWidth: 16,
-                              //                 color: colors.first,
-                              //               ),
-                              //             ];
-                              //           }
-
-                              //           // Multiple maintenance types
-                              //           final splitPoints =
-                              //               splitLineIntoSegments(
-                              //                 polyline.points.first,
-                              //                 polyline.points.last,
-                              //                 colors.length,
-                              //               );
-
-                              //           final List<Polyline> lines = [];
-
-                              //           for (
-                              //             int i = 0;
-                              //             i < splitPoints.length - 1;
-                              //             i++
-                              //           ) {
-                              //             lines.add(
-                              //               Polyline(
-                              //                 points: [
-                              //                   splitPoints[i],
-                              //                   splitPoints[i + 1],
-                              //                 ],
-                              //                 strokeWidth: 16,
-                              //                 color: colors[i],
-                              //               ),
-                              //             );
-                              //           }
-
-                              //           return lines;
-                              //         })
-                              //         .toList(),
-                              //   ),
-                              // if (showOverHeadLayer)
-                              if (showPrimaryOverHeadLayer ||
-                                  showSecondaryOverHeadLayer)
-                                PolylineLayer(
-                                  polylines: overHeadPolylines.asMap().entries.expand((
-                                    entry,
-                                  ) {
-                                    // final index = entry.key;
-                                    final polyline = entry.value;
-                                    final bool isPrimary =
-                                        polyline.service == "0";
-                                    final bool isSecondary =
-                                        polyline.service == "1";
-
-                                    if (isPrimary &&
-                                        !showPrimaryOverHeadLayer) {
-                                      return <Polyline>[];
-                                    }
-
-                                    if (isSecondary &&
-                                        !showSecondaryOverHeadLayer) {
-                                      return <Polyline>[];
-                                    }
-                                    final maintTypes = polyline.maintType
-                                        .split(",")
-                                        .map((e) => e.trim().toUpperCase())
-                                        .where((e) => e.isNotEmpty)
-                                        .toList();
-
-                                    final maintStatuses = polyline.maintStatus
-                                        .split(",")
-                                        .map((e) => e.trim())
-                                        .toList();
-
-                                    // No maintType -> original polyline color
-                                    if (maintTypes.isEmpty) {
-                                      return [
-                                        Polyline(
-                                          points: polyline.points,
-                                          strokeWidth: 12,
-                                          // color: polyline.originalColor,
-                                          ////lightenColor color bug fix(01-10-2026)
-                                          color:
-                                              selectedPolylineIndexes.contains(
-                                                entry.key,
-                                              )
-                                              ? lightenColor(
-                                                  polyline.originalColor,
-                                                )
-                                              : polyline.originalColor,
-                                        ),
-                                      ];
-                                    }
-
-                                    // Get only CHECKED maintTypes
-                                    final visibleIndexes = <int>[];
-
-                                    for (
-                                      int i = 0;
-                                      i < maintTypes.length;
-                                      i++
-                                    ) {
-                                      final type = maintTypes[i];
-
-                                      if (workLayerVisibility[type] ?? false) {
-                                        visibleIndexes.add(i);
-                                      }
-                                    }
-
-                                    // =====================================================
-                                    // CASE 1: ALL maintTypes are unchecked
-                                    // Show complete span in original color
-                                    // =====================================================
-                                    if (visibleIndexes.isEmpty) {
-                                      return [
-                                        Polyline(
-                                          points: polyline.points,
-                                          strokeWidth: 12,
-                                          color: polyline.originalColor,
-                                        ),
-                                      ];
-                                    }
-
-                                    // =====================================================
-                                    // CASE 2: ONLY ONE maintType is checked
-                                    // Show COMPLETE span in that maintType color
-                                    // =====================================================
-                                    if (visibleIndexes.length == 1) {
-                                      final i = visibleIndexes.first;
-                                      final type = maintTypes[i];
-
-                                      final status = i < maintStatuses.length
-                                          ? maintStatuses[i].toLowerCase()
-                                          : "";
-
-                                      final Color color =
-                                          status == "completed" ||
-                                              status == "rework completed" ||
-                                              status == "final completed" ||
-                                              status == "passed"
-                                          ? Colors.grey
-                                          : getColorFromName(
-                                              type,
-                                              noSprayColor:
-                                                  polyline.originalColor,
-                                            );
-
-                                      return [
-                                        Polyline(
-                                          points: polyline.points,
-                                          strokeWidth: 16,
-                                          color: color,
-                                        ),
-                                      ];
-                                    }
-
-                                    // =====================================================
-                                    // CASE 3: MULTIPLE maintTypes are checked
-                                    // Split the span between only the checked maintTypes
-                                    // =====================================================
-                                    final visibleColors = <Color>[];
-
-                                    for (final i in visibleIndexes) {
-                                      final type = maintTypes[i];
-
-                                      final status = i < maintStatuses.length
-                                          ? maintStatuses[i].toLowerCase()
-                                          : "";
-
-                                      if (status == "completed" ||
-                                          status == "rework completed" ||
-                                          status == "final completed" ||
-                                          status == "passed") {
-                                        visibleColors.add(Colors.grey);
-                                      } else {
-                                        visibleColors.add(
-                                          getColorFromName(
-                                            type,
-                                            noSprayColor:
-                                                polyline.originalColor,
-                                          ),
-                                        );
-                                      }
-                                    }
-
-                                    final splitPoints = splitLineIntoSegments(
-                                      polyline.points.first,
-                                      polyline.points.last,
-                                      visibleColors.length,
-                                    );
-
-                                    final List<Polyline> lines = [];
-
-                                    for (
-                                      int i = 0;
-                                      i < splitPoints.length - 1;
-                                      i++
-                                    ) {
-                                      lines.add(
-                                        Polyline(
-                                          points: [
-                                            splitPoints[i],
-                                            splitPoints[i + 1],
-                                          ],
-                                          strokeWidth: 16,
-                                          color: visibleColors[i],
-                                        ),
-                                      );
-                                    }
-
-                                    return lines;
-                                  }).toList(),
-                                ), //////////////////////////////////added20-8-2026
-                              //-------------------------
-                              // if (showUnderGroundLayer)
-                              //   PolylineLayer(polylines: underGroundPolylines),
-                              if (showPrimaryUnderGroundLayer)
-                                PolylineLayer(
-                                  polylines: primaryUnderGroundPolylines,
-                                ),
-
-                              if (showSecondaryUnderGroundLayer)
-                                PolylineLayer(
-                                  polylines: secondaryUnderGroundPolylines,
-                                ),
-                              if ((showPrimaryOverHeadLayer ||
-                                      showSecondaryOverHeadLayer) &&
-                                  (workLayerVisibility["NO SPRAY"] ?? false))
-                                MarkerLayer(markers: noSprayMarkers),
-                              // if (showConsumerLayer)
-                              if (showConsumerLayer)
-                                MarkerLayer(markers: consumerMarkers),
-                              if (showPoleLayer)
-                                MarkerLayer(markers: poleMarkers),
-                              MarkerLayer(markers: _markers),
-                              MarkerLayer(markers: completedMarkers),
-                              MarkerLayer(markers: chatMarkers),
-                              MarkerLayer(markers: _markerSearch),
-                              //current position marker
-                              // MarkerLayer(
-                              //   markers: [
-                              //     Marker(
-                              //       point: const LatLng(17.3850, 78.4867),
-                              //       width: 50,
-                              //       height: 50,
-                              //       child: const Icon(
-                              //         Icons.location_on,
-                              //         color: Colors.red,
-                              //         size: 40,
-                              //       ),
-                              //     ),
-                              //   ],
-                              // ),
-                            ],
-                          ),
-                          (primaryRoleText != userTypeText)
-                              ? Padding(
-                                  padding: EdgeInsets.only(top: 2.0, left: 8),
-                                  child: Align(
-                                    alignment: Alignment.topLeft,
-                                    child: Text(
-                                      "$primaryRoleText, acting as $userTypeText.",
-                                      textAlign: TextAlign.left,
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 16,
-                                      ),
                                     ),
-                                  ),
-                                )
-                              : Container(),
-                        ],
-                      ),
-                      Visibility(
-                        visible: _isVisibleSearchByLocation,
-                        child: Positioned(
-                          top: 25,
-                          left: 20,
-                          right: 60,
-                          height: 45,
-                          child: TypeAheadField<Map<String, dynamic>>(
-                            controller: _searchController,
-
-                            builder: (context, controller, focusNode) {
-                              return TextField(
-                                controller: controller,
-                                focusNode: focusNode,
-                                decoration: InputDecoration(
-                                  hintText: 'Search locations...',
-                                  filled: true,
-                                  fillColor: Colors.white,
-                                  prefixIcon: const Icon(Icons.search),
-                                  suffixIcon: controller.text.isNotEmpty
-                                      ? IconButton(
-                                          icon: const Icon(Icons.clear),
-                                          onPressed: () {
-                                            controller.clear();
-
-                                            setState(() {
-                                              _showedLocationpin = false;
-                                            });
-                                          },
-                                        )
-                                      : null,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 2.0,
-                                    horizontal: 12.0,
-                                  ),
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                ),
-                              );
-                            },
-
-                            // Directly call your API
-                            suggestionsCallback: (query) async {
-                              // if (query.trim().isEmpty) {
-                              //   return [];
-                              // }
-                              final searchText = query.trim();
-                              if (searchText.length < 1) {
-                                return [];
-                              }
-
-                              try {
-                                final response =
-                                    await getDataByNameAndAccountNumber(
-                                      query.trim(),
-                                    );
-
-                                if (response is Map &&
-                                    response['getDataByNameAndAccountNumber'] !=
-                                        null) {
-                                  return List<Map<String, dynamic>>.from(
-                                    response['getDataByNameAndAccountNumber'],
-                                  );
-                                }
-
-                                return [];
-                              } catch (e) {
-                                print("Error getting location suggestions: $e");
-                                return [];
-                              }
-                            },
-
-                            itemBuilder: (context, suggestion) {
-                              return ListTile(
-                                leading: const Icon(Icons.location_city),
-                                title: Text(
-                                  suggestion['wmBF_Name'] ??
-                                      suggestion['name'] ??
-                                      'Unknown',
-                                ),
-                                subtitle: Text(
-                                  "Service: ${suggestion['wmBF_Servi'] ?? ''}\n"
-                                  "Parcel: ${suggestion['parcelNumber'] ?? ''}",
-                                ),
-                              );
-                            },
-
-                            onSelected: (suggestion) {
-                              _currentZoom = 15.0;
-
-                              _searchController.text =
-                                  suggestion['wmBF_Name'] ??
-                                  suggestion['name'] ??
-                                  suggestion['wmBF_Servi'] ??
-                                  'Unknown';
-
-                              _updateMapLocation(
-                                suggestion['wmBF_Name'] ??
-                                    suggestion['wmBF_Servi'] ??
-                                    '',
-                                suggestion['geometry'],
-                              );
-
-                              setState(() {
-                                _showedLocationpin = true;
-                              });
-                            },
-                          ),
-                        ),
-                      ), ////////////////
-                      ////////////////
-                      if (showPopup && popupOffset != null)
-                        Positioned(
-                          left: popupOffset!.dx - 130,
-                          top: popupOffset!.dy - 140,
-                          child:
-                              RegExp(r'\d').hasMatch(
-                                overHeadPolylines[selectedPolylineIndex!].jobNo
-                                    .trim(),
-                              )
-                              ? const SizedBox.shrink()
-                              // _buildPolylineMarkAsReadPopup()
-                              : _buildPolylinePopup(),
-                          // : const SizedBox.shrink(), // Don't show inline popup
-                        ),
-                      Positioned(
-                        top: 10,
-                        right: 5,
-                        child: FloatingActionButton(
-                          backgroundColor: Colors.white,
-                          onPressed: _toggleMapStyle,
-                          mini: true,
-                          child: (mapStyle == "street")
-                              ? Image.asset(
-                                  'assets/satellite_n.png',
-                                  width: 24,
-                                  height: 34,
-                                  // color: Color.fromARGB(255, 7, 59, 120),
-                                )
-                              : Image.asset(
-                                  'assets/map_n.png',
-                                  width: 24,
-                                  height: 24,
-                                ),
-                          //  Icon(
-                          //   mapStyle == "street" ? Icons.satellite : Icons.map,
-                          //   color: Colors.black,
-                          // ),
-                        ),
-                      ),
-                      Positioned(
-                        top: 60,
-                        right: 5,
-                        child: FloatingActionButton(
-                          heroTag: "layers",
-                          mini: true,
-                          backgroundColor: Colors.white,
-                          child: const Icon(
-                            Icons.layers,
-                            color: Color.fromARGB(255, 7, 59, 120),
-                            // color: Colors.black
-                          ),
-                          onPressed: () {
-                            setState(() {
-                              showLayerPanel = !showLayerPanel;
-                            });
-                          },
-                        ),
-                      ),
-
-                      Visibility(
-                        visible: _isVisibleSpeed,
-                        child: Positioned(
-                          bottom: 15,
-                          left: 10,
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              borderRadius: BorderRadius.circular(10),
+                                  ],
+                                );
+                              },
                             ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.center,
+
+                            const SizedBox(height: 8),
+
+                            /// Substation & Feeder
+                            Row(
                               children: [
-                                Text(
-                                  _currentSpeed != null
-                                      ? _currentSpeed!.toStringAsFixed(1)
-                                      : "0.0",
-                                  style: const TextStyle(
-                                    color: Color.fromARGB(255, 7, 59, 120),
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
+                                Expanded(
+                                  flex: 3,
+                                  child: infoTile(
+                                    Icons.location_city,
+                                    "Substation",
+                                    selectedSubstation ?? "-",
                                   ),
                                 ),
-                                const Text(
-                                  "mph",
-                                  style: TextStyle(
-                                    color: Color.fromARGB(255, 7, 59, 120),
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
+                                const SizedBox(width: 8),
+                                SizedBox(
+                                  width: isTabletView ? 280 : 150,
+                                  child: infoTile(
+                                    Icons.alt_route,
+                                    "Feeder",
+                                    selectedFeeder ?? "-",
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 10,
-                        right: 5,
-                        child: Column(
-                          children: [
-                            GestureDetector(
-                              onTap: _resetRotation,
-                              child: Transform.rotate(
-                                angle: -_deviceHeading * pi / 180,
-                                child: Image.asset(
-                                  'assets/compass.png',
-                                  width: 45,
-                                  height: 45,
-                                ),
-                              ),
-                            ),
-
-                            const SizedBox(height: 6),
-                            MapActionButton(
-                              imagePath: (driveMode == 0)
-                                  ? 'assets/gps_black_n.png'
-                                  : 'assets/gps_blue_n.png',
-                              onTap: _recenterMap,
-                            ),
-                            // GestureDetector(
-                            //   onTap: _recenterMap,
-                            //   // mini: true,
-                            //   // child: Icon(Icons.my_location,
-                            //   //     color: (driveMode == 0)
-                            //   //         ? const Color.fromARGB(233, 54, 54, 54)
-                            //   //         : const Color.fromARGB(233, 46, 99, 168)),
-                            //   child: (driveMode == 0)
-                            //       ? Image.asset(
-                            //           'assets/location black.png',
-                            //           width: 50,
-                            //           height: 60,
-                            //         )
-                            //       : Image.asset(
-                            //           'assets/location_blue.png',
-                            //           width: 50,
-                            //           height: 60,
-                            //         ),
-                            // ),
-                            const SizedBox(height: 6),
-                            MapActionButton(
-                              imagePath: 'assets/plus_n.png',
-                              onTap: _zoomIn,
-                            ),
-
-                            const SizedBox(height: 6),
-                            MapActionButton(
-                              imagePath: 'assets/minus_n.png',
-                              onTap: _zoomOut,
-                            ),
-                            const SizedBox(height: 6),
-                            MapActionButton(
-                              imagePath: 'assets/f_n.png',
-                              onTap: () => _handleFeederTap(context),
-                            ),
-                            // GestureDetector(
-                            //   onTap: () => _handleFeederTap(context),
-                            //   // mini: true,
-                            //   child:
-                            //       // const Icon(Icons.zoom_out),
-                            //       Image.asset(
-                            //         'assets/F.png',
-                            //         width: 50,
-                            //         height: 50,
-                            //       ),
-                            // ),
-                            const SizedBox(height: 6),
-                            MapActionButton(
-                              imagePath: 'assets/w_n.png',
-                              onTap: () => _handleWorkTap(context),
-                            ),
-                            const SizedBox(height: 10),
-                            // GestureDetector(
-                            //   onTap: () => _handleWorkTap(context),
-                            //   // mini: true,
-                            //   child:
-                            //       // const Icon(Icons.zoom_out),
-                            //       Image.asset(
-                            //         'assets/W.png',
-                            //         width: 50,
-                            //         height: 50,
-                            //       ),
-                            // ),
                           ],
                         ),
                       ),
-                      if (showLayerPanel)
-                        Positioned(
-                          top: 110,
-                          right: 10,
-                          child: Material(
-                            color: Colors.white,
-                            elevation: 8,
-                            borderRadius: BorderRadius.circular(10),
-                            clipBehavior: Clip.antiAlias,
-                            child: ConstrainedBox(
-                              constraints: BoxConstraints(
-                                maxWidth: 280,
-                                maxHeight: panelHeight,
-                                // maxHeight:
-                                //     MediaQuery.of(context).size.height *
-                                //     0.70, // 65% of screen
+                    ),
+                  ),
+
+                  // Visibility(
+                  //   visible: showDetails,
+                  //   child: Container(
+                  //     padding: const EdgeInsets.all(12),
+                  //     decoration: BoxDecoration(
+                  //       color: const Color.fromARGB(255, 7, 59, 120),
+                  //       boxShadow: [
+                  //         BoxShadow(color: Colors.grey.shade300, blurRadius: 6),
+                  //       ],
+                  //     ),
+                  //     child: Container(
+                  //       width: double.infinity,
+                  //       padding: const EdgeInsets.all(12),
+                  //       decoration: BoxDecoration(
+                  //         color: Colors.white,
+                  //         borderRadius: BorderRadius.circular(8),
+                  //       ),
+                  //       child: Column(
+                  //         crossAxisAlignment: CrossAxisAlignment.start,
+                  //         children: [
+                  //           _buildInfoRow("Job No", widget.jobNo),
+                  //           const Divider(height: 20),
+
+                  //           _buildInfoRow(
+                  //             "Substation",
+                  //             selectedSubstation.toString(),
+                  //           ),
+                  //           const Divider(height: 20),
+
+                  //           _buildInfoRow("Feeder", selectedFeeder.toString()),
+                  //         ],
+                  //       ),
+                  //     ),
+                  //   ),
+                  // ),
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        Stack(
+                          children: [
+                            FlutterMap(
+                              mapController: _mapController,
+                              options: MapOptions(
+                                initialCenter:
+                                    _currentLocation ?? const LatLng(0.0, 0.0),
+                                // LatLng(17.3850, 78.4867), // Hyderabad
+                                initialZoom: _currentZoom,
+                                maxZoom: 22,
+                                minZoom: 0.0,
+
+                                // Disable map rotation
+                                interactionOptions: const InteractionOptions(
+                                  flags:
+                                      InteractiveFlag.all &
+                                      ~InteractiveFlag.rotate,
+                                  // pinchZoomWinGestures: MultiFingerGesture.all,
+                                ),
+                                ////////////poly line on tap---------
+                                onTap: (tapPosition, latLng) {
+                                  ///old Approximate meters code changes--------
+                                  // _onPolylineTap(latLng);
+                                  ///new Pixels code changes----------
+                                  if (tapPosition.relative != null) {
+                                    _onPolylineTap(
+                                      tapPosition.relative!,
+                                      latLng,
+                                    );
+                                  }
+                                },
+
+                                onPositionChanged: (position, hasGesture) {
+                                  final zoom = position.zoom
+                                      .clamp(1.0, 22.0)
+                                      .toDouble();
+                                  //to hide poles and consumers when extream zoom in
+                                  final bool wasZoomLevel =
+                                      _currentZoom >= 15.0;
+                                  final bool isZoomLevel = zoom >= 15.0;
+
+                                  _currentZoom = zoom;
+
+                                  if (showPopup) {
+                                    _updatePopupPosition();
+                                  }
+
+                                  // Only change layer visibility when zoom crosses 15
+                                  if (wasZoomLevel != isZoomLevel) {
+                                    setState(() {
+                                      if (_currentZoom < 15.0) {
+                                        showPoleLayer = false;
+                                        showConsumerLayer = false;
+                                      } else {
+                                        showPoleLayer = true;
+                                        showConsumerLayer = true;
+                                      }
+                                    });
+                                  }
+                                },
+                                ////////--------------
                               ),
-                              child: Padding(
-                                padding: const EdgeInsets.all(10),
-                                child: StatefulBuilder(
-                                  builder: (context, panelState) {
-                                    return ScrollbarTheme(
-                                      data: ScrollbarThemeData(
-                                        // thumbColor: WidgetStateProperty.all(
-                                        //   Colors.blueGrey
-                                        //   // const Color.fromARGB(255, 7, 59, 120),
-                                        // ),
-                                        trackColor: WidgetStateProperty.all(
-                                          Colors.grey.shade300,
-                                        ),
-                                        trackBorderColor:
-                                            WidgetStateProperty.all(
-                                              Colors.transparent,
+                              children: [
+                                TileLayer(
+                                  urlTemplate: mapStyle == "street"
+                                      ? "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                      //"https://tile.openstreetmap.de/{z}/{x}/{y}.png"
+                                      : "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+
+                                  userAgentPackageName: "com.ariespro.civm2",
+                                ),
+                                if (showSubstationLayer)
+                                  PolygonLayer(
+                                    polygons: substationBoundaryPolygons,
+                                  ),
+
+                                /////
+                                //  PolylineLayer(
+                                //   polylines: overHeadPolylines,
+                                // ),
+
+                                ///plylin ontap--------
+                                // if (showOverHeadLayer)
+                                //   PolylineLayer(
+                                //     polylines: overHeadPolylines
+                                //         .asMap()
+                                //         .entries
+                                //         .expand((entry) {
+                                //           final index = entry.key;
+                                //           final polyline = entry.value;
+
+                                //           final maintTypes = polyline.maintType
+                                //               .split(",")
+                                //               .map((e) => e.trim())
+                                //               .where((e) => e.isNotEmpty)
+                                //               .toList();
+
+                                //           final maintStatuses = polyline
+                                //               .maintStatus
+                                //               .split(",")
+                                //               .map((e) => e.trim())
+                                //               .toList();
+
+                                //           final visibleMaintTypes = <String>[];
+                                //           final colors = <Color>[];
+
+                                //           for (
+                                //             int i = 0;
+                                //             i < maintTypes.length;
+                                //             i++
+                                //           ) {
+                                //             final type = maintTypes[i];
+
+                                //             // Layer visibility
+                                //             if (!(workLayerVisibility[type] ??
+                                //                 true)) {
+                                //               continue;
+                                //             }
+
+                                //             final status =
+                                //                 i < maintStatuses.length
+                                //                 ? maintStatuses[i].toLowerCase()
+                                //                 : "";
+
+                                //             visibleMaintTypes.add(type);
+
+                                //             // Completed maintenance = Grey
+                                //             if (status == "completed" ||
+                                //                 status == "rework completed" ||
+                                //                 status == "final completed") {
+                                //               colors.add(Colors.grey);
+                                //             } else {
+                                //               colors.add(getColorFromName(type));
+                                //             }
+                                //           }
+
+                                //           // All maintenance types are hidden
+                                //           if (polyline.maintType
+                                //                   .trim()
+                                //                   .isNotEmpty &&
+                                //               colors.isEmpty) {
+                                //             return <Polyline>[];
+                                //           }
+
+                                //           // No maintenance type
+                                //           if (colors.isEmpty) {
+                                //             return [
+                                //               Polyline(
+                                //                 points: polyline.points,
+                                //                 strokeWidth: 12,
+                                //                 color:
+                                //                     selectedPolylineIndexes
+                                //                         .contains(index)
+                                //                     ? lightenColor(
+                                //                         polyline.originalColor,
+                                //                       )
+                                //                     : polyline.originalColor,
+                                //               ),
+                                //             ];
+                                //           }
+
+                                //           // Only one maintenance type
+                                //           if (colors.length == 1) {
+                                //             return [
+                                //               Polyline(
+                                //                 points: polyline.points,
+                                //                 strokeWidth: 16,
+                                //                 color: colors.first,
+                                //               ),
+                                //             ];
+                                //           }
+
+                                //           // Multiple maintenance types
+                                //           final splitPoints =
+                                //               splitLineIntoSegments(
+                                //                 polyline.points.first,
+                                //                 polyline.points.last,
+                                //                 colors.length,
+                                //               );
+
+                                //           final List<Polyline> lines = [];
+
+                                //           for (
+                                //             int i = 0;
+                                //             i < splitPoints.length - 1;
+                                //             i++
+                                //           ) {
+                                //             lines.add(
+                                //               Polyline(
+                                //                 points: [
+                                //                   splitPoints[i],
+                                //                   splitPoints[i + 1],
+                                //                 ],
+                                //                 strokeWidth: 16,
+                                //                 color: colors[i],
+                                //               ),
+                                //             );
+                                //           }
+
+                                //           return lines;
+                                //         })
+                                //         .toList(),
+                                //   ),
+                                // if (showOverHeadLayer)
+                                if (showPrimaryOverHeadLayer ||
+                                    showSecondaryOverHeadLayer)
+                                  PolylineLayer(
+                                    polylines: overHeadPolylines.asMap().entries.expand((
+                                      entry,
+                                    ) {
+                                      // final index = entry.key;
+                                      final polyline = entry.value;
+                                      final bool isPrimary =
+                                          polyline.service == "0";
+                                      final bool isSecondary =
+                                          polyline.service == "1";
+
+                                      if (isPrimary &&
+                                          !showPrimaryOverHeadLayer) {
+                                        return <Polyline>[];
+                                      }
+
+                                      if (isSecondary &&
+                                          !showSecondaryOverHeadLayer) {
+                                        return <Polyline>[];
+                                      }
+                                      final maintTypes = polyline.maintType
+                                          .split(",")
+                                          .map((e) => e.trim().toUpperCase())
+                                          .where((e) => e.isNotEmpty)
+                                          .toList();
+
+                                      final maintStatuses = polyline.maintStatus
+                                          .split(",")
+                                          .map((e) => e.trim())
+                                          .toList();
+
+                                      // No maintType -> original polyline color
+                                      if (maintTypes.isEmpty) {
+                                        return [
+                                          Polyline(
+                                            points: polyline.points,
+                                            strokeWidth: 12,
+                                            // color: polyline.originalColor,
+                                            ////lightenColor color bug fix(01-10-2026)
+                                            color:
+                                                selectedPolylineIndexes
+                                                    .contains(entry.key)
+                                                ? lightenColor(
+                                                    polyline.originalColor,
+                                                  )
+                                                : polyline.originalColor,
+                                          ),
+                                        ];
+                                      }
+
+                                      // Get only CHECKED maintTypes
+                                      final visibleIndexes = <int>[];
+
+                                      for (
+                                        int i = 0;
+                                        i < maintTypes.length;
+                                        i++
+                                      ) {
+                                        final type = maintTypes[i];
+
+                                        if (workLayerVisibility[type] ??
+                                            false) {
+                                          visibleIndexes.add(i);
+                                        }
+                                      }
+
+                                      // =====================================================
+                                      // CASE 1: ALL maintTypes are unchecked
+                                      // Show complete span in original color
+                                      // =====================================================
+                                      if (visibleIndexes.isEmpty) {
+                                        return [
+                                          Polyline(
+                                            points: polyline.points,
+                                            strokeWidth: 12,
+                                            color: polyline.originalColor,
+                                          ),
+                                        ];
+                                      }
+
+                                      // =====================================================
+                                      // CASE 2: ONLY ONE maintType is checked
+                                      // Show COMPLETE span in that maintType color
+                                      // =====================================================
+                                      if (visibleIndexes.length == 1) {
+                                        final i = visibleIndexes.first;
+                                        final type = maintTypes[i];
+
+                                        final status = i < maintStatuses.length
+                                            ? maintStatuses[i].toLowerCase()
+                                            : "";
+
+                                        final Color color =
+                                            status == "completed" ||
+                                                status == "rework completed" ||
+                                                status == "final completed" ||
+                                                status == "passed"
+                                            ? Colors.grey
+                                            : getColorFromName(
+                                                type,
+                                                noSprayColor:
+                                                    polyline.originalColor,
+                                              );
+
+                                        return [
+                                          Polyline(
+                                            points: polyline.points,
+                                            strokeWidth: 16,
+                                            color: color,
+                                          ),
+                                        ];
+                                      }
+
+                                      // =====================================================
+                                      // CASE 3: MULTIPLE maintTypes are checked
+                                      // Split the span between only the checked maintTypes
+                                      // =====================================================
+                                      final visibleColors = <Color>[];
+
+                                      for (final i in visibleIndexes) {
+                                        final type = maintTypes[i];
+
+                                        final status = i < maintStatuses.length
+                                            ? maintStatuses[i].toLowerCase()
+                                            : "";
+
+                                        if (status == "completed" ||
+                                            status == "rework completed" ||
+                                            status == "final completed" ||
+                                            status == "passed") {
+                                          visibleColors.add(Colors.grey);
+                                        } else {
+                                          visibleColors.add(
+                                            getColorFromName(
+                                              type,
+                                              noSprayColor:
+                                                  polyline.originalColor,
                                             ),
-                                        thickness: WidgetStateProperty.all(4),
-                                        radius: const Radius.circular(8),
+                                          );
+                                        }
+                                      }
+
+                                      final splitPoints = splitLineIntoSegments(
+                                        polyline.points.first,
+                                        polyline.points.last,
+                                        visibleColors.length,
+                                      );
+
+                                      final List<Polyline> lines = [];
+
+                                      for (
+                                        int i = 0;
+                                        i < splitPoints.length - 1;
+                                        i++
+                                      ) {
+                                        lines.add(
+                                          Polyline(
+                                            points: [
+                                              splitPoints[i],
+                                              splitPoints[i + 1],
+                                            ],
+                                            strokeWidth: 16,
+                                            color: visibleColors[i],
+                                          ),
+                                        );
+                                      }
+
+                                      return lines;
+                                    }).toList(),
+                                  ), //////////////////////////////////added20-8-2026
+                                //-------------------------
+                                // if (showUnderGroundLayer)
+                                //   PolylineLayer(polylines: underGroundPolylines),
+                                if (showPrimaryUnderGroundLayer)
+                                  PolylineLayer(
+                                    polylines: primaryUnderGroundPolylines,
+                                  ),
+
+                                if (showSecondaryUnderGroundLayer)
+                                  PolylineLayer(
+                                    polylines: secondaryUnderGroundPolylines,
+                                  ),
+                                if ((showPrimaryOverHeadLayer ||
+                                        showSecondaryOverHeadLayer) &&
+                                    (workLayerVisibility["NO SPRAY"] ?? false))
+                                  MarkerLayer(markers: noSprayMarkers),
+                                // if (showConsumerLayer)
+                                if (showConsumerLayer)
+                                  MarkerLayer(markers: consumerMarkers),
+                                if (showPoleLayer)
+                                  MarkerLayer(markers: poleMarkers),
+                                MarkerLayer(markers: _markers),
+                                MarkerLayer(markers: completedMarkers),
+                                MarkerLayer(markers: chatMarkers),
+                                MarkerLayer(markers: _markerSearch),
+                                //current position marker
+                                // MarkerLayer(
+                                //   markers: [
+                                //     Marker(
+                                //       point: const LatLng(17.3850, 78.4867),
+                                //       width: 50,
+                                //       height: 50,
+                                //       child: const Icon(
+                                //         Icons.location_on,
+                                //         color: Colors.red,
+                                //         size: 40,
+                                //       ),
+                                //     ),
+                                //   ],
+                                // ),
+                              ],
+                            ),
+                            (primaryRoleText != userTypeText)
+                                ? Padding(
+                                    padding: EdgeInsets.only(top: 2.0, left: 8),
+                                    child: Align(
+                                      alignment: Alignment.topLeft,
+                                      child: Text(
+                                        "$primaryRoleText, acting as $userTypeText.",
+                                        textAlign: TextAlign.left,
+                                        style: TextStyle(
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
                                       ),
+                                    ),
+                                  )
+                                : Container(),
+                          ],
+                        ),
+                        Visibility(
+                          visible: _isVisibleSearchByLocation,
+                          child: Positioned(
+                            top: 25,
+                            left: 20,
+                            right: 60,
+                            height: 45,
+                            child: TypeAheadField<Map<String, dynamic>>(
+                              controller: _searchController,
 
-                                      child: Scrollbar(
-                                        controller: _layerScrollController,
-                                        thumbVisibility: true,
-                                        trackVisibility: true,
-                                        interactive: true,
-                                        // radius: const Radius.circular(8),
-                                        // thickness: 4,
-                                        child: SingleChildScrollView(
+                              builder: (context, controller, focusNode) {
+                                return TextField(
+                                  controller: controller,
+                                  focusNode: focusNode,
+                                  decoration: InputDecoration(
+                                    hintText: 'Search locations...',
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    prefixIcon: const Icon(Icons.search),
+                                    suffixIcon: controller.text.isNotEmpty
+                                        ? IconButton(
+                                            icon: const Icon(Icons.clear),
+                                            onPressed: () {
+                                              controller.clear();
+
+                                              setState(() {
+                                                _showedLocationpin = false;
+                                              });
+                                            },
+                                          )
+                                        : null,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 2.0,
+                                      horizontal: 12.0,
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(10),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                );
+                              },
+
+                              // Directly call your API
+                              suggestionsCallback: (query) async {
+                                // if (query.trim().isEmpty) {
+                                //   return [];
+                                // }
+                                final searchText = query.trim();
+                                if (searchText.length < 1) {
+                                  return [];
+                                }
+
+                                try {
+                                  final response =
+                                      await getDataByNameAndAccountNumber(
+                                        query.trim(),
+                                      );
+
+                                  if (response is Map &&
+                                      response['getDataByNameAndAccountNumber'] !=
+                                          null) {
+                                    return List<Map<String, dynamic>>.from(
+                                      response['getDataByNameAndAccountNumber'],
+                                    );
+                                  }
+
+                                  return [];
+                                } catch (e) {
+                                  print(
+                                    "Error getting location suggestions: $e",
+                                  );
+                                  return [];
+                                }
+                              },
+
+                              itemBuilder: (context, suggestion) {
+                                return ListTile(
+                                  leading: const Icon(Icons.location_city),
+                                  title: Text(
+                                    suggestion['wmBF_Name'] ??
+                                        suggestion['name'] ??
+                                        'Unknown',
+                                  ),
+                                  subtitle: Text(
+                                    "Service: ${suggestion['wmBF_Servi'] ?? ''}\n"
+                                    "Parcel: ${suggestion['parcelNumber'] ?? ''}",
+                                  ),
+                                );
+                              },
+
+                              onSelected: (suggestion) {
+                                _currentZoom = 15.0;
+
+                                _searchController.text =
+                                    suggestion['wmBF_Name'] ??
+                                    suggestion['name'] ??
+                                    suggestion['wmBF_Servi'] ??
+                                    'Unknown';
+
+                                _updateMapLocation(
+                                  suggestion['wmBF_Name'] ??
+                                      suggestion['wmBF_Servi'] ??
+                                      '',
+                                  suggestion['geometry'],
+                                );
+
+                                setState(() {
+                                  _showedLocationpin = true;
+                                });
+                              },
+                            ),
+                          ),
+                        ), ////////////////
+                        ////////////////
+                        if (showPopup && popupOffset != null)
+                          Positioned(
+                            left: popupOffset!.dx - 130,
+                            top: popupOffset!.dy - 140,
+                            child:
+                                RegExp(r'\d').hasMatch(
+                                  overHeadPolylines[selectedPolylineIndex!]
+                                      .jobNo
+                                      .trim(),
+                                )
+                                ? const SizedBox.shrink()
+                                // _buildPolylineMarkAsReadPopup()
+                                : _buildPolylinePopup(),
+                            // : const SizedBox.shrink(), // Don't show inline popup
+                          ),
+                        Positioned(
+                          top: 10,
+                          right: 5,
+                          child: FloatingActionButton(
+                            backgroundColor: Colors.white,
+                            onPressed: _toggleMapStyle,
+                            mini: true,
+                            child: (mapStyle == "street")
+                                ? Image.asset(
+                                    'assets/satellite_n.png',
+                                    width: 24,
+                                    height: 34,
+                                    // color: Color.fromARGB(255, 7, 59, 120),
+                                  )
+                                : Image.asset(
+                                    'assets/map_n.png',
+                                    width: 24,
+                                    height: 24,
+                                  ),
+                            //  Icon(
+                            //   mapStyle == "street" ? Icons.satellite : Icons.map,
+                            //   color: Colors.black,
+                            // ),
+                          ),
+                        ),
+                        Positioned(
+                          top: 60,
+                          right: 5,
+                          child: FloatingActionButton(
+                            heroTag: "layers",
+                            mini: true,
+                            backgroundColor: Colors.white,
+                            child: const Icon(
+                              Icons.layers,
+                              color: Color.fromARGB(255, 7, 59, 120),
+                              // color: Colors.black
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                showLayerPanel = !showLayerPanel;
+                              });
+                            },
+                          ),
+                        ),
+
+                        Visibility(
+                          visible: _isVisibleSpeed,
+                          child: Positioned(
+                            bottom: 15,
+                            left: 10,
+                            child: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Text(
+                                    _currentSpeed != null
+                                        ? _currentSpeed!.toStringAsFixed(1)
+                                        : "0.0",
+                                    style: const TextStyle(
+                                      color: Color.fromARGB(255, 7, 59, 120),
+                                      fontSize: 22,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const Text(
+                                    "mph",
+                                    style: TextStyle(
+                                      color: Color.fromARGB(255, 7, 59, 120),
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          bottom: 10,
+                          right: 5,
+                          child: Column(
+                            children: [
+                              GestureDetector(
+                                onTap: _resetRotation,
+                                child: Transform.rotate(
+                                  angle: -_deviceHeading * pi / 180,
+                                  child: Image.asset(
+                                    'assets/compass.png',
+                                    width: 45,
+                                    height: 45,
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 6),
+                              MapActionButton(
+                                imagePath: (driveMode == 0)
+                                    ? 'assets/gps_black_n.png'
+                                    : 'assets/gps_blue_n.png',
+                                onTap: _recenterMap,
+                              ),
+                              // GestureDetector(
+                              //   onTap: _recenterMap,
+                              //   // mini: true,
+                              //   // child: Icon(Icons.my_location,
+                              //   //     color: (driveMode == 0)
+                              //   //         ? const Color.fromARGB(233, 54, 54, 54)
+                              //   //         : const Color.fromARGB(233, 46, 99, 168)),
+                              //   child: (driveMode == 0)
+                              //       ? Image.asset(
+                              //           'assets/location black.png',
+                              //           width: 50,
+                              //           height: 60,
+                              //         )
+                              //       : Image.asset(
+                              //           'assets/location_blue.png',
+                              //           width: 50,
+                              //           height: 60,
+                              //         ),
+                              // ),
+                              const SizedBox(height: 6),
+                              MapActionButton(
+                                imagePath: 'assets/plus_n.png',
+                                onTap: _zoomIn,
+                              ),
+
+                              const SizedBox(height: 6),
+                              MapActionButton(
+                                imagePath: 'assets/minus_n.png',
+                                onTap: _zoomOut,
+                              ),
+                              const SizedBox(height: 6),
+                              MapActionButton(
+                                imagePath: 'assets/f_n.png',
+                                onTap: () => _handleFeederTap(context),
+                              ),
+                              // GestureDetector(
+                              //   onTap: () => _handleFeederTap(context),
+                              //   // mini: true,
+                              //   child:
+                              //       // const Icon(Icons.zoom_out),
+                              //       Image.asset(
+                              //         'assets/F.png',
+                              //         width: 50,
+                              //         height: 50,
+                              //       ),
+                              // ),
+                              const SizedBox(height: 6),
+                              MapActionButton(
+                                imagePath: 'assets/w_n.png',
+                                onTap: () => _handleWorkTap(context),
+                              ),
+                              const SizedBox(height: 10),
+                              // GestureDetector(
+                              //   onTap: () => _handleWorkTap(context),
+                              //   // mini: true,
+                              //   child:
+                              //       // const Icon(Icons.zoom_out),
+                              //       Image.asset(
+                              //         'assets/W.png',
+                              //         width: 50,
+                              //         height: 50,
+                              //       ),
+                              // ),
+                            ],
+                          ),
+                        ),
+                        if (showLayerPanel)
+                          Positioned(
+                            top: 110,
+                            right: 10,
+                            child: Material(
+                              color: Colors.white,
+                              elevation: 8,
+                              borderRadius: BorderRadius.circular(10),
+                              clipBehavior: Clip.antiAlias,
+                              child: ConstrainedBox(
+                                constraints: BoxConstraints(
+                                  maxWidth: 280,
+                                  maxHeight: panelHeight,
+                                  // maxHeight:
+                                  //     MediaQuery.of(context).size.height *
+                                  //     0.70, // 65% of screen
+                                ),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(10),
+                                  child: StatefulBuilder(
+                                    builder: (context, panelState) {
+                                      return ScrollbarTheme(
+                                        data: ScrollbarThemeData(
+                                          // thumbColor: WidgetStateProperty.all(
+                                          //   Colors.blueGrey
+                                          //   // const Color.fromARGB(255, 7, 59, 120),
+                                          // ),
+                                          trackColor: WidgetStateProperty.all(
+                                            Colors.grey.shade300,
+                                          ),
+                                          trackBorderColor:
+                                              WidgetStateProperty.all(
+                                                Colors.transparent,
+                                              ),
+                                          thickness: WidgetStateProperty.all(4),
+                                          radius: const Radius.circular(8),
+                                        ),
+
+                                        child: Scrollbar(
                                           controller: _layerScrollController,
-                                          child: Column(
-                                            children: [
-                                              /// Main Layers
-                                              _layerTile(
-                                                "Substation",
-                                                showSubstationLayer,
-                                                (v) {
-                                                  panelState(
-                                                    () => showSubstationLayer =
-                                                        v!,
-                                                  );
-                                                  setState(() {});
-                                                },
-                                              ),
-
-                                              // _layerTile(
-                                              //   "Overhead",
-                                              //   showOverHeadLayer,
-                                              //   (v) {
-                                              //     panelState(() {
-                                              //       showOverHeadLayer = v!;
-                                              //       showMaintLayer = v!;
-                                              //       // Update all work layer checkboxes
-
-                                              //       workLayerVisibility
-                                              //           .updateAll(
-                                              //             (key, value) =>
-                                              //                 showOverHeadLayer,
-                                              //           );
-                                              //     });
-                                              //     setState(() {
-                                              //       _buildStatusMarkers();
-                                              //     });
-                                              //   },
-                                              // ),
-
-                                              // _layerTile(
-                                              //   "Underground",
-                                              //   showUnderGroundLayer,
-                                              //   (v) {
-                                              //     panelState(
-                                              //       () => showUnderGroundLayer =
-                                              //           v!,
-                                              //     );
-                                              //     setState(() {});
-                                              //   },
-                                              // ),
-                                              _layerTile(
-                                                "Primary",
-                                                showPrimaryLayer,
-                                                (v) {
-                                                  panelState(() {
-                                                    showPrimaryLayer = v!;
-                                                    showPrimaryOverHeadLayer =
-                                                        v;
-                                                    showPrimaryUnderGroundLayer =
-                                                        v;
-                                                    showMaintLayer = v!;
-                                                    // Update all work layer checkboxes
-                                                    if (showMaintLayer) {
-                                                      updateWorkLayerVisibilityFromMaintType(
-                                                        overHeadPolylines,
-                                                      );
-                                                    } else {
-                                                      workLayerVisibility
-                                                          .updateAll(
-                                                            (key, value) =>
-                                                                false,
-                                                          );
-                                                    }
-                                                    _buildStatusMarkers();
-                                                  });
-                                                  setState(() {});
-                                                },
-                                              ),
-
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  left: 25,
+                                          thumbVisibility: true,
+                                          trackVisibility: true,
+                                          interactive: true,
+                                          // radius: const Radius.circular(8),
+                                          // thickness: 4,
+                                          child: SingleChildScrollView(
+                                            controller: _layerScrollController,
+                                            child: Column(
+                                              children: [
+                                                /// Main Layers
+                                                _layerTile(
+                                                  "Substation",
+                                                  showSubstationLayer,
+                                                  (v) {
+                                                    panelState(
+                                                      () =>
+                                                          showSubstationLayer =
+                                                              v!,
+                                                    );
+                                                    setState(() {});
+                                                  },
                                                 ),
-                                                child: _layerTile(
-                                                  "Overhead",
-                                                  showPrimaryOverHeadLayer,
+
+                                                // _layerTile(
+                                                //   "Overhead",
+                                                //   showOverHeadLayer,
+                                                //   (v) {
+                                                //     panelState(() {
+                                                //       showOverHeadLayer = v!;
+                                                //       showMaintLayer = v!;
+                                                //       // Update all work layer checkboxes
+
+                                                //       workLayerVisibility
+                                                //           .updateAll(
+                                                //             (key, value) =>
+                                                //                 showOverHeadLayer,
+                                                //           );
+                                                //     });
+                                                //     setState(() {
+                                                //       _buildStatusMarkers();
+                                                //     });
+                                                //   },
+                                                // ),
+
+                                                // _layerTile(
+                                                //   "Underground",
+                                                //   showUnderGroundLayer,
+                                                //   (v) {
+                                                //     panelState(
+                                                //       () => showUnderGroundLayer =
+                                                //           v!,
+                                                //     );
+                                                //     setState(() {});
+                                                //   },
+                                                // ),
+                                                _layerTile(
+                                                  "Primary",
+                                                  showPrimaryLayer,
                                                   (v) {
                                                     panelState(() {
+                                                      showPrimaryLayer = v!;
                                                       showPrimaryOverHeadLayer =
-                                                          v!;
-
-                                                      showPrimaryLayer =
-                                                          showPrimaryOverHeadLayer ||
-                                                          showPrimaryUnderGroundLayer;
+                                                          v;
+                                                      showPrimaryUnderGroundLayer =
+                                                          v;
                                                       showMaintLayer = v!;
                                                       // Update all work layer checkboxes
                                                       if (showMaintLayer) {
@@ -1517,424 +1527,462 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                                                   false,
                                                             );
                                                       }
-                                                      ///////////////////
-                                                      // workLayerVisibility
-                                                      //     .updateAll(
-                                                      //       (key, value) =>
-                                                      //           showPrimaryOverHeadLayer,
-                                                      //     );
                                                       _buildStatusMarkers();
                                                     });
+                                                    setState(() {});
                                                   },
                                                 ),
-                                              ),
 
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  left: 25,
-                                                ),
-                                                child: _layerTile(
-                                                  "Underground",
-                                                  showPrimaryUnderGroundLayer,
-                                                  (v) {
-                                                    panelState(() {
-                                                      showPrimaryUnderGroundLayer =
-                                                          v!;
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        left: 25,
+                                                      ),
+                                                  child: _layerTile(
+                                                    "Overhead",
+                                                    showPrimaryOverHeadLayer,
+                                                    (v) {
+                                                      panelState(() {
+                                                        showPrimaryOverHeadLayer =
+                                                            v!;
 
-                                                      showPrimaryLayer =
-                                                          showPrimaryOverHeadLayer ||
-                                                          showPrimaryUnderGroundLayer;
-                                                    });
-                                                  },
-                                                ),
-                                              ),
-
-                                              _layerTile(
-                                                "Secondary",
-                                                showSecondaryLayer,
-                                                (v) {
-                                                  panelState(() {
-                                                    showSecondaryLayer = v!;
-                                                    showSecondaryOverHeadLayer =
-                                                        v;
-                                                    showSecondaryUnderGroundLayer =
-                                                        v;
-                                                  });
-                                                  setState(() {});
-                                                },
-                                              ),
-
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  left: 25,
-                                                ),
-                                                child: _layerTile(
-                                                  "Overhead",
-                                                  showSecondaryOverHeadLayer,
-                                                  (v) {
-                                                    panelState(() {
-                                                      showSecondaryOverHeadLayer =
-                                                          v!;
-
-                                                      showSecondaryLayer =
-                                                          showSecondaryOverHeadLayer ||
-                                                          showSecondaryUnderGroundLayer;
-                                                    });
-                                                  },
-                                                ),
-                                              ),
-
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  left: 25,
-                                                ),
-                                                child: _layerTile(
-                                                  "Underground",
-                                                  showSecondaryUnderGroundLayer,
-                                                  (v) {
-                                                    panelState(() {
-                                                      showSecondaryUnderGroundLayer =
-                                                          v!;
-
-                                                      showSecondaryLayer =
-                                                          showSecondaryOverHeadLayer ||
-                                                          showSecondaryUnderGroundLayer;
-                                                    });
-                                                  },
-                                                ),
-                                              ),
-
-                                              _layerTile(
-                                                "Consumer",
-                                                showConsumerLayer,
-                                                (v) {
-                                                  panelState(
-                                                    () =>
-                                                        showConsumerLayer = v!,
-                                                  );
-                                                  setState(() {});
-                                                },
-                                              ),
-
-                                              _layerTile(
-                                                "Poles",
-                                                showPoleLayer,
-                                                (v) {
-                                                  panelState(
-                                                    () => showPoleLayer = v!,
-                                                  );
-                                                  setState(() {});
-                                                },
-                                              ),
-
-                                              //  const Divider(),
-
-                                              /// Expand / Collapse
-                                              InkWell(
-                                                onTap: () {
-                                                  panelState(() {
-                                                    expandWorkLayers =
-                                                        !expandWorkLayers;
-                                                    subLayersText =
-                                                        !subLayersText;
-                                                  });
-                                                },
-                                                child: Row(
-                                                  children: [
-                                                    //
-                                                    _layerTile(
-                                                      "IVM Work Plan",
-                                                      showMaintLayer,
-                                                      (v) {
-                                                        panelState(() {
-                                                          showMaintLayer = v!;
-                                                          // showOverHeadLayer =
-                                                          //     v!;
-                                                          // Update all work layer checkboxes
-                                                          if (showMaintLayer) {
-                                                            updateWorkLayerVisibilityFromMaintType(
-                                                              overHeadPolylines,
-                                                            );
-                                                          } else {
-                                                            workLayerVisibility
-                                                                .updateAll(
-                                                                  (
-                                                                    key,
-                                                                    value,
-                                                                  ) => false,
-                                                                );
-                                                          }
-                                                          //IVM WORK PLAN ALL BOXES CHECK and UNCHECK CODE
-                                                          // workLayerVisibility
-                                                          //     .updateAll(
-                                                          //       (key, value) =>
-                                                          //           showMaintLayer,
-                                                          //     );
-                                                        });
-                                                        setState(() {
-                                                          _buildStatusMarkers();
-                                                        });
-                                                      },
-                                                    ),
-                                                    const SizedBox(width: 8),
-
-                                                    if (overHeadPolylines.any(
-                                                      (item) => item.jobNo
-                                                          .toString()
-                                                          .trim()
-                                                          .isNotEmpty,
-                                                    ))
-                                                      Builder(
-                                                        builder: (context) {
-                                                          final jobItem =
-                                                              overHeadPolylines
-                                                                  .firstWhere(
-                                                                    (
-                                                                      item,
-                                                                    ) => item
-                                                                        .jobNo
-                                                                        .toString()
-                                                                        .trim()
-                                                                        .isNotEmpty,
-                                                                  );
-                                                          return Text(
-                                                            '(${jobItem.completedMiles}/${jobItem.totalMilesApi})',
-                                                            style: const TextStyle(
-                                                              color:
-                                                                  Colors.black,
-                                                              fontSize: 14,
-                                                              // fontWeight: FontWeight.w600,
-                                                            ),
+                                                        showPrimaryLayer =
+                                                            showPrimaryOverHeadLayer ||
+                                                            showPrimaryUnderGroundLayer;
+                                                        showMaintLayer = v!;
+                                                        // Update all work layer checkboxes
+                                                        if (showMaintLayer) {
+                                                          updateWorkLayerVisibilityFromMaintType(
+                                                            overHeadPolylines,
                                                           );
-                                                        },
-                                                      )
-                                                    else
-                                                      (Text(
-                                                        '(0.00/0.00)',
-                                                        style: const TextStyle(
-                                                          color: Colors.black,
-                                                          fontSize: 14,
-                                                          // fontWeight: FontWeight.w600,
-                                                        ),
-                                                      )),
-
-                                                    const SizedBox(width: 10),
-                                                    Icon(
-                                                      expandWorkLayers
-                                                          ? Icons
-                                                                .keyboard_arrow_down
-                                                          : Icons
-                                                                .keyboard_arrow_right,
-                                                    ),
-                                                    // const Text(
-                                                    //   "IVM Work Plan",
-                                                    //   style: TextStyle(
-                                                    //     fontWeight:
-                                                    //         FontWeight.bold,
-                                                    //     color: Colors.green,
-                                                    //   ),
-                                                    // ),
-                                                  ],
+                                                        } else {
+                                                          workLayerVisibility
+                                                              .updateAll(
+                                                                (key, value) =>
+                                                                    false,
+                                                              );
+                                                        }
+                                                        ///////////////////
+                                                        // workLayerVisibility
+                                                        //     .updateAll(
+                                                        //       (key, value) =>
+                                                        //           showPrimaryOverHeadLayer,
+                                                        //     );
+                                                        _buildStatusMarkers();
+                                                      });
+                                                    },
+                                                  ),
                                                 ),
-                                              ),
-                                              const SizedBox(width: 6),
 
-                                              if (subLayersText)
-                                                Align(
-                                                  alignment:
-                                                      Alignment.centerLeft,
-                                                  child: Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          left: 6.0,
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        left: 25,
+                                                      ),
+                                                  child: _layerTile(
+                                                    "Underground",
+                                                    showPrimaryUnderGroundLayer,
+                                                    (v) {
+                                                      panelState(() {
+                                                        showPrimaryUnderGroundLayer =
+                                                            v!;
+
+                                                        showPrimaryLayer =
+                                                            showPrimaryOverHeadLayer ||
+                                                            showPrimaryUnderGroundLayer;
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+
+                                                _layerTile(
+                                                  "Secondary",
+                                                  showSecondaryLayer,
+                                                  (v) {
+                                                    panelState(() {
+                                                      showSecondaryLayer = v!;
+                                                      showSecondaryOverHeadLayer =
+                                                          v;
+                                                      showSecondaryUnderGroundLayer =
+                                                          v;
+                                                    });
+                                                    setState(() {});
+                                                  },
+                                                ),
+
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        left: 25,
+                                                      ),
+                                                  child: _layerTile(
+                                                    "Overhead",
+                                                    showSecondaryOverHeadLayer,
+                                                    (v) {
+                                                      panelState(() {
+                                                        showSecondaryOverHeadLayer =
+                                                            v!;
+
+                                                        showSecondaryLayer =
+                                                            showSecondaryOverHeadLayer ||
+                                                            showSecondaryUnderGroundLayer;
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+
+                                                Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        left: 25,
+                                                      ),
+                                                  child: _layerTile(
+                                                    "Underground",
+                                                    showSecondaryUnderGroundLayer,
+                                                    (v) {
+                                                      panelState(() {
+                                                        showSecondaryUnderGroundLayer =
+                                                            v!;
+
+                                                        showSecondaryLayer =
+                                                            showSecondaryOverHeadLayer ||
+                                                            showSecondaryUnderGroundLayer;
+                                                      });
+                                                    },
+                                                  ),
+                                                ),
+
+                                                _layerTile(
+                                                  "Consumer",
+                                                  showConsumerLayer,
+                                                  (v) {
+                                                    panelState(
+                                                      () => showConsumerLayer =
+                                                          v!,
+                                                    );
+                                                    setState(() {});
+                                                  },
+                                                ),
+
+                                                _layerTile(
+                                                  "Poles",
+                                                  showPoleLayer,
+                                                  (v) {
+                                                    panelState(
+                                                      () => showPoleLayer = v!,
+                                                    );
+                                                    setState(() {});
+                                                  },
+                                                ),
+
+                                                //  const Divider(),
+
+                                                /// Expand / Collapse
+                                                InkWell(
+                                                  onTap: () {
+                                                    panelState(() {
+                                                      expandWorkLayers =
+                                                          !expandWorkLayers;
+                                                      subLayersText =
+                                                          !subLayersText;
+                                                    });
+                                                  },
+                                                  child: Row(
+                                                    children: [
+                                                      //
+                                                      _layerTile(
+                                                        "IVM Work Plan",
+                                                        showMaintLayer,
+                                                        (v) {
+                                                          panelState(() {
+                                                            showMaintLayer = v!;
+                                                            // showOverHeadLayer =
+                                                            //     v!;
+                                                            // Update all work layer checkboxes
+                                                            if (showMaintLayer) {
+                                                              updateWorkLayerVisibilityFromMaintType(
+                                                                overHeadPolylines,
+                                                              );
+                                                            } else {
+                                                              workLayerVisibility
+                                                                  .updateAll(
+                                                                    (
+                                                                      key,
+                                                                      value,
+                                                                    ) => false,
+                                                                  );
+                                                            }
+                                                            //IVM WORK PLAN ALL BOXES CHECK and UNCHECK CODE
+                                                            // workLayerVisibility
+                                                            //     .updateAll(
+                                                            //       (key, value) =>
+                                                            //           showMaintLayer,
+                                                            //     );
+                                                          });
+                                                          setState(() {
+                                                            _buildStatusMarkers();
+                                                          });
+                                                        },
+                                                      ),
+                                                      const SizedBox(width: 8),
+
+                                                      if (overHeadPolylines.any(
+                                                        (item) => item.jobNo
+                                                            .toString()
+                                                            .trim()
+                                                            .isNotEmpty,
+                                                      ))
+                                                        Builder(
+                                                          builder: (context) {
+                                                            final jobItem =
+                                                                overHeadPolylines
+                                                                    .firstWhere(
+                                                                      (
+                                                                        item,
+                                                                      ) => item
+                                                                          .jobNo
+                                                                          .toString()
+                                                                          .trim()
+                                                                          .isNotEmpty,
+                                                                    );
+                                                            return Text(
+                                                              '(${jobItem.completedMiles}/${jobItem.totalMilesApi})',
+                                                              style: const TextStyle(
+                                                                color: Colors
+                                                                    .black,
+                                                                fontSize: 14,
+                                                                // fontWeight: FontWeight.w600,
+                                                              ),
+                                                            );
+                                                          },
+                                                        )
+                                                      else
+                                                        (Text(
+                                                          '(0.00/0.00)',
+                                                          style: const TextStyle(
+                                                            color: Colors.black,
+                                                            fontSize: 14,
+                                                            // fontWeight: FontWeight.w600,
+                                                          ),
+                                                        )),
+
+                                                      const SizedBox(width: 10),
+                                                      Icon(
+                                                        expandWorkLayers
+                                                            ? Icons
+                                                                  .keyboard_arrow_down
+                                                            : Icons
+                                                                  .keyboard_arrow_right,
+                                                      ),
+                                                      // const Text(
+                                                      //   "IVM Work Plan",
+                                                      //   style: TextStyle(
+                                                      //     fontWeight:
+                                                      //         FontWeight.bold,
+                                                      //     color: Colors.green,
+                                                      //   ),
+                                                      // ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 6),
+
+                                                if (subLayersText)
+                                                  Align(
+                                                    alignment:
+                                                        Alignment.centerLeft,
+                                                    child: Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                            left: 6.0,
+                                                          ),
+                                                      child: const Text(
+                                                        "Sub Layer",
+                                                        style: TextStyle(
+                                                          color: Color.fromARGB(
+                                                            255,
+                                                            27,
+                                                            116,
+                                                            30,
+                                                          ),
+                                                          fontWeight:
+                                                              FontWeight.bold,
+                                                          fontSize: 16,
                                                         ),
-                                                    child: const Text(
-                                                      "Sub Layer",
-                                                      style: TextStyle(
-                                                        color: Color.fromARGB(
-                                                          255,
-                                                          27,
-                                                          116,
-                                                          30,
-                                                        ),
-                                                        fontWeight:
-                                                            FontWeight.bold,
-                                                        fontSize: 16,
                                                       ),
                                                     ),
                                                   ),
-                                                ),
-                                              if (expandWorkLayers) ...[
-                                                const SizedBox(height: 5),
+                                                if (expandWorkLayers) ...[
+                                                  const SizedBox(height: 5),
 
-                                                ...workLayerVisibility.keys.map((
-                                                  name,
-                                                ) {
-                                                  return Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                          left: 18,
-                                                        ),
-                                                    child: InkWell(
-                                                      onTap: () {
-                                                        panelState(() {
-                                                          workLayerVisibility[name] =
-                                                              !workLayerVisibility[name]!;
-                                                          //////for atleast one work type selected///////
-                                                          showMaintLayer =
-                                                              workLayerVisibility
-                                                                  .values
-                                                                  .any(
-                                                                    (
-                                                                      isSelected,
-                                                                    ) =>
+                                                  ...workLayerVisibility.keys.map((
+                                                    name,
+                                                  ) {
+                                                    return Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                            left: 18,
+                                                          ),
+                                                      child: InkWell(
+                                                        onTap: () {
+                                                          panelState(() {
+                                                            workLayerVisibility[name] =
+                                                                !workLayerVisibility[name]!;
+                                                            //////for atleast one work type selected///////
+                                                            showMaintLayer =
+                                                                workLayerVisibility
+                                                                    .values
+                                                                    .any(
+                                                                      (
                                                                         isSelected,
-                                                                  );
-                                                        });
-                                                        setState(() {
-                                                          _buildStatusMarkers();
-                                                        });
-                                                      },
-                                                      child: Padding(
-                                                        padding:
-                                                            const EdgeInsets.symmetric(
-                                                              vertical: 2,
-                                                            ),
-                                                        child: Row(
-                                                          children: [
-                                                            Checkbox(
-                                                              value:
-                                                                  workLayerVisibility[name],
-                                                              visualDensity:
-                                                                  VisualDensity
-                                                                      .compact,
-                                                              materialTapTargetSize:
-                                                                  MaterialTapTargetSize
-                                                                      .shrinkWrap,
-                                                              activeColor:
-                                                                  getColorFromName(
-                                                                    name,
-                                                                  ),
-                                                              // const Color.fromARGB(
-                                                              //   255,
-                                                              //   7,
-                                                              //   59,
-                                                              //   120,
-                                                              // ),
-                                                              onChanged: (value) {
-                                                                panelState(() {
-                                                                  workLayerVisibility[name] =
-                                                                      value!;
-                                                                  //////for atleast one work type selected///////
-                                                                  showMaintLayer =
-                                                                      workLayerVisibility
-                                                                          .values
-                                                                          .any(
-                                                                            (
-                                                                              isSelected,
-                                                                            ) =>
-                                                                                isSelected,
-                                                                          );
-                                                                });
-                                                                setState(() {
-                                                                  _buildStatusMarkers();
-                                                                });
-                                                              },
-                                                            ),
-                                                            const SizedBox(
-                                                              width: 2,
-                                                            ),
-                                                            // Expanded(
-                                                            //   child: Text(
-                                                            //     name,
-                                                            //     style:
-                                                            //         const TextStyle(
-                                                            //           fontSize:
-                                                            //               13,
-                                                            //         ),
-                                                            //   ),
-                                                            // ),
-                                                            ///progress value changes
-                                                            Expanded(
-                                                              child: Builder(
-                                                                builder: (context) {
-                                                                  final isNoSpray =
-                                                                      name
-                                                                          .trim()
-                                                                          .toUpperCase() ==
-                                                                      'NO SPRAY';
-                                                                  final progress =
-                                                                      getMaintTypeProgress();
-                                                                  final typeProgress =
-                                                                      progress[name
-                                                                          .toUpperCase()];
-
-                                                                  final completed =
-                                                                      typeProgress?['completed'] ??
-                                                                      0.0;
-                                                                  final total =
-                                                                      typeProgress?['total'] ??
-                                                                      0.0;
-
-                                                                  final displayName = name
-                                                                      .toLowerCase()
-                                                                      .split(
-                                                                        ' ',
-                                                                      )
-                                                                      .map(
-                                                                        (
-                                                                          word,
-                                                                        ) =>
-                                                                            word.isEmpty
-                                                                            ? word
-                                                                            : '${word[0].toUpperCase()}${word.substring(1)}',
-                                                                      )
-                                                                      .join(
-                                                                        ' ',
-                                                                      );
-
-                                                                  return Text(
-                                                                    isNoSpray
-                                                                        ? '$displayName (${total.toStringAsFixed(2)})'
-                                                                        : '$displayName (${completed.toStringAsFixed(2)}/${total.toStringAsFixed(2)})',
-                                                                    style: const TextStyle(
-                                                                      fontSize:
-                                                                          13,
+                                                                      ) =>
+                                                                          isSelected,
+                                                                    );
+                                                          });
+                                                          setState(() {
+                                                            _buildStatusMarkers();
+                                                          });
+                                                        },
+                                                        child: Padding(
+                                                          padding:
+                                                              const EdgeInsets.symmetric(
+                                                                vertical: 2,
+                                                              ),
+                                                          child: Row(
+                                                            children: [
+                                                              Checkbox(
+                                                                value:
+                                                                    workLayerVisibility[name],
+                                                                visualDensity:
+                                                                    VisualDensity
+                                                                        .compact,
+                                                                materialTapTargetSize:
+                                                                    MaterialTapTargetSize
+                                                                        .shrinkWrap,
+                                                                activeColor:
+                                                                    getColorFromName(
+                                                                      name,
                                                                     ),
-                                                                  );
-                                                                  // Text(
-                                                                  //   '$displayName (${completed.toStringAsFixed(2)}/${total.toStringAsFixed(2)})',
-                                                                  //   style: const TextStyle(
-                                                                  //     fontSize:
-                                                                  //         13,
-                                                                  //   ),
-                                                                  // );
+                                                                // const Color.fromARGB(
+                                                                //   255,
+                                                                //   7,
+                                                                //   59,
+                                                                //   120,
+                                                                // ),
+                                                                onChanged: (value) {
+                                                                  panelState(() {
+                                                                    workLayerVisibility[name] =
+                                                                        value!;
+                                                                    //////for atleast one work type selected///////
+                                                                    showMaintLayer = workLayerVisibility
+                                                                        .values
+                                                                        .any(
+                                                                          (
+                                                                            isSelected,
+                                                                          ) =>
+                                                                              isSelected,
+                                                                        );
+                                                                  });
+                                                                  setState(() {
+                                                                    _buildStatusMarkers();
+                                                                  });
                                                                 },
                                                               ),
-                                                            ),
-                                                          ],
+                                                              const SizedBox(
+                                                                width: 2,
+                                                              ),
+                                                              // Expanded(
+                                                              //   child: Text(
+                                                              //     name,
+                                                              //     style:
+                                                              //         const TextStyle(
+                                                              //           fontSize:
+                                                              //               13,
+                                                              //         ),
+                                                              //   ),
+                                                              // ),
+                                                              ///progress value changes
+                                                              Expanded(
+                                                                child: Builder(
+                                                                  builder: (context) {
+                                                                    final isNoSpray =
+                                                                        name
+                                                                            .trim()
+                                                                            .toUpperCase() ==
+                                                                        'NO SPRAY';
+                                                                    final progress =
+                                                                        getMaintTypeProgress();
+                                                                    final typeProgress =
+                                                                        progress[name
+                                                                            .toUpperCase()];
+
+                                                                    final completed =
+                                                                        typeProgress?['completed'] ??
+                                                                        0.0;
+                                                                    final total =
+                                                                        typeProgress?['total'] ??
+                                                                        0.0;
+
+                                                                    final displayName = name
+                                                                        .toLowerCase()
+                                                                        .split(
+                                                                          ' ',
+                                                                        )
+                                                                        .map(
+                                                                          (
+                                                                            word,
+                                                                          ) =>
+                                                                              word.isEmpty
+                                                                              ? word
+                                                                              : '${word[0].toUpperCase()}${word.substring(1)}',
+                                                                        )
+                                                                        .join(
+                                                                          ' ',
+                                                                        );
+
+                                                                    return Text(
+                                                                      isNoSpray
+                                                                          ? '$displayName (${total.toStringAsFixed(2)})'
+                                                                          : '$displayName (${completed.toStringAsFixed(2)}/${total.toStringAsFixed(2)})',
+                                                                      style: const TextStyle(
+                                                                        fontSize:
+                                                                            13,
+                                                                      ),
+                                                                    );
+                                                                    // Text(
+                                                                    //   '$displayName (${completed.toStringAsFixed(2)}/${total.toStringAsFixed(2)})',
+                                                                    //   style: const TextStyle(
+                                                                    //     fontSize:
+                                                                    //         13,
+                                                                    //   ),
+                                                                    // );
+                                                                  },
+                                                                ),
+                                                              ),
+                                                            ],
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                  );
-                                                }).toList(),
+                                                    );
+                                                  }).toList(),
+                                                ],
                                               ],
-                                            ],
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                    );
-                                  },
+                                      );
+                                    },
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
+      ),
     );
   }
 
@@ -4052,8 +4100,8 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
     final maxChatHeight = screenHeight * 0.30;
     final connectivityResult = await Connectivity().checkConnectivity();
     if (!connectivityResult.contains(ConnectivityResult.none)) {
-       // fix: Removed await to reduce the modal opening time.
-       DatabaseHelper.instance.fetchAndSaveMessages(
+      // fix: Removed await to reduce the modal opening time.
+      DatabaseHelper.instance.fetchAndSaveMessages(
         overHeadPolylines[index].oid.toString(),
       );
     }
@@ -5593,7 +5641,8 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
           // print("Overhead rows: ${overHeadData.length}");
           Navigator.pop(context);
           showPopup = false;
-          loadApiData();
+          print("isYes $isYes");
+          if (isYes == false) loadApiData();
         }
       } catch (e) {
         setState(() {});
@@ -5602,7 +5651,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
         //   selectedSubstation.toString(),
         //   selectedFeeder.toString(),
         // );
-        loadApiData();
+        if (isYes == false) loadApiData();
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text("Saved Offline")));
@@ -5620,7 +5669,7 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
       //   selectedSubstation.toString(),
       //   selectedFeeder.toString(),
       // );
-      loadApiData();
+      if (isYes == false) loadApiData();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No Internet. Saved Offline")),
       );
