@@ -2445,5 +2445,75 @@ CREATE TABLE inspectionListTable(
     }
   }
 
+  /////////////
+  Future<List<Map<String, dynamic>>> getLatest10MapDownloads() async {
+  final db = await database;
+
+  final result = await db.rawQuery("""
+    SELECT
+      fetchId,
+      substation,
+      feederName,
+      jobNo,
+      MAX(createdAt) AS createdAt
+    FROM overHeadTable
+    WHERE fetchId IN (
+      SELECT DISTINCT fetchId
+      FROM overHeadTable
+      ORDER BY fetchId DESC
+      LIMIT 10
+    )
+    GROUP BY fetchId, substation, feederName, jobNo
+    ORDER BY fetchId DESC
+  """);
+
+  print("Latest Map Downloads: ${result.length}");
+
+  for (var item in result) {
+//     print(
+// “Substation: ${item['substation']}, ”
+// “Feeder: ${item['feederName']}, ”
+// “Job No: ${item['jobNo']}, ”
+//       "Fetch ID: ${item['fetchId']}",
+//     );
+  }
+
+  return result;
+}
   ////////////
+   Future<List<Map<String, dynamic>>> getLatest10MapDownloadsCO() async {
+  final db = await database;
+
+  final result = await db.rawQuery("""
+    SELECT
+      fetchId,
+      substation,
+      feederName,
+      jobNo,
+      MAX(createdAt) AS createdAt
+    FROM overHeadChangeOrderTable
+    WHERE fetchId IN (
+      SELECT DISTINCT fetchId
+      FROM overHeadChangeOrderTable
+      ORDER BY fetchId DESC
+      LIMIT 10
+    )
+    GROUP BY fetchId, substation, feederName, jobNo
+    ORDER BY fetchId DESC
+  """);
+
+  print("Latest Map Downloads: ${result.length}");
+
+  for (var item in result) {
+    print(
+"Substation: ${item['substation']}, "
+"Feeder: ${item['feederName']}, "
+"Job No: ${item['jobNo']}, "
+      "Fetch ID: ${item['fetchId']}",
+    );
+  }
+
+  return result;
+}
+ 
 }

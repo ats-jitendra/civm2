@@ -1073,7 +1073,9 @@ class _MapScreenState extends State<MapScreen> {
                                         return [
                                           Polyline(
                                             points: polyline.points,
-                                            strokeWidth: 12,
+                                            strokeWidth: polyline.service == "1"
+                                                ? 8
+                                                : 12,
                                             //color: polyline.originalColor,
                                             ////lightenColor color bug fix(01-10-2026)
                                             color:
@@ -5312,8 +5314,7 @@ class _MapScreenState extends State<MapScreen> {
         //   selectedSubstation.toString(),
         //   selectedFeeder.toString(),
         // );
-         if (isYes == false)
-        loadApiData();
+        if (isYes == false) loadApiData();
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text("Saved Offline")));
@@ -5331,8 +5332,7 @@ class _MapScreenState extends State<MapScreen> {
       //   selectedSubstation.toString(),
       //   selectedFeeder.toString(),
       // );
-       if (isYes == false)
-      loadApiData();
+      if (isYes == false) loadApiData();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("No Internet. Saved Offline")),
       );

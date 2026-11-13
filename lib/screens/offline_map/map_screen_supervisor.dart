@@ -32,13 +32,13 @@ class MapScreenSupervisor extends StatefulWidget {
   String jobNo;
   String substation;
   String feeder;
-   String masterJobNo;
+  String masterJobNo;
   MapScreenSupervisor({
     super.key,
     required this.jobNo,
     required this.substation,
     required this.feeder,
-     required this.masterJobNo,
+    required this.masterJobNo,
   });
 
   @override
@@ -381,7 +381,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
         : screenHeight < 900
         ? screenHeight * 0.60
         : screenHeight * 0.80;
-        final isTabletView = MediaQuery.of(context).size.width >= 600;
+    final isTabletView = MediaQuery.of(context).size.width >= 600;
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
@@ -518,7 +518,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                               SizedBox(
+                              SizedBox(
                                 width: isTabletView ? 280 : 150,
                                 child: infoTile(
                                   Icons.alt_route,
@@ -530,7 +530,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                           ),
                         ],
                       ),
-                  ),
+                    ),
                   ),
                 ),
                 Expanded(
@@ -755,7 +755,9 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
                                   return [
                                     Polyline(
                                       points: polyline.points,
-                                      strokeWidth: 12,
+                                      strokeWidth: polyline.service == "1"
+                                          ? 8
+                                          : 12,
                                       // color: polyline.originalColor,
                                       ////lightenColor color bug fix(01-10-2026)
                                       color:
@@ -3691,8 +3693,8 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     final maxChatHeight = screenHeight * 0.30;
     final connectivityResult = await Connectivity().checkConnectivity();
     if (!connectivityResult.contains(ConnectivityResult.none)) {
-       // fix: Removed await to reduce the modal opening time.
-       DatabaseHelper.instance.fetchAndSaveMessages(
+      // fix: Removed await to reduce the modal opening time.
+      DatabaseHelper.instance.fetchAndSaveMessages(
         overHeadPolylines[index].oid.toString(),
       );
     }
@@ -5728,7 +5730,6 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
       ],
     );
   }
-
 
   /////////images
   Future<void> cameraInit() async {

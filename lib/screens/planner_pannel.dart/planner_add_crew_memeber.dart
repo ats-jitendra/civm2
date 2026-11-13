@@ -1,21 +1,19 @@
 import 'package:CIVM/models/user_details.dart';
 import 'package:CIVM/models/user_model.dart';
-import 'package:CIVM/repository/map_url.dart';
 import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/screens/leaflat_map/leaf_lat_map_wakeLock.dart';
 import 'package:CIVM/screens/login_page.dart';
 import 'package:CIVM/screens/offline_map/map_screen.dart';
+import 'package:CIVM/screens/planner_pannel.dart/planner_bottom_navigation.dart';
 import 'package:CIVM/utils/common_functions.dart';
 import 'package:CIVM/screens/map/provider/location_provider.dart';
 import 'package:CIVM/screens/my_chrome_safari_map_recording.dart';
-import 'package:CIVM/screens/planner_pannel.dart/planner_add_new_row_table.dart';
 import 'package:CIVM/screens/planner_pannel.dart/planner_change_order_all_status.dart';
 import 'package:CIVM/screens/generalForeman_New_pannel/contractor_bottom_navigation.dart';
 import 'package:CIVM/sharedPrefs/constants.dart';
 import 'package:CIVM/utils/custom_toast_snackbar_progressdialog.dart';
 import 'package:CIVM/utils/user_pref.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../data/response/status.dart';
@@ -2658,7 +2656,7 @@ class _DrawerManuState extends State<DrawerManu> {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (BuildContext context) =>
-                              const PlannerAddNewRowTable(),
+                              const PlannerBottomNavigationPannel(),
                         ),
                       );
                     },

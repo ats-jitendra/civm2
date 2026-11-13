@@ -497,7 +497,6 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                   Icons.location_city,
                                   "Substation",
                                   selectedSubstation ?? "-",
-                                
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -696,7 +695,9 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
                                   return [
                                     Polyline(
                                       points: polyline.points,
-                                      strokeWidth: 12,
+                                      strokeWidth: polyline.service == "1"
+                                          ? 8
+                                          : 12,
                                       // color: polyline.originalColor,
                                       ////lightenColor color bug fix(01-10-2026)
                                       color:
@@ -4312,8 +4313,8 @@ class _MapScreenCrewState extends State<MapScreenCrew> {
     final maxChatHeight = screenHeight * 0.30;
     final connectivityResult = await Connectivity().checkConnectivity();
     if (!connectivityResult.contains(ConnectivityResult.none)) {
-       // fix: Removed await to reduce the modal opening time.
-       DatabaseHelper.instance.fetchAndSaveMessages(
+      // fix: Removed await to reduce the modal opening time.
+      DatabaseHelper.instance.fetchAndSaveMessages(
         overHeadPolylines[index].oid.toString(),
       );
     }

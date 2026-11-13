@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:CIVM/screens/offline_map/CO_map_screen.dart';
+import 'package:CIVM/screens/offline_map/CO_map_screen_planner.dart';
+import 'package:CIVM/screens/offline_map/map_data_base_helper.dart';
 import 'package:CIVM/screens/offline_map/map_screen.dart';
 import 'package:CIVM/models/add_new_row_maint_model.dart';
 import 'package:CIVM/models/add_new_row_tabular_data.dart';
@@ -9,6 +10,7 @@ import 'package:CIVM/models/user_model.dart';
 import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/screens/generalForeman_New_pannel/contractor_bottom_navigation.dart';
 import 'package:CIVM/screens/my_chrome_safari_map_recording.dart';
+import 'package:CIVM/screens/offline_map/map_screen_planner.dart';
 import 'package:CIVM/screens/planner_pannel.dart/planner_add_new_row_maintenance_plan_table_tab1_detail_screen.dart';
 import 'package:CIVM/utils/common_functions.dart';
 import 'package:CIVM/utils/user_pref.dart';
@@ -87,6 +89,9 @@ class _PlannerAddNewRowTableState extends State<PlannerAddNewRowTable> {
   String primaryRoleText = '';
   List<GetAlls> allData = [];
   List<GetAlls> filteredList = [];
+
+  String? selectedType = "IVM";
+  final List<String> typeList = ["IVM", "Change Order"];
 
   @override
   void initState() {
@@ -204,6 +209,25 @@ class _PlannerAddNewRowTableState extends State<PlannerAddNewRowTable> {
                       child: Center(
                         child: Column(
                           children: [
+                                                        InkWell(
+  onTap: () {
+    showRecentDownloadsDialog();
+  },
+  child: Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: const Color.fromARGB(255, 7, 59, 120),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Text(
+      "📵 You are Offline!",
+      style: TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  ),
+),
                             Image.asset(
                               'assets/empty_box.png',
                               height: 200,
@@ -1495,6 +1519,197 @@ class _PlannerAddNewRowTableState extends State<PlannerAddNewRowTable> {
     if (!mounted) return;
     await checkCurrentUser();
   }
+
+  Future<void> showRecentDownloadsDialog() async {
+  List<dynamic> downloads =
+    await getRecentDownloads(selectedType ?? 'IVM');
+
+  if (!mounted) return;
+
+  showDialog(
+    context: context,
+    builder: (dialogContext) {
+      return StatefulBuilder(
+        builder: (context, dialogSetState) {
+          return AlertDialog(
+            title: const Text(
+              "Recent Map Downloads",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: SizedBox(
+              width: 500,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildDropdown(
+                    "Select Type",
+                    selectedType,
+                    typeList,
+                    (value) async {
+                      if (value == null) return;
+
+                      dialogSetState(() {
+                        selectedType = value;
+                        downloads = [];
+                      });
+
+                      final newDownloads =
+                          await getRecentDownloads(value);
+
+                      dialogSetState(() {
+                        downloads = newDownloads;
+                      });
+                    },
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Flexible(
+                    child: downloads.isEmpty
+                        ? const Center(
+                            child: Text("No downloaded records found"),
+                          )
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: downloads.length,
+                            itemBuilder: (context, index) {
+                              final item = downloads[index];
+
+                              return InkWell(
+                                onTap: () {
+                                  print('onTap Map');
+
+                                  Navigator.pop(dialogContext);
+
+                                  (selectedType == 'IVM')? Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          MapScreenPlanner(
+                                        jobNo: item['jobNo'],
+                                        substation: item['substation'],
+                                        feeder: (item['feederName'] ?? '')
+                                            .toString()
+                                            .split('(')
+                                            .first
+                                            .trim(),
+                                        visibilityFlag: '',
+                                        type: '',
+                                        crew: '',
+                                        masterJobNo: '',
+                                      ),
+                                    ),
+                                  ):Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          COMapScreenPlanner(
+                                        jobNo: item['jobNo'],
+                                        substation: item['substation'],
+                                        feeder: (item['feederName'] ?? '')
+                                            .toString()
+                                            .split('(')
+                                            .first
+                                            .trim(),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                child: Card(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                            "Substation: ${item['substation'] ?? '-'}"),
+                                        Text(
+                                            "Feeder: ${item['feederName'] ?? '-'}"),
+                                        Text(
+                                            "Job No: ${item['jobNo']}"),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text("Close"),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+  Widget _buildDropdown(
+    String hint,
+    String? value,
+    List<String> items,
+    ValueChanged<String?> onChanged,
+  ) {
+    return SizedBox(
+      height: 40,
+      child: DropdownButtonFormField<String>(
+        initialValue: items.contains(value) ? value : null,
+        isExpanded: true,
+        decoration: InputDecoration(
+          hintText: hint,
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 8,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        icon: const Icon(Icons.keyboard_arrow_down),
+        items: items
+            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+            .toList(),
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+ Future<List<dynamic>> getRecentDownloads(String type) async {
+  List<dynamic> allDownloads = [];
+
+  if (type == 'IVM') {
+    allDownloads =
+        await DatabaseHelper.instance.getLatest10MapDownloads();
+  } else if (type == 'Change Order') {
+    allDownloads =
+        await DatabaseHelper.instance.getLatest10MapDownloadsCO();
+  }
+
+  return allDownloads.where((item) {
+    final jobNo = item['jobNo'];
+    return jobNo != null && jobNo.toString().trim().isNotEmpty;
+  }).toList();
+}
+
 }
 
 // ignore: must_be_immutable
@@ -1530,7 +1745,6 @@ class _DrawerManuState extends State<DrawerManu> {
   Widget build(BuildContext context) {
     final userPreferences = Provider.of<UserPref>(context);
     var provider = Provider.of<LocationProvider>(context, listen: true);
-    final browser = MyChromeSafariBrowser();
     if (isDrawerLoading) {
       return const Drawer(child: Center(child: CircularProgressIndicator()));
     }

@@ -9,7 +9,7 @@ import 'package:CIVM/screens/map/provider/location_provider.dart';
 import 'package:CIVM/screens/my_chrome_safari_map_recording.dart';
 import 'package:CIVM/screens/offline_map/map_screen.dart';
 import 'package:CIVM/screens/planner_pannel.dart/planner_add_crew_memeber.dart';
-import 'package:CIVM/screens/planner_pannel.dart/planner_add_new_row_table.dart';
+import 'package:CIVM/screens/planner_pannel.dart/planner_bottom_navigation.dart';
 import 'package:CIVM/screens/planner_pannel.dart/planner_job_details_screen.dart';
 import 'package:CIVM/sharedPrefs/constants.dart';
 import 'package:CIVM/utils/common_functions.dart';
@@ -20,8 +20,6 @@ import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
-import 'package:CIVM/repository/map_url.dart';
 
 // ignore: must_be_immutable
 class PlannerChangeOrderAllStatus extends StatefulWidget {
@@ -1246,7 +1244,7 @@ class _DrawerManuState extends State<DrawerManu> {
                       Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (BuildContext context) =>
-                              const PlannerAddNewRowTable(),
+                              const PlannerBottomNavigationPannel(),
                         ),
                       );
                     },

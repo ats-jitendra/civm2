@@ -915,7 +915,9 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
                                         return [
                                           Polyline(
                                             points: polyline.points,
-                                            strokeWidth: 12,
+                                            strokeWidth: polyline.service == "1"
+                                                ? 8
+                                                : 12,
                                             // color: polyline.originalColor,
                                             ////lightenColor color bug fix(01-10-2026)
                                             color:

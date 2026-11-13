@@ -125,10 +125,40 @@ class _BottomNavigationAccountPageState
                   case Status.LOADING:
                     return const Center(child: CircularProgressIndicator());
                   case Status.ERROR:
-                    return CustomToastSnackBarProgressDialog
-                        .flushBarErrorMessage(
-                            value.accountPageGetTabularData.message.toString(),
-                            context);
+                return Padding(
+                  padding: const EdgeInsets.only(
+                    top: 16.0,
+                    bottom: 16,
+                    left: 8,
+                    right: 8,
+                  ),
+                  child: Center(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: Column(
+                        children: [
+                          Image.asset(
+                            'assets/empty_box.png',
+                            height: 200,
+                            width: 200,
+                            fit: BoxFit.cover,
+                          ),
+                          const Center(
+                            child: Text(
+                              'Sorry, Data Not Found!',
+                              textAlign: TextAlign.left,
+                              style: TextStyle(
+                                color: Color.fromARGB(255, 7, 59, 120),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
 
                   case Status.COMPLETED:
                     return SingleChildScrollView(

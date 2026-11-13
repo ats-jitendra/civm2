@@ -664,7 +664,9 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
                                       return [
                                         Polyline(
                                           points: polyline.points,
-                                          strokeWidth: 12,
+                                          strokeWidth: polyline.service == "1"
+                                              ? 8
+                                              : 12,
                                           color:
                                               // selectedPolylineIndexes.contains(
                                               //   index,
@@ -3240,7 +3242,7 @@ class _COMapScreenCrewState extends State<COMapScreenCrew> {
     final connectivityResult = await Connectivity().checkConnectivity();
     if (!connectivityResult.contains(ConnectivityResult.none)) {
       // fix: Removed await to reduce the modal opening time.
-       DatabaseHelper.instance.fetchAndSaveMessages(
+      DatabaseHelper.instance.fetchAndSaveMessages(
         overHeadPolylines[index].coordinateIds.toString(),
       );
     }
