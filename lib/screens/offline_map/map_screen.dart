@@ -35,6 +35,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter_speed_test_plus/flutter_speed_test_plus.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -189,6 +190,14 @@ class _MapScreenState extends State<MapScreen> {
   List<String> selectedTokenNos = [];
   bool isLoadingWorkOrders = false;
   bool isYes = false;
+
+  ///
+  final internetSpeedTest = FlutterInternetSpeedTest();
+  final double minimumDownloadSpeed = 5.0;
+  bool isSpeedTesting = false;
+
+  double downloadSpeed = 0.0;
+  double uploadSpeed = 0.0;
   @override
   void initState() {
     // TODO: implement initState
@@ -246,19 +255,125 @@ class _MapScreenState extends State<MapScreen> {
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
       result,
     ) async {
-      final online = !result.contains(ConnectivityResult.none);
+      final hasConnection = !result.contains(ConnectivityResult.none);
+
+      if (!hasConnection) {
+        if (!mounted) return;
+
+        final wasOnline = isOnline;
+
+        setState(() {
+          isOnline = false;
+          downloadSpeed = 0.00;
+          uploadSpeed = 0.00;
+        });
+
+        if (wasOnline) {
+          _showConnectivitySnackBar(false);
+        }
+
+        debugPrint('No network connection');
+        debugPrint('Download Speed: 0.00 Mbps');
+        return;
+      }
+
+      // Check actual download speed
+      final speedAvailable = await checkNetworkSpeed();
 
       if (!mounted) return;
 
+      final wasOnline = isOnline;
+
       setState(() {
-        isOnline = online;
+        isOnline = speedAvailable;
       });
 
-      _showConnectivitySnackBar(online);
-      if (online) {
+      // Show snackbar only when status changes
+      if (wasOnline != speedAvailable) {
+        _showConnectivitySnackBar(speedAvailable);
+      }
+
+      if (speedAvailable) {
+        debugPrint('Internet Available - Loading API Data');
         await loadApiData();
+      } else {
+        downloadSpeed = 0.00;
+        debugPrint('Network speed below 10 Mbps - Switching Offline');
       }
     });
+  }
+
+  Future<bool> checkNetworkSpeed() async {
+    if (isSpeedTesting) return false;
+
+    isSpeedTesting = true;
+
+    final completer = Completer<bool>();
+
+    try {
+      await internetSpeedTest.startTesting(
+        useFastApi: true,
+
+        onStarted: () {
+          debugPrint('Network speed test started');
+        },
+
+        onProgress: (percent, data) {
+          if (data.type == TestType.download) {
+            downloadSpeed = data.transferRate;
+
+            debugPrint(
+              'Download Speed: ${downloadSpeed.toStringAsFixed(2)} Mbps',
+            );
+          } else {
+            uploadSpeed = data.transferRate;
+
+            debugPrint('Upload Speed: ${uploadSpeed.toStringAsFixed(2)} Mbps');
+          }
+        },
+
+        onCompleted: (download, upload) {
+          downloadSpeed = download.transferRate;
+          uploadSpeed = upload.transferRate;
+
+          final isGoodSpeed = downloadSpeed >= minimumDownloadSpeed;
+
+          debugPrint('========== NETWORK RESULT ==========');
+          debugPrint('Download: $downloadSpeed Mbps');
+          debugPrint('Upload: $uploadSpeed Mbps');
+          debugPrint('Network Status: ${isGoodSpeed ? 'ONLINE' : 'OFFLINE'}');
+          debugPrint('====================================');
+
+          if (!completer.isCompleted) {
+            completer.complete(isGoodSpeed);
+          }
+        },
+
+        onError: (errorMessage, speedTestError) {
+          debugPrint('Speed Test Error: $errorMessage');
+
+          if (!completer.isCompleted) {
+            completer.complete(false);
+          }
+        },
+
+        onCancel: () {
+          if (!completer.isCompleted) {
+            completer.complete(false);
+          }
+        },
+      );
+
+      return await completer.future.timeout(
+        const Duration(minutes: 2),
+        onTimeout: () => false,
+      );
+    } catch (e) {
+      debugPrint('Network Error: $e');
+      return false;
+    } finally {
+      isSpeedTesting = false;
+    }
   }
 
   void _startListeningToCompass() {
@@ -436,8 +551,8 @@ class _MapScreenState extends State<MapScreen> {
       child: Scaffold(
         appBar: AppBar(
           iconTheme: const IconThemeData(color: Colors.white),
-          title: const Text(
-            "IVM System Map",
+          title: Text(
+            "${downloadSpeed.toStringAsFixed(2)} Mbps IVM System Map",
             //"Live IVM System Map",
             style: TextStyle(color: Colors.white),
           ),
