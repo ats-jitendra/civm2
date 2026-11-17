@@ -158,17 +158,18 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
   String selectedMaintType = "";
   String selectedMaintStatus = "";
   List<String> selectedWorkTypesUpdate = [];
-  final Map<String, Color> workTypeColors = {
-    "JARRAFF": const Color.fromARGB(255, 96, 0, 113),
-    "MOWING": const Color.fromARGB(255, 113, 68, 1),
-    "MINI JARRAFF": const Color.fromARGB(255, 247, 19, 2),
-    "BYL": const Color.fromARGB(255, 2, 212, 249),
-    "BUCKET": Colors.orange,
-    "GROUND": Colors.yellow,
-    "CROSS-COUNTRY SPRAY": const Color.fromARGB(255, 38, 1, 247),
-    "ROADSIDE SPRAY": const Color.fromARGB(255, 1, 127, 5),
-    "NO SPRAY": const Color.fromARGB(255, 252, 199, 249),
-  };
+  // final Map<String, Color> workTypeColors = {
+  //   "JARRAFF": const Color.fromARGB(255, 124, 61, 196),
+  //     "MOWING": const Color.fromARGB(255, 69, 42, 1),
+  //     "MINI JARRAFF": const Color.fromARGB(255, 160, 2, 2),
+  //     "BYL": const Color.fromARGB(255, 2, 212, 249),
+  //     "BUCKET": Colors.orange,
+  //     "GROUND": Color.fromARGB(255, 214, 193, 1),
+  //     // const Color.fromARGB(255, 231, 208, 2),
+  //     "CROSS-COUNTRY SPRAY": const Color.fromARGB(255, 46, 30, 134),
+  //     "ROADSIDE SPRAY": const Color.fromARGB(255, 1, 79, 3),
+  //     "NO SPRAY": const Color.fromARGB(255, 252, 199, 249),
+  // };
 
   ///
   late List<CameraDescription> _cameras;
@@ -1884,14 +1885,14 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
 
   Future<String?> _showWorkColorDialog(BuildContext context) async {
     Map<String, Color> colorMap = {
-      "Jarraff": const Color.fromARGB(255, 96, 0, 113),
-      "Mowing": const Color.fromARGB(255, 113, 68, 1),
-      "Mini Jarraff": const Color.fromARGB(255, 247, 19, 2),
+       "Jarraff": const Color.fromARGB(255, 124, 61, 196),
+      "Mowing": const Color.fromARGB(255, 69, 42, 1),
+      "Mini Jarraff": const Color.fromARGB(255, 160, 2, 2),
       "BYL": const Color.fromARGB(255, 2, 212, 249),
       "Bucket": Colors.orange,
-      "Ground": Colors.yellow,
-      "Cross-country spray": const Color.fromARGB(255, 38, 1, 247),
-      "Roadside spray": const Color.fromARGB(255, 1, 127, 5),
+      "Ground": Color.fromARGB(255, 214, 193, 1),
+      "Cross-country spray": const Color.fromARGB(255, 46, 30, 134),
+      "Roadside spray": const Color.fromARGB(255, 1, 79, 3),
       "No spray": const Color.fromARGB(255, 252, 199, 249),
     };
 
@@ -3293,14 +3294,15 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
 
   void _showDetailsPopup(int index) async {
     final Map<String, Color> workTypeColors = {
-      "JARRAFF": const Color.fromARGB(255, 96, 0, 113),
-      "MOWING": const Color.fromARGB(255, 113, 68, 1),
-      "MINI JARRAFF": const Color.fromARGB(255, 247, 19, 2),
+      "JARRAFF": const Color.fromARGB(255, 124, 61, 196),
+      "MOWING": const Color.fromARGB(255, 69, 42, 1),
+      "MINI JARRAFF": const Color.fromARGB(255, 160, 2, 2),
       "BYL": const Color.fromARGB(255, 2, 212, 249),
       "BUCKET": Colors.orange,
-      "GROUND": Colors.yellow,
-      "CROSS-COUNTRY SPRAY": const Color.fromARGB(255, 38, 1, 247),
-      "ROADSIDE SPRAY": const Color.fromARGB(255, 1, 127, 5),
+      "GROUND": Color.fromARGB(255, 214, 193, 1),
+      // const Color.fromARGB(255, 231, 208, 2),
+      "CROSS-COUNTRY SPRAY": const Color.fromARGB(255, 46, 30, 134),
+      "ROADSIDE SPRAY": const Color.fromARGB(255, 1, 79, 3),
       "NO SPRAY": const Color.fromARGB(255, 252, 199, 249),
     };
 
@@ -3700,14 +3702,15 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
       );
     }
     final Map<String, Color> workTypeColors = {
-      "JARRAFF": const Color.fromARGB(255, 96, 0, 113),
-      "MOWING": const Color.fromARGB(255, 113, 68, 1),
-      "MINI JARRAFF": const Color.fromARGB(255, 247, 19, 2),
+      "JARRAFF": const Color.fromARGB(255, 124, 61, 196),
+      "MOWING": const Color.fromARGB(255, 69, 42, 1),
+      "MINI JARRAFF": const Color.fromARGB(255, 160, 2, 2),
       "BYL": const Color.fromARGB(255, 2, 212, 249),
       "BUCKET": Colors.orange,
-      "GROUND": Colors.yellow,
-      "CROSS-COUNTRY SPRAY": const Color.fromARGB(255, 38, 1, 247),
-      "ROADSIDE SPRAY": const Color.fromARGB(255, 1, 127, 5),
+      "GROUND": Color.fromARGB(255, 214, 193, 1),
+      // const Color.fromARGB(255, 231, 208, 2),
+      "CROSS-COUNTRY SPRAY": const Color.fromARGB(255, 46, 30, 134),
+      "ROADSIDE SPRAY": const Color.fromARGB(255, 1, 79, 3),
       "NO SPRAY": const Color.fromARGB(255, 252, 199, 249),
     };
 
@@ -5580,10 +5583,10 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
   Color getColorFromName(String color, {Color? noSprayColor}) {
     switch (color.toUpperCase().trim()) {
       case "JARRAFF":
-        return Colors.purple;
-      // return const Color.fromARGB(255, 96, 0, 113);
+        return const Color.fromARGB(255, 124, 61, 196);
+      //const Color.fromARGB(255, 96, 0, 113);
       case "MINI JARRAFF":
-        return const Color.fromARGB(255, 247, 19, 2);
+        return const Color.fromARGB(255, 160, 2, 2);
       case "NO SPRAY":
         ///////no spray label fix
         if (noSprayColor != null) {
@@ -5591,15 +5594,17 @@ class _MapScreenAdminState extends State<MapScreenAdmin> {
         }
         return const Color.fromARGB(255, 252, 199, 249);
       case "MOWING":
-        return const Color.fromARGB(255, 113, 68, 1);
+        return const Color.fromARGB(255, 69, 42, 1);
+        // const Color.fromARGB(255, 85, 51, 1);
       case "BUCKET":
         return Colors.orange;
       case "GROUND":
-        return Colors.yellow;
+        return Color.fromARGB(255, 214, 193, 1);
+        // const Color.fromARGB(255, 231, 208, 2);
       case "CROSS-COUNTRY SPRAY":
-        return const Color.fromARGB(255, 38, 1, 247);
+        return const Color.fromARGB(255, 46, 30, 134);
       case "ROADSIDE SPRAY":
-        return const Color.fromARGB(255, 1, 127, 5);
+        return const Color.fromARGB(255, 1, 79, 3);
       case "BYL":
         return const Color.fromARGB(255, 2, 212, 249);
 

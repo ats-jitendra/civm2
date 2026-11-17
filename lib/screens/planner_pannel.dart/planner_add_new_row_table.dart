@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:CIVM/screens/offline_map/CO_map_screen.dart';
 import 'package:CIVM/screens/offline_map/CO_map_screen_planner.dart';
 import 'package:CIVM/screens/offline_map/map_data_base_helper.dart';
 import 'package:CIVM/screens/offline_map/map_screen.dart';
@@ -1579,45 +1580,74 @@ class _PlannerAddNewRowTableState extends State<PlannerAddNewRowTable> {
                               final item = downloads[index];
 
                               return InkWell(
-                                onTap: () {
-                                  print('onTap Map');
+                               onTap: () {
+  print('onTap Map');
 
-                                  Navigator.pop(dialogContext);
+  Navigator.pop(dialogContext);
 
-                                  (selectedType == 'IVM')? Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          MapScreenPlanner(
-                                        jobNo: item['jobNo'],
-                                        substation: item['substation'],
-                                        feeder: (item['feederName'] ?? '')
-                                            .toString()
-                                            .split('(')
-                                            .first
-                                            .trim(),
-                                        visibilityFlag: '',
-                                        type: '',
-                                        crew: '',
-                                        masterJobNo: '',
-                                      ),
-                                    ),
-                                  ):Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          COMapScreenPlanner(
-                                        jobNo: item['jobNo'],
-                                        substation: item['substation'],
-                                        feeder: (item['feederName'] ?? '')
-                                            .toString()
-                                            .split('(')
-                                            .first
-                                            .trim(),
-                                      ),
-                                    ),
-                                  );
-                                },
+  final jobNo = item['jobNo'];
+
+  final hasJobNo = jobNo != null &&
+      jobNo.toString().trim().isNotEmpty;
+
+  if (selectedType == 'IVM') {
+
+    if (hasJobNo) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MapScreenPlanner(
+            jobNo: jobNo,
+            substation: item['substation'],
+            feeder: (item['feederName'] ?? '')
+                .toString()
+                .split('(')
+                .first
+                .trim(),
+            visibilityFlag: '',
+            type: '',
+            crew: '',
+            masterJobNo: '',
+          ),
+        ),
+      );
+    } else {
+      // Navigate to IVM CreateMap
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MapScreen(),
+        ),
+      );
+    }
+
+  } else if (selectedType == 'Change Order') {
+
+    if (hasJobNo) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => COMapScreenPlanner(
+            jobNo: jobNo,
+            substation: item['substation'],
+            feeder: (item['feederName'] ?? '')
+                .toString()
+                .split('(')
+                .first
+                .trim(),
+          ),
+        ),
+      );
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => COMapScreen(),
+        ),
+      );
+    }
+  }
+},
                                 child: Card(
                                   margin: const EdgeInsets.only(bottom: 8),
                                   child: Padding(
@@ -1704,10 +1734,11 @@ class _PlannerAddNewRowTableState extends State<PlannerAddNewRowTable> {
         await DatabaseHelper.instance.getLatest10MapDownloadsCO();
   }
 
-  return allDownloads.where((item) {
-    final jobNo = item['jobNo'];
-    return jobNo != null && jobNo.toString().trim().isNotEmpty;
-  }).toList();
+  // return allDownloads.where((item) {
+  //   final jobNo = item['jobNo'];
+  //   return jobNo != null && jobNo.toString().trim().isNotEmpty;
+  // }).toList();
+  return allDownloads;
 }
 
 }

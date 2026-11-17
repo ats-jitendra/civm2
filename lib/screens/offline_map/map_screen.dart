@@ -35,7 +35,6 @@ import 'package:sqflite/sqflite.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:path/path.dart' as path;
-import 'package:flutter_speed_test_plus/flutter_speed_test_plus.dart';
 
 class MapScreen extends StatefulWidget {
   const MapScreen({super.key});
@@ -191,13 +190,7 @@ class _MapScreenState extends State<MapScreen> {
   bool isLoadingWorkOrders = false;
   bool isYes = false;
 
-  ///
-  final internetSpeedTest = FlutterInternetSpeedTest();
-  final double minimumDownloadSpeed = 5.0;
-  bool isSpeedTesting = false;
-
-  double downloadSpeed = 0.0;
-  double uploadSpeed = 0.0;
+  
   @override
   void initState() {
     // TODO: implement initState
@@ -251,131 +244,25 @@ class _MapScreenState extends State<MapScreen> {
     disposeCamera();
   }
 
-  Future<void> _listenToConnectivity() async {
+   Future<void> _listenToConnectivity() async {
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
       result,
     ) async {
-      final hasConnection = !result.contains(ConnectivityResult.none);
-
-      if (!hasConnection) {
-        if (!mounted) return;
-
-        final wasOnline = isOnline;
-
-        setState(() {
-          isOnline = false;
-          downloadSpeed = 0.00;
-          uploadSpeed = 0.00;
-        });
-
-        if (wasOnline) {
-          _showConnectivitySnackBar(false);
-        }
-
-        debugPrint('No network connection');
-        debugPrint('Download Speed: 0.00 Mbps');
-        return;
-      }
-
-      // Check actual download speed
-      final speedAvailable = await checkNetworkSpeed();
+      final online = !result.contains(ConnectivityResult.none);
 
       if (!mounted) return;
 
-      final wasOnline = isOnline;
-
       setState(() {
-        isOnline = speedAvailable;
+        isOnline = online;
       });
 
-      // Show snackbar only when status changes
-      if (wasOnline != speedAvailable) {
-        _showConnectivitySnackBar(speedAvailable);
-      }
-
-      if (speedAvailable) {
-        debugPrint('Internet Available - Loading API Data');
+      _showConnectivitySnackBar(online);
+      if (online) {
         await loadApiData();
-      } else {
-        downloadSpeed = 0.00;
-        debugPrint('Network speed below 10 Mbps - Switching Offline');
       }
     });
   }
-
-  Future<bool> checkNetworkSpeed() async {
-    if (isSpeedTesting) return false;
-
-    isSpeedTesting = true;
-
-    final completer = Completer<bool>();
-
-    try {
-      await internetSpeedTest.startTesting(
-        useFastApi: true,
-
-        onStarted: () {
-          debugPrint('Network speed test started');
-        },
-
-        onProgress: (percent, data) {
-          if (data.type == TestType.download) {
-            downloadSpeed = data.transferRate;
-
-            debugPrint(
-              'Download Speed: ${downloadSpeed.toStringAsFixed(2)} Mbps',
-            );
-          } else {
-            uploadSpeed = data.transferRate;
-
-            debugPrint('Upload Speed: ${uploadSpeed.toStringAsFixed(2)} Mbps');
-          }
-        },
-
-        onCompleted: (download, upload) {
-          downloadSpeed = download.transferRate;
-          uploadSpeed = upload.transferRate;
-
-          final isGoodSpeed = downloadSpeed >= minimumDownloadSpeed;
-
-          debugPrint('========== NETWORK RESULT ==========');
-          debugPrint('Download: $downloadSpeed Mbps');
-          debugPrint('Upload: $uploadSpeed Mbps');
-          debugPrint('Network Status: ${isGoodSpeed ? 'ONLINE' : 'OFFLINE'}');
-          debugPrint('====================================');
-
-          if (!completer.isCompleted) {
-            completer.complete(isGoodSpeed);
-          }
-        },
-
-        onError: (errorMessage, speedTestError) {
-          debugPrint('Speed Test Error: $errorMessage');
-
-          if (!completer.isCompleted) {
-            completer.complete(false);
-          }
-        },
-
-        onCancel: () {
-          if (!completer.isCompleted) {
-            completer.complete(false);
-          }
-        },
-      );
-
-      return await completer.future.timeout(
-        const Duration(minutes: 2),
-        onTimeout: () => false,
-      );
-    } catch (e) {
-      debugPrint('Network Error: $e');
-      return false;
-    } finally {
-      isSpeedTesting = false;
-    }
-  }
-
+ 
   void _startListeningToCompass() {
     // print("_startListeningToCompass called");
     // FlutterCompass.events?.listen((CompassEvent event) {
@@ -552,8 +439,7 @@ class _MapScreenState extends State<MapScreen> {
         appBar: AppBar(
           iconTheme: const IconThemeData(color: Colors.white),
           title: Text(
-            "${downloadSpeed.toStringAsFixed(2)} Mbps IVM System Map",
-            //"Live IVM System Map",
+            "IVM System Map",
             style: TextStyle(color: Colors.white),
           ),
           backgroundColor: const Color.fromARGB(255, 7, 59, 120),
@@ -2382,14 +2268,14 @@ class _MapScreenState extends State<MapScreen> {
 
   Future<String?> _showWorkColorDialog(BuildContext context) async {
     Map<String, Color> colorMap = {
-      "Jarraff": const Color.fromARGB(255, 96, 0, 113),
-      "Mowing": const Color.fromARGB(255, 113, 68, 1),
-      "Mini Jarraff": const Color.fromARGB(255, 247, 19, 2),
+      "Jarraff": const Color.fromARGB(255, 124, 61, 196),
+      "Mowing": const Color.fromARGB(255, 69, 42, 1),
+      "Mini Jarraff": const Color.fromARGB(255, 160, 2, 2),
       "BYL": const Color.fromARGB(255, 2, 212, 249),
       "Bucket": Colors.orange,
-      "Ground": Colors.yellow,
-      "Cross-country spray": const Color.fromARGB(255, 38, 1, 247),
-      "Roadside spray": const Color.fromARGB(255, 1, 127, 5),
+      "Ground": Color.fromARGB(255, 214, 193, 1),
+      "Cross-country spray": const Color.fromARGB(255, 46, 30, 134),
+      "Roadside spray": const Color.fromARGB(255, 1, 79, 3),
       "No spray": const Color.fromARGB(255, 252, 199, 249),
     };
 
@@ -3037,7 +2923,14 @@ class _MapScreenState extends State<MapScreen> {
     if (mounted) {
       setState(() {});
     }
-
+    //bug fix----poles not showing on initial visit on map
+    if (_currentZoom < 15.0) {
+      showPoleLayer = false;
+      showConsumerLayer = false;
+    } else {
+      showPoleLayer = true;
+      showConsumerLayer = true;
+    }
     Navigator.pop(context);
     // if (overHeadData.isNotEmpty) {
     //   // _zoomToLatestCreatedObject();
@@ -3992,14 +3885,15 @@ class _MapScreenState extends State<MapScreen> {
   void _showDetailsPopup(int index) async {
     bool isSavingMapData = false;
     final Map<String, Color> workTypeColors = {
-      "JARRAFF": const Color.fromARGB(255, 96, 0, 113),
-      "MOWING": const Color.fromARGB(255, 113, 68, 1),
-      "MINI JARRAFF": const Color.fromARGB(255, 247, 19, 2),
+      "JARRAFF": const Color.fromARGB(255, 124, 61, 196),
+      "MOWING": const Color.fromARGB(255, 69, 42, 1),
+      "MINI JARRAFF": const Color.fromARGB(255, 160, 2, 2),
       "BYL": const Color.fromARGB(255, 2, 212, 249),
       "BUCKET": Colors.orange,
-      "GROUND": Colors.yellow,
-      "CROSS-COUNTRY SPRAY": const Color.fromARGB(255, 38, 1, 247),
-      "ROADSIDE SPRAY": const Color.fromARGB(255, 1, 127, 5),
+      "GROUND": Color.fromARGB(255, 214, 193, 1),
+      // const Color.fromARGB(255, 231, 208, 2),
+      "CROSS-COUNTRY SPRAY": const Color.fromARGB(255, 46, 30, 134),
+      "ROADSIDE SPRAY": const Color.fromARGB(255, 1, 79, 3),
       "NO SPRAY": const Color.fromARGB(255, 252, 199, 249),
     };
 
@@ -4508,14 +4402,15 @@ class _MapScreenState extends State<MapScreen> {
       );
     }
     final Map<String, Color> workTypeColors = {
-      "JARRAFF": const Color.fromARGB(255, 96, 0, 113),
-      "MOWING": const Color.fromARGB(255, 113, 68, 1),
-      "MINI JARRAFF": const Color.fromARGB(255, 247, 19, 2),
+      "JARRAFF": const Color.fromARGB(255, 124, 61, 196),
+      "MOWING": const Color.fromARGB(255, 69, 42, 1),
+      "MINI JARRAFF": const Color.fromARGB(255, 160, 2, 2),
       "BYL": const Color.fromARGB(255, 2, 212, 249),
       "BUCKET": Colors.orange,
-      "GROUND": Colors.yellow,
-      "CROSS-COUNTRY SPRAY": const Color.fromARGB(255, 38, 1, 247),
-      "ROADSIDE SPRAY": const Color.fromARGB(255, 1, 127, 5),
+      "GROUND": Color.fromARGB(255, 214, 193, 1),
+      // const Color.fromARGB(255, 231, 208, 2),
+      "CROSS-COUNTRY SPRAY": const Color.fromARGB(255, 46, 30, 134),
+      "ROADSIDE SPRAY": const Color.fromARGB(255, 1, 79, 3),
       "NO SPRAY": const Color.fromARGB(255, 252, 199, 249),
     };
 
@@ -5894,10 +5789,10 @@ class _MapScreenState extends State<MapScreen> {
   Color getColorFromName(String color, {Color? noSprayColor}) {
     switch (color.toUpperCase().trim()) {
       case "JARRAFF":
-        return Colors.purple;
+        return const Color.fromARGB(255, 124, 61, 196);
       //const Color.fromARGB(255, 96, 0, 113);
       case "MINI JARRAFF":
-        return const Color.fromARGB(255, 247, 19, 2);
+        return const Color.fromARGB(255, 160, 2, 2);
       case "NO SPRAY":
         ///////no spray label fix
         if (noSprayColor != null) {
@@ -5905,15 +5800,17 @@ class _MapScreenState extends State<MapScreen> {
         }
         return const Color.fromARGB(255, 252, 199, 249);
       case "MOWING":
-        return const Color.fromARGB(255, 113, 68, 1);
+        return const Color.fromARGB(255, 69, 42, 1);
+        // const Color.fromARGB(255, 85, 51, 1);
       case "BUCKET":
         return Colors.orange;
       case "GROUND":
-        return Colors.yellow;
+        return Color.fromARGB(255, 214, 193, 1);
+        // const Color.fromARGB(255, 231, 208, 2);
       case "CROSS-COUNTRY SPRAY":
-        return const Color.fromARGB(255, 38, 1, 247);
+        return const Color.fromARGB(255, 46, 30, 134);
       case "ROADSIDE SPRAY":
-        return const Color.fromARGB(255, 1, 127, 5);
+        return const Color.fromARGB(255, 1, 79, 3);
       case "BYL":
         return const Color.fromARGB(255, 2, 212, 249);
 

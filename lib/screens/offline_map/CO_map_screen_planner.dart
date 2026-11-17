@@ -1486,15 +1486,7 @@ class _COMapScreenPlannerState extends State<COMapScreenPlanner> {
 
   Future<String?> _showWorkColorDialog(BuildContext context) async {
     Map<String, Color> colorMap = {
-      "Jarraff": const Color.fromARGB(255, 96, 0, 113),
-      "Mowing": const Color.fromARGB(255, 113, 68, 1),
-      "Mini Jarraff": const Color.fromARGB(255, 247, 19, 2),
-      "BYL": const Color.fromARGB(255, 2, 212, 249),
-      "Bucket": Colors.orange,
-      "Ground": Colors.yellow,
-      "Cross-country spray": const Color.fromARGB(255, 38, 1, 247),
-      "Roadside spray": const Color.fromARGB(255, 1, 127, 5),
-      "No spray": const Color.fromARGB(255, 252, 199, 249),
+      "Danger tree removal": const Color.fromRGBO(200, 184, 22, 1),
     };
 
     return showDialog<String>(
