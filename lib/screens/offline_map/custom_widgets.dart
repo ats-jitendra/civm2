@@ -934,3 +934,32 @@ Future<bool> showExitPopup(
       ) ??
       false;
 }
+
+void showNetworkSpeedSnackBar(BuildContext context) {
+  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      behavior: SnackBarBehavior.floating,
+      margin: const EdgeInsets.all(16),
+      backgroundColor: Colors.orange[800],
+      duration: const Duration(seconds: 4),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      content: Row(
+        children: [
+          Icon(Icons.wifi, color: Colors.white),
+          const SizedBox(width: 10),
+          Text(
+            "Slow network. Map is going offline..",
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+int responseTimeLimit = 3000;

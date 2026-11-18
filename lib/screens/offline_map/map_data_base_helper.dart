@@ -28,7 +28,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 24,
+      version: 25,
       onCreate: _createDB,
       onUpgrade: (db, oldVersion, newVersion) async {
         // Future database migrations go here.
@@ -310,6 +310,39 @@ class DatabaseHelper {
           await db.execute(
             "ALTER TABLE overHeadChangeOrderTable ADD COLUMN sharedCrewIds TEXT",
           );
+        }
+        if (oldVersion < 25) {
+          await db.execute('''
+    CREATE TABLE commentHistoryTable_new (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      comment TEXT,
+      userName TEXT,
+      userId TEXT,
+      mapLocation TEXT,
+      flag TEXT,
+      status INTEGER DEFAULT 1,
+      fetchId INTEGER
+    )
+  ''');
+
+          await db.execute('''
+    INSERT INTO commentHistoryTable_new (
+      id, comment, userName, userId,
+      mapLocation, flag, status, fetchId
+    )
+    SELECT
+      id, comment, userName, userId,
+      mapLocation, flag, status, fetchId
+    FROM commentHistoryTable
+    WHERE id IS NOT NULL
+  ''');
+
+          await db.execute('DROP TABLE commentHistoryTable');
+
+          await db.execute('''
+    ALTER TABLE commentHistoryTable_new
+    RENAME TO commentHistoryTable
+  ''');
         }
       },
     );
@@ -2447,9 +2480,9 @@ CREATE TABLE inspectionListTable(
 
   /////////////
   Future<List<Map<String, dynamic>>> getLatest10MapDownloads() async {
-  final db = await database;
+    final db = await database;
 
-  final result = await db.rawQuery("""
+    final result = await db.rawQuery("""
     SELECT
       fetchId,
       substation,
@@ -2467,24 +2500,25 @@ CREATE TABLE inspectionListTable(
     ORDER BY fetchId DESC
   """);
 
-  print("Latest Map Downloads: ${result.length}");
+    print("Latest Map Downloads: ${result.length}");
 
-  for (var item in result) {
-//     print(
-// “Substation: ${item['substation']}, ”
-// “Feeder: ${item['feederName']}, ”
-// “Job No: ${item['jobNo']}, ”
-//       "Fetch ID: ${item['fetchId']}",
-//     );
+    for (var item in result) {
+      //     print(
+      // “Substation: ${item['substation']}, ”
+      // “Feeder: ${item['feederName']}, ”
+      // “Job No: ${item['jobNo']}, ”
+      //       "Fetch ID: ${item['fetchId']}",
+      //     );
+    }
+
+    return result;
   }
 
-  return result;
-}
   ////////////
-   Future<List<Map<String, dynamic>>> getLatest10MapDownloadsCO() async {
-  final db = await database;
+  Future<List<Map<String, dynamic>>> getLatest10MapDownloadsCO() async {
+    final db = await database;
 
-  final result = await db.rawQuery("""
+    final result = await db.rawQuery("""
     SELECT
       fetchId,
       substation,
@@ -2502,18 +2536,17 @@ CREATE TABLE inspectionListTable(
     ORDER BY fetchId DESC
   """);
 
-  print("Latest Map Downloads: ${result.length}");
+    print("Latest Map Downloads: ${result.length}");
 
-  for (var item in result) {
-    print(
-"Substation: ${item['substation']}, "
-"Feeder: ${item['feederName']}, "
-"Job No: ${item['jobNo']}, "
-      "Fetch ID: ${item['fetchId']}",
-    );
+    for (var item in result) {
+      print(
+        "Substation: ${item['substation']}, "
+        "Feeder: ${item['feederName']}, "
+        "Job No: ${item['jobNo']}, "
+        "Fetch ID: ${item['fetchId']}",
+      );
+    }
+
+    return result;
   }
-
-  return result;
-}
- 
 }

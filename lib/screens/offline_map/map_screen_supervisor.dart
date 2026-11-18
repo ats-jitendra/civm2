@@ -258,29 +258,113 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     }
   }
 
+////offline response time code changes
+  bool isCheckingInternet = false;
+  int responseTime = 0;
+  Future<bool>? _internetCheckFuture;
+  bool _isInitialDataLoading = true;
   Future<void> _listenToConnectivity() async {
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
       result,
     ) async {
-      final online = !result.contains(ConnectivityResult.none);
+      final hasNetwork = !result.contains(ConnectivityResult.none);
+
+      final online = hasNetwork ? await checkInternetConnection() : false;
 
       if (!mounted) return;
 
-      setState(() {
-        isOnline = online;
-      });
+      final wasOnline = isOnline;
 
-      _showConnectivitySnackBar(online);
-      if (online) {
-        await loadApiData();
+      if (wasOnline != online) {
+        setState(() {
+          isOnline = online;
+        });
+
+        debugPrint('Connectivity Changed: ${online ? 'ONLINE' : 'OFFLINE'}');
+
+        _showConnectivitySnackBar(online);
+
+        if (online
+        //  && !_isInitialDataLoading
+        ) {
+          await loadApiData();
+          print('loading--------------');
+        }
       }
     });
   }
 
+  Future<bool> checkInternetConnection() {
+    if (_internetCheckFuture != null) {
+      return _internetCheckFuture!;
+    }
+
+    isCheckingInternet = true;
+    _internetCheckFuture = _performInternetCheck();
+
+    return _internetCheckFuture!.whenComplete(() {
+      isCheckingInternet = false;
+      _internetCheckFuture = null;
+    });
+  }
+
+  Future<bool> _performInternetCheck() async {
+    try {
+      final stopwatch = Stopwatch()..start();
+
+      final response = await http
+          .get(Uri.parse('https://www.google.com/generate_204'))
+          .timeout(const Duration(seconds: 5));
+
+      stopwatch.stop();
+
+      responseTime = stopwatch.elapsedMilliseconds;
+
+      final online =
+          response.statusCode == 204 && responseTime <= responseTimeLimit;
+      debugPrint('responseTimeLimit: $responseTimeLimit ms');
+      debugPrint('Response Time: $responseTime ms');
+      debugPrint('HTTP Status: ${response.statusCode}');
+      debugPrint('Network Status: ${online ? 'ONLINE' : 'OFFLINE'}');
+      if (online == false) showNetworkSpeedSnackBar(context);
+
+      return online;
+    } catch (e) {
+      responseTime = 0;
+      debugPrint('Internet Check Failed: $e');
+      debugPrint('Network Status: OFFLINE');
+      return false;
+    }
+  }
+
+  Future<bool> _hasFastInternet() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+
+    if (connectivityResult.contains(ConnectivityResult.none)) {
+      return false;
+    }
+
+    return await checkInternetConnection();
+  }
+
+  ///////////////////////////////
   Future<void> _initializeMap() async {
     await _getCurrentLocation();
     _listenToLocationUpdates();
     // _loadGeoJSONBoundary();
+     ////offline response time code cahnges
+    final online = await _hasFastInternet();
+
+    if (!mounted) return;
+
+    setState(() {
+      isOnline = online;
+    });
+
+    debugPrint(
+      'Initial Screen Network Status: ${isOnline ? 'ONLINE' : 'OFFLINE'}',
+    );
+    ////////////////////
     loadApiData();
   }
 
@@ -1970,9 +2054,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     selectedMapObjects.clear();
     print("selectedMapObjects ${jsonEncode(selectedMapObjects)}");
     showLoader(context);
-    final connectivityResult = await Connectivity().checkConnectivity();
-
-    if (!connectivityResult.contains(ConnectivityResult.none)) {
+   if (isOnline) {
       // Internet available
       // await DatabaseHelper.instance.fetchAndSaveDropdownData(
       //   selectedYear.toString(),
@@ -3693,8 +3775,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     print('selectedMapObjectsUpdate in dailog box : $selectedMapObjectsUpdate');
     final screenHeight = MediaQuery.of(context).size.height;
     final maxChatHeight = screenHeight * 0.30;
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (!connectivityResult.contains(ConnectivityResult.none)) {
+    if (await _hasFastInternet()) {
       // fix: Removed await to reduce the modal opening time.
       DatabaseHelper.instance.fetchAndSaveMessages(
         overHeadPolylines[index].oid.toString(),
@@ -5043,9 +5124,9 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
 
   Future<void> submitMapData(List<Map<String, dynamic>> mapData) async {
     print("APIcalled");
-    final connectivity = await Connectivity().checkConnectivity();
+   
     print('11111:: $mapData');
-    if (!connectivity.contains(ConnectivityResult.none)) {
+    if (await _hasFastInternet()) {
       try {
         final response = await http.post(
           Uri.parse("${AppUrl.baseUrl}login_user/createMap"),
@@ -5148,9 +5229,9 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     List<Map<String, dynamic>> mapData,
   ) async {
     print("APIcalled");
-    final connectivity = await Connectivity().checkConnectivity();
+   
     print('11111:: ${jsonEncode(mapData)}');
-    if (!connectivity.contains(ConnectivityResult.none)) {
+  if (await _hasFastInternet()) {
       try {
         final response = await http.post(
           Uri.parse("${AppUrl.baseUrl}login_user/updateJobStatus"),
@@ -5217,92 +5298,13 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
       // loadApiData();
     }
   }
-  //running method
-  // Future<void> reworkORCompletedMapData(
-  //   List<Map<String, dynamic>> mapData,
-  // ) async {
-  //   print("APIcalled");
-  //   final connectivity = await Connectivity().checkConnectivity();
-  //   print('11111:: $mapData');
-  //   if (!connectivity.contains(ConnectivityResult.none)) {
-  //     try {
-  //       final response = await http.post(
-  //         Uri.parse(
-  //           "${AppUrl.baseUrl}login_user/updateJobStatus",
-  //         ),
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           "Authorization": "Bearer $token",
-  //         },
-  //         body: jsonEncode(mapData),
-  //       );
-  //       print('jsonEncode(mapData) ${jsonEncode(mapData)}');
-  //       print("response code ${response.statusCode}");
-  //       if (response.statusCode == 200) {
-  //         print("response code ${response.statusCode}");
-  //         final responseData = jsonDecode(response.body);
-  //         print("response from submitMapData-------------");
-  //         print("Decoded Response: $responseData");
-  //         final db = await DatabaseHelper.instance.database;
-
-  //         Batch batch = db.batch();
-
-  //         await batch.commit(noResult: true);
-
-  //         ScaffoldMessenger.of(context).showSnackBar(
-  //           const SnackBar(content: Text("Submitted Successfully")),
-  //         );
-  //         selectedMapObjects.clear();
-  //         print("Submitted Successfully $selectedMapObjects");
-  //         print("Updated Successfully $selectedMapObjectsUpdate");
-  //         // overHeadData = await DatabaseHelper.instance.getOverHeadData(
-  //         //     selectedSubstation.toString(), selectedFeeder.toString());
-  //         // print("Overhead rows: ${overHeadData.length}");
-  //         // Close Final Completion Dialog
-  //         Navigator.of(context, rootNavigator: true).pop();
-
-  //         // Close Details Dialog
-  //         Navigator.of(context, rootNavigator: true).pop();
-
-  //         showPopup = false;
-  //         loadApiData();
-  //       }
-  //     } catch (e) {
-  //       setState(() {});
-  //       // await DatabaseHelper.instance.saveOfflineMapData(mapData);//OFFLINE
-  //       // loadApiData();
-  //       // ScaffoldMessenger.of(
-  //       //   context,
-  //       // ).showSnackBar(const SnackBar(content: Text("Saved Offline")));
-  //       Navigator.pop(context);
-  //       showPopup = false;
-  //       //  loadApiData();
-  //     }
-  //   } else {
-  //     setState(() {});
-  //     await DatabaseHelper.instance.saveOfflineMapData(mapData);
-
-  //     // overHeadData = await DatabaseHelper.instance.getOverHeadData(
-  //     //   selectedSubstation.toString(),
-  //     //   selectedFeeder.toString(),
-  //     // );
-  //     loadApiData();
-  //     ScaffoldMessenger.of(context).showSnackBar(
-  //       const SnackBar(content: Text("No Internet. Saved Offline")),
-  //     );
-  //     selectedMapObjects.clear();
-  //     print("Submitted Successfully $selectedMapObjects");
-  //     Navigator.pop(context); //commented
-  //     showPopup = false;
-  //     // loadApiData();
-  //   }
-  // }
+ 
 
   Future<void> updateMessageData(
     Map<String, dynamic> mapData,
     VoidCallback refreshDialog,
   ) async {
-    final connectivity = await Connectivity().checkConnectivity();
+   
 
     // if (connectivity.contains(ConnectivityResult.none)) {
     //   ScaffoldMessenger.of(
@@ -5321,7 +5323,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
       ),
       "status": 0,
     };
-    if (!connectivity.contains(ConnectivityResult.none)) {
+    if (await _hasFastInternet()) {
       try {
         final response = await http.post(
           Uri.parse(
@@ -7422,7 +7424,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     required String year,
     required String chatMsg,
   }) async {
-    final connectivity = await Connectivity().checkConnectivity();
+   
 
     final body = {
       "oid": oid,
@@ -7437,7 +7439,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
       "chatMsg": chatMsg,
     };
 
-    if (!connectivity.contains(ConnectivityResult.none)) {
+    if (await _hasFastInternet()) {
       try {
         print("========== Create Change Order Request ==========");
         print(jsonEncode(body));
@@ -8199,9 +8201,9 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
   // }
 
   Future<List<Map<String, dynamic>>> loadReworkData() async {
-    final connectivityResult = await Connectivity().checkConnectivity();
+     if (await _hasFastInternet()) {
 
-    if (!connectivityResult.contains(ConnectivityResult.none)) {
+   
       await DatabaseHelper.instance.fetchAndSaveReworkDetails(
         token,
 
@@ -8217,9 +8219,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
   }
 
   Future<List<Map<String, dynamic>>> loadInspectionData() async {
-    final connectivityResult = await Connectivity().checkConnectivity();
-
-    if (!connectivityResult.contains(ConnectivityResult.none)) {
+   if (await _hasFastInternet()) {
       await DatabaseHelper.instance.fetchAndSaveInspectionList(
         token,
 
@@ -8242,8 +8242,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     double longitude,
     String mapLocation,
   ) async {
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (!connectivityResult.contains(ConnectivityResult.none)) {
+   if (await _hasFastInternet()) {
       await DatabaseHelper.instance.fetchAndSaveCommentHistory(mapLocation);
     }
     commentsData = await DatabaseHelper.instance.getCommentHistory(mapLocation);
@@ -9053,7 +9052,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
     Map<String, dynamic> mapData,
     VoidCallback refreshDialog,
   ) async {
-    final connectivity = await Connectivity().checkConnectivity();
+  
 
     final Map<String, dynamic> saveData = {
       "mapLocation": mapData["mapLocation"]?.toString() ?? "",
@@ -9063,7 +9062,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
       "status": 0,
     };
 
-    if (!connectivity.contains(ConnectivityResult.none)) {
+    if (await _hasFastInternet()) {
       try {
         final response = await http.post(
           Uri.parse("${AppUrl.baseUrl}login_user/addComment"),
@@ -9087,7 +9086,7 @@ class _MapScreenSupervisorState extends State<MapScreenSupervisor> {
 
           // Save successfully submitted comment
           await db.insert("commentHistoryTable", {
-            "id": responseData["id"] ?? 0,
+           // "id": responseData["id"] ?? 0,
             "comment": mapData["description"]?.toString() ?? "",
             "userName": userName,
             "userId": mapData["userId"]?.toString() ?? "",

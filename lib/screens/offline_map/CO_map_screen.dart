@@ -248,25 +248,96 @@ class _COMapScreenState extends State<COMapScreen> {
     disposeCamera();
   }
 
+////offline response time code changes
+  bool isCheckingInternet = false;
+  int responseTime = 0;
+  Future<bool>? _internetCheckFuture;
+  bool _isInitialDataLoading = true;
   Future<void> _listenToConnectivity() async {
     _connectivitySubscription = Connectivity().onConnectivityChanged.listen((
       result,
     ) async {
-      final online = !result.contains(ConnectivityResult.none);
+      final hasNetwork = !result.contains(ConnectivityResult.none);
+
+      final online = hasNetwork ? await checkInternetConnection() : false;
 
       if (!mounted) return;
 
-      setState(() {
-        isOnline = online;
-      });
+      final wasOnline = isOnline;
 
-      _showConnectivitySnackBar(online);
-      if (online) {
-        await loadApiData();
+      if (wasOnline != online) {
+        setState(() {
+          isOnline = online;
+        });
+
+        debugPrint('Connectivity Changed: ${online ? 'ONLINE' : 'OFFLINE'}');
+
+        _showConnectivitySnackBar(online);
+
+        if (online
+        //  && !_isInitialDataLoading
+        ) {
+          await loadApiData();
+          print('loading--------------');
+        }
       }
     });
   }
 
+  Future<bool> checkInternetConnection() {
+    if (_internetCheckFuture != null) {
+      return _internetCheckFuture!;
+    }
+
+    isCheckingInternet = true;
+    _internetCheckFuture = _performInternetCheck();
+
+    return _internetCheckFuture!.whenComplete(() {
+      isCheckingInternet = false;
+      _internetCheckFuture = null;
+    });
+  }
+
+  Future<bool> _performInternetCheck() async {
+    try {
+      final stopwatch = Stopwatch()..start();
+
+      final response = await http
+          .get(Uri.parse('https://www.google.com/generate_204'))
+          .timeout(const Duration(seconds: 5));
+
+      stopwatch.stop();
+
+      responseTime = stopwatch.elapsedMilliseconds;
+
+      final online =
+          response.statusCode == 204 && responseTime <= responseTimeLimit;
+      debugPrint('responseTimeLimit: $responseTimeLimit ms');
+      debugPrint('Response Time: $responseTime ms');
+      debugPrint('HTTP Status: ${response.statusCode}');
+      debugPrint('Network Status: ${online ? 'ONLINE' : 'OFFLINE'}');
+      if (online == false) showNetworkSpeedSnackBar(context);
+
+      return online;
+    } catch (e) {
+      responseTime = 0;
+      debugPrint('Internet Check Failed: $e');
+      debugPrint('Network Status: OFFLINE');
+      return false;
+    }
+  }
+
+  Future<bool> _hasFastInternet() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+
+    if (connectivityResult.contains(ConnectivityResult.none)) {
+      return false;
+    }
+
+    return await checkInternetConnection();
+  }
+
+  ///////////////////////////////
   void _startListeningToCompass() {
     // print("_startListeningToCompass called");
     // FlutterCompass.events?.listen((CompassEvent event) {
@@ -287,6 +358,19 @@ class _COMapScreenState extends State<COMapScreen> {
     // Restore previous selection FIRST
     await restoreSelectedLocation();
     // _loadGeoJSONBoundary();
+     ////offline response time code cahnges
+    final online = await _hasFastInternet();
+
+    if (!mounted) return;
+
+    setState(() {
+      isOnline = online;
+    });
+
+    debugPrint(
+      'Initial Screen Network Status: ${isOnline ? 'ONLINE' : 'OFFLINE'}',
+    );
+    ////////////////////
     loadApiData();
   }
 
@@ -480,12 +564,7 @@ class _COMapScreenState extends State<COMapScreen> {
                               showLoader(context);
 
                               try {
-                                final connectivityResult = await Connectivity()
-                                    .checkConnectivity();
-
-                                if (!connectivityResult.contains(
-                                  ConnectivityResult.none,
-                                )) {
+                            if (await _hasFastInternet()) {
                                   // Online: Clear dependent dropdown selections
                                   setState(() {
                                     selectedSubstation = null;
@@ -626,195 +705,7 @@ class _COMapScreenState extends State<COMapScreen> {
                         );
                       },
                     ),
-                    // Column(
-                    //   children: [
-                    //     Row(
-                    //       children: [
-                    //         Expanded(
-                    //           child:
-                    //           _buildDropdown(
-                    //             "Select Type",
-                    //             selectedType,
-                    //             typeList,
-                    //             (value) {
-                    //               if (value == "IVM") {
-                    //                  Navigator.pushReplacement(
-                    //                    context,
-                    //                    MaterialPageRoute(
-                    //                    builder: (context) => MapScreen(),
-                    //                   ),
-                    //                 );
-                    //                 } else {
-                    //                 setState(() {
-                    //                  selectedType = value;
-                    //                  });
-                    //                }
-                    //               // setState(() => selectedType = value);
-                    //             },
-                    //           ),
-                    //         ),
-                    //        // const SizedBox(width: 8),
-                    //       ],
-                    //     ),
-                    //     const SizedBox(height: 8),
-                    //     Row(
-                    //       children: [
-                    //         Expanded(
-                    //           // flex: 2,
-                    //           child: _buildDropdown("Select Year", selectedYear, yearList, (
-                    //             value,
-                    //           ) async {
-                    //             setState(() {
-                    //               selectedYear = value;
-                    //             });
-
-                    //             //  loadApiData();
-                    //             showLoader(context);
-                    //             final connectivityResult = await Connectivity()
-                    //                 .checkConnectivity();
-
-                    //             if (!connectivityResult.contains(
-                    //               ConnectivityResult.none,
-                    //             )) {
-                    //               // Internet available
-                    //               await DatabaseHelper.instance
-                    //                   .fetchAndSaveDropdownData(
-                    //                     selectedYear.toString(),
-                    //                     selectedSubstationId.toString(),
-                    //                   );
-
-                    //               print(
-                    //                 "Fetched dropdown data from API and saved to SQLite",
-                    //               );
-                    //             } else {
-                    //               print(
-                    //                 "Offline - Loading dropdown data from SQLite",
-                    //               );
-                    //             }
-                    //             // Load dropdown values from SQLite
-                    //             await loadDropdownData();
-                    //             setState(() {
-                    //               // Reset substation if it is no longer available
-                    //               if (!substationList.any(
-                    //                 (e) => e.subName == selectedSubstation,
-                    //               )) {
-                    //                 selectedSubstation = null;
-                    //                 selectedSubstationId = null;
-                    //               }
-
-                    //               // Reset feeder if it is no longer available
-                    //               if (!feederList.contains(selectedFeeder)) {
-                    //                 selectedFeeder = null;
-                    //               }
-
-                    //               // Reset year if it is no longer available
-                    //               if (!yearList.contains(selectedYear)) {
-                    //                 selectedYear = null;
-                    //               }
-                    //             });
-                    //             Navigator.pop(context);
-                    //             //////////////////////////////////
-                    //             // setState(() {
-                    //             //   if (!substationList.any(
-                    //             //       (e) => e.subName == selectedSubstation)) {
-                    //             //     selectedSubstation = substationList.isNotEmpty
-                    //             //         ? substationList.first.subName
-                    //             //         : null;
-
-                    //             //     selectedSubstationId = substationList.isNotEmpty
-                    //             //         ? substationList.first.subId
-                    //             //         : null;
-                    //             //   }
-
-                    //             //   if (!feederList.contains(selectedFeeder)) {
-                    //             //     selectedFeeder = feederList.isNotEmpty
-                    //             //         ? feederList.first
-                    //             //         : null;
-                    //             //   }
-
-                    //             //   if (!yearList.contains(selectedYear)) {
-                    //             //     selectedYear =
-                    //             //         yearList.isNotEmpty ? yearList.first : null;
-                    //             //   }
-                    //             // });
-                    //           }),
-                    //         ),
-                    //         const SizedBox(width: 8),
-                    //         Expanded(
-                    //           // flex: 3,
-                    //           child: _buildDropdown(
-                    //             "Select Substation",
-                    //             selectedSubstation,
-                    //             substationList.map((e) => e.subName).toList(),
-                    //             (value) {
-                    //               final selected = substationList.firstWhere(
-                    //                 (e) => e.subName == value,
-                    //               );
-
-                    //               setState(() {
-                    //                 selectedSubstation = value;
-                    //                 selectedSubstationId = selected.subId;
-                    //               });
-
-                    //               loadApiData();
-                    //             },
-                    //           ),
-                    //         ),
-
-                    //         // Expanded(
-                    //         //   flex: 2,
-                    //         //   child: _buildDropdown(
-                    //         //     "Select Feeder",
-                    //         //     selectedFeeder,
-                    //         //     feederList,
-                    //         //     (value) {
-                    //         //       setState(() {
-                    //         //         selectedFeeder = value;
-                    //         //       });
-                    //         //       loadApiData();
-                    //         //     },
-                    //         //   ),
-                    //         // ),
-                    //       ],
-                    //     ),
-                    //     const SizedBox(height: 8),
-                    //  Row(
-                    //       children: [
-                    //         Expanded(
-                    //           child: _buildDropdown(
-                    //             "Select Feeder",
-                    //             selectedFeeder,
-                    //             feederList,
-                    //             (value) {
-                    //               setState(() {
-                    //                 selectedFeeder = value;
-                    //               });
-                    //               loadApiData();
-                    //             },
-                    //           ),
-                    //         ),
-
-                    //         const SizedBox(width: 8),
-                    //         Expanded(
-                    //           child: _buildMultiSelectDropdown(
-                    //             "Select Work Order",
-                    //             selectedTokenNos,
-                    //             workOrderList,
-                    //             (values) {
-                    //               setState(() {
-                    //                 selectedTokenNos = values;
-                    //                 coTokenNo = values.join(', ');
-                    //               });
-
-                    //               print("Selected Token Nos: $coTokenNo");
-                    //             },
-                    //           ),
-                    //         ),
-                    //       ],
-                    //     ),
-                    //   ],
-                    // ),
-                  ),
+                       ),
                 ),
 
                 Expanded(
@@ -1818,9 +1709,7 @@ class _COMapScreenState extends State<COMapScreen> {
     selectedMapObjects.clear();
     print("selectedMapObjects ${jsonEncode(selectedMapObjects)}");
     showLoader(context);
-    final connectivityResult = await Connectivity().checkConnectivity();
-
-    if (!connectivityResult.contains(ConnectivityResult.none)) {
+   if (isOnline) {
       // Internet available
       await DatabaseHelper.instance.fetchAndSaveDropdownData(
         selectedYear.toString(),
@@ -3950,8 +3839,7 @@ class _COMapScreenState extends State<COMapScreen> {
     chatController.clear();
     final screenHeight = MediaQuery.of(context).size.height;
     final maxChatHeight = screenHeight * 0.30;
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (!connectivityResult.contains(ConnectivityResult.none)) {
+    if (await _hasFastInternet()) {
       // fix: Removed await to reduce the modal opening time.
       DatabaseHelper.instance.fetchAndSaveMessages(
         overHeadPolylines[index].coordinateIds.toString(),
@@ -4783,9 +4671,7 @@ class _COMapScreenState extends State<COMapScreen> {
 
   Future<void> submitMapData(List<Map<String, dynamic>> mapData) async {
     print("APIcalled");
-    final connectivity = await Connectivity().checkConnectivity();
-
-    if (!connectivity.contains(ConnectivityResult.none)) {
+ if (await _hasFastInternet()) {
       try {
         final response = await http.post(
           Uri.parse("${AppUrl.baseUrl}login_user/createMap"),
@@ -4887,7 +4773,7 @@ class _COMapScreenState extends State<COMapScreen> {
     Map<String, dynamic> mapData,
     VoidCallback refreshDialog,
   ) async {
-    final connectivity = await Connectivity().checkConnectivity();
+   
 
     // if (connectivity.contains(ConnectivityResult.none)) {
     //   ScaffoldMessenger.of(
@@ -4906,7 +4792,7 @@ class _COMapScreenState extends State<COMapScreen> {
       ),
       "status": 0,
     };
-    if (!connectivity.contains(ConnectivityResult.none)) {
+    if (await _hasFastInternet()) {
       try {
         final response = await http.post(
           Uri.parse(
@@ -4992,7 +4878,7 @@ class _COMapScreenState extends State<COMapScreen> {
     Map<String, dynamic> mapData,
     VoidCallback refreshDialog,
   ) async {
-    final connectivity = await Connectivity().checkConnectivity();
+   
 
     final Map<String, dynamic> saveData = {
       "mapLocation": mapData["mapLocation"]?.toString() ?? "",
@@ -5002,7 +4888,7 @@ class _COMapScreenState extends State<COMapScreen> {
       "status": 0,
     };
 
-    if (!connectivity.contains(ConnectivityResult.none)) {
+   if (await _hasFastInternet()) {
       try {
         final response = await http.post(
           Uri.parse("${AppUrl.baseUrl}login_user/addComment"),
@@ -5026,7 +4912,7 @@ class _COMapScreenState extends State<COMapScreen> {
 
           // Save successfully submitted comment
           await db.insert("commentHistoryTable", {
-            "id": responseData["id"] ?? 0,
+           // "id": responseData["id"] ?? 0,
             "comment": mapData["description"]?.toString() ?? "",
             "userName": userName,
             "userId": mapData["userId"]?.toString() ?? "",
@@ -6034,7 +5920,7 @@ class _COMapScreenState extends State<COMapScreen> {
     required String year,
     required String chatMsg,
   }) async {
-    final connectivity = await Connectivity().checkConnectivity();
+   
 
     final body = {
       "oid": oid,
@@ -6049,7 +5935,7 @@ class _COMapScreenState extends State<COMapScreen> {
       "chatMsg": chatMsg,
     };
 
-    if (!connectivity.contains(ConnectivityResult.none)) {
+     if (await _hasFastInternet()) {
       try {
         print("========== Create Change Order Request ==========");
         print(jsonEncode(body));
@@ -6336,8 +6222,7 @@ class _COMapScreenState extends State<COMapScreen> {
     double longitude,
     String mapLocation,
   ) async {
-    final connectivityResult = await Connectivity().checkConnectivity();
-    if (!connectivityResult.contains(ConnectivityResult.none)) {
+    if (await _hasFastInternet()) {
       await DatabaseHelper.instance.fetchAndSaveCommentHistory(mapLocation);
     }
     commentsData = await DatabaseHelper.instance.getCommentHistory(mapLocation);
