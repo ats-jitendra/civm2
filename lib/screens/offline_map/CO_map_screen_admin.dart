@@ -472,8 +472,8 @@ class _COMapScreenAdminState extends State<COMapScreenAdmin> {
     return Scaffold(
       appBar: AppBar(
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text(
-          "Change Order System Map",
+        title:  Text(
+          "${responseTime}ms Change Order System Map",
           //"Live IVM System Map",
           style: TextStyle(color: Colors.white),
         ),

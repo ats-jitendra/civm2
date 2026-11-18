@@ -543,8 +543,8 @@ class _MapScreenPlannerState extends State<MapScreenPlanner> {
       child: Scaffold(
         appBar: AppBar(
           iconTheme: const IconThemeData(color: Colors.white),
-          title: const Text(
-            "IVM System Map",
+          title:  Text(
+            "${responseTime}ms IVM System Map",
             style: TextStyle(color: Colors.white),
           ),
           backgroundColor: const Color.fromARGB(255, 7, 59, 120),
