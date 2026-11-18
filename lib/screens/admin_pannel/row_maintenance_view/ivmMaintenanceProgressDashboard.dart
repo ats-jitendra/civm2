@@ -4,6 +4,9 @@ import 'dart:io';
 
 import 'package:CIVM/models/iVMMaintenanceProgressDashboardModel.dart';
 import 'package:CIVM/resources/app_url.dart';
+import 'package:CIVM/screens/offline_map/CO_map_screen_admin.dart';
+import 'package:CIVM/screens/offline_map/map_data_base_helper.dart';
+import 'package:CIVM/screens/offline_map/map_screen_admin.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pie_chart/pie_chart.dart';
@@ -87,6 +90,9 @@ class _IVMMaintenanceProgressDashboardState
     ),
   ];
 
+  String? selectedType = "IVM";
+  final List<String> typeList = ["IVM", "Change Order"];
+
   @override
   void initState() {
     selectedYear = currentYear.toString();
@@ -168,9 +174,58 @@ class _IVMMaintenanceProgressDashboardState
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (snapshot.hasError) {
-              return Center(child: Text(snapshot.error.toString()));
-            }
+            if (snapshot.hasError || !snapshot.hasData) {
+  return   Padding(
+                      padding: const EdgeInsets.only(
+                        top: 16.0,
+                        bottom: 16,
+                        left: 8,
+                        right: 8,
+                      ),
+                      child: Center(
+                        child: Column(
+                          children: [
+                                                        InkWell(
+  onTap: () {
+    showRecentDownloadsDialog();
+  },
+  child: Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: const Color.fromARGB(255, 7, 59, 120),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Text(
+      "📵 You are Offline!",
+      style: TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
+    ),
+  ),
+),
+                            Image.asset(
+                              'assets/empty_box.png',
+                              height: 200,
+                              width: 200,
+                              fit: BoxFit.cover,
+                            ),
+                            const Center(
+                              child: Text(
+                                'Sorry, Data Not Found!',
+                                textAlign: TextAlign.left,
+                                style: TextStyle(
+                                  color: Color.fromARGB(255, 7, 59, 120),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+               }
 
             final data = snapshot.data!;
             yearList = data.years ?? [];
@@ -2850,6 +2905,204 @@ class _IVMMaintenanceProgressDashboardState
 
     await checkCurrentUser();
   }
+
+  Future<void> showRecentDownloadsDialog() async {
+  List<dynamic> downloads =
+    await getRecentDownloads(selectedType ?? 'IVM');
+
+  if (!mounted) return;
+
+  showDialog(
+    context: context,
+    builder: (dialogContext) {
+      return StatefulBuilder(
+        builder: (context, dialogSetState) {
+          return AlertDialog(
+            title: const Text(
+              "Recent Map Downloads",
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            content: SizedBox(
+              width: 500,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildDropdown(
+                    "Select Type",
+                    selectedType,
+                    typeList,
+                    (value) async {
+                      if (value == null) return;
+
+                      dialogSetState(() {
+                        selectedType = value;
+                        downloads = [];
+                      });
+
+                      final newDownloads =
+                          await getRecentDownloads(value);
+
+                      dialogSetState(() {
+                        downloads = newDownloads;
+                      });
+                    },
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  Flexible(
+                    child: downloads.isEmpty
+                        ? const Center(
+                            child: Text("No downloaded records found"),
+                          )
+                        : ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: downloads.length,
+                            itemBuilder: (context, index) {
+                              final item = downloads[index];
+
+                              return InkWell(
+                               onTap: () {
+  print('onTap Map');
+
+  Navigator.pop(dialogContext);
+
+  final jobNo = item['jobNo'];
+
+  final hasJobNo = jobNo != null &&
+      jobNo.toString().trim().isNotEmpty;
+
+  if (selectedType == 'IVM') {
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => MapScreenAdmin(
+            jobNo: jobNo,
+            substation: item['substation'],
+            feeder: (item['feederName'] ?? '')
+                .toString()
+                .split('(')
+                .first
+                .trim(),
+            masterJobNo: '',
+          ),
+        ),
+      );
+
+  } else if (selectedType == 'Change Order') {
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => COMapScreenAdmin(
+            jobNo: jobNo,
+            substation: item['substation'],
+            feeder: (item['feederName'] ?? '')
+                .toString()
+                .split('(')
+                .first
+                .trim(),
+          ),
+        ),
+      );
+  }
+},
+                                child: Card(
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(10),
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                            "Substation: ${item['substation'] ?? '-'}"),
+                                        Text(
+                                            "Feeder: ${item['feederName'] ?? '-'}"),
+                                        Text(
+                                            "Job No: ${item['jobNo']}"),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(dialogContext),
+                child: const Text("Close"),
+              ),
+            ],
+          );
+        },
+      );
+    },
+  );
+}
+
+  Widget _buildDropdown(
+    String hint,
+    String? value,
+    List<String> items,
+    ValueChanged<String?> onChanged,
+  ) {
+    return SizedBox(
+      height: 40,
+      child: DropdownButtonFormField<String>(
+        initialValue: items.contains(value) ? value : null,
+        isExpanded: true,
+        decoration: InputDecoration(
+          hintText: hint,
+          filled: true,
+          fillColor: Colors.white,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 14,
+            vertical: 8,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(6),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        icon: const Icon(Icons.keyboard_arrow_down),
+        items: items
+            .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+            .toList(),
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+ Future<List<dynamic>> getRecentDownloads(String type) async {
+  List<dynamic> allDownloads = [];
+
+  if (type == 'IVM') {
+    allDownloads =
+        await DatabaseHelper.instance.getLatest10MapDownloads();
+  } else if (type == 'Change Order') {
+    allDownloads =
+        await DatabaseHelper.instance.getLatest10MapDownloadsCO();
+  }
+
+  return allDownloads.where((item) {
+    final jobNo = item['jobNo'];
+    return jobNo != null && jobNo.toString().trim().isNotEmpty;
+  }).toList();
+  // return allDownloads;
+}
 }
 
 class MonthlyPerformanceChart {

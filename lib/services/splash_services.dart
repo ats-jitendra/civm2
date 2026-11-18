@@ -1,5 +1,6 @@
 // ignore_for_file: use_build_context_synchronously
 
+import 'dart:async';
 import 'dart:convert';
 import 'package:CIVM/models/user_details.dart';
 import 'package:CIVM/models/user_model.dart';
@@ -14,6 +15,7 @@ import 'package:CIVM/resources/app_url.dart';
 import 'package:CIVM/screens/preLogin_screen.dart';
 import 'package:CIVM/utils/routes/route_name.dart';
 import 'package:CIVM/utils/user_pref.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -122,7 +124,23 @@ class SplashServices {
             Navigator.pushNamed(context, RoutesName.supervisorHome);
           } else if (value.user!.userType == '3' &&
               value.user!.status == 'ACTIVE') {
-                getUserDetailsByUsername(value,context);
+              
+  bool online = await checkInternetConnection();
+
+  if (online) {
+    print('Internet Connected');
+
+    await getUserDetailsByUsername(value, context);
+
+  } else {
+    print('Internet Not Connected');
+
+    Navigator.pushReplacementNamed(
+      context,
+      RoutesName.contractorHome,
+    );
+  }
+                
             // print('333333333');
             // Navigator.of(context).pop();
             // Navigator.pushNamed(context, RoutesName.contractorHome);
@@ -132,10 +150,24 @@ class SplashServices {
             Navigator.of(context).pop();
             Navigator.pushNamed(context, RoutesName.crewHome);
           } else if (value.user!.userType == '6' &&
-              value.user!.status == 'ACTIVE') {
-                getUserDetailsByUsername(value,context);
-            // Navigator.pushNamed(context, RoutesName.plannerHome);
-          } else {
+    value.user!.status == 'ACTIVE') {
+
+  bool online = await checkInternetConnection();
+
+  if (online) {
+    print('Internet Connected');
+
+    await getUserDetailsByUsername(value, context);
+
+  } else {
+    print('Internet Not Connected');
+
+    Navigator.pushReplacementNamed(
+      context,
+      RoutesName.plannerHome,
+    );
+  }
+} else {
             print('Logged Out');
             Navigator.of(context).pop();
             Navigator.pushNamed(context, RoutesName.login);
@@ -200,5 +232,20 @@ class SplashServices {
     print(e);
   }
   return null;
+}
+
+StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
+
+Future<bool> checkInternetConnection() async {
+  final result = await Connectivity().checkConnectivity();
+
+  final online = !result.contains(ConnectivityResult.none);
+
+  print('Current Internet Status: $online');
+
+  return online;
+}
+void disposeConnectivity() {
+  _connectivitySubscription?.cancel();
 }
 }
